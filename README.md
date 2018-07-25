@@ -13,7 +13,7 @@ Subreddits must make **a-mirror-bot** a moderator for this bot to work. Without 
 If your sub is interested in having its mirror bots use **a-mirror-bot** to maintain a single stickied list of mirrors, please [contact the developer](https://reddit.com/message/compose/?to=Clutch_22&subject=a-mirror-bot%20-%20new%20subreddit%20support).
 
 # Bot devleopers
-Our API is very straightforward to use (or at least we think so). Please see [our wiki](https://github.com/kyleratti/a-centralized-mirror/wiki) for more details.
+Our API is very straightforward to use (or at least we think so). Please [see our wiki](https://github.com/kyleratti/a-centralized-mirror/wiki) for more details.
 
 You will need to [contact the developer](https://reddit.com/message/compose/?to=Clutch_22&subject=a-mirror-bot%20-%20api%20access) to receive your API access tokens and register your bot. In your message, please include:
 
