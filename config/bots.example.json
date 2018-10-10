@@ -1,0 +1,15 @@
+{
+    "goodBots": [
+        {
+            "username": "a-bot-username",
+            "developer": "a-bots-developers-username",
+            "token": "unique-bot-auth-token"
+        }
+    ],
+    "badBots": [
+        {
+            "username": "a-bot-username",
+            "reason": "bad bot"
+        }
+    ]
+}
