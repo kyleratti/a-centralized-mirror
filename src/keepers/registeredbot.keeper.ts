@@ -39,7 +39,7 @@ export class RegisteredBotKeeper implements Keeper {
             })
             .catch(err => {
                 console.error(`failed loading bots.json: ${err}`);
-                console.log(`error during bots.json import, using last known good config`);
+                console.log(`error during bots.json import, using last known good config, if any`);
             });
     }
 }

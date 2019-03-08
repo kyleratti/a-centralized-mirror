@@ -23,3 +23,12 @@ developer:
 active subreddits:
 do the mods of those subreddits know about this bot?
 ```
+
+# Bot Logic
+## New Mirror
+1. Hit API
+2. Insert comment or update w/ AwaitingUpdate status
+3. Crontab runs, checks for all commentreplies with AwaitingUpdate status
+4. Modify associated post
+5. Mark request as completed
+6. WebHook when completed?

@@ -112,4 +112,26 @@ router.delete('/video/delete', (req, res) => {
         });
 })
 
+router.post('/reddit/updateposts', (req, res) => {
+    // TODO: check for API + CRONTAB authentication
+    CommentReply.findAll({
+        where: {
+            status: CommentStatus.AwaitingUpdate
+        },
+        group: "redditPostId"
+    })
+        .then((data) => {
+            // TODO: assemble array based on post ID
+            // TODO: loop through array
+            // TODO: select all comments based on postId?
+            // TODO: generate new reply, send to reddit
+        })
+        .catch((err) => {
+            return response(res, {
+                code: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: `Error updating reddit posts: ${err}`
+            });
+        });
+});
+
 export const ApiController: Router = router;
