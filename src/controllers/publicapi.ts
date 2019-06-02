@@ -130,4 +130,4 @@ router.post("/reddit/updateposts", (req, res) => {
     });*/
 });
 
-export const ApiController: Router = router;
+export const PublicApi: Router = router;
