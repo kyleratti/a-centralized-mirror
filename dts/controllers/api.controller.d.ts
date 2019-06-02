@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from "express";
 export interface ResponseData {
     /** The HTTP status code to respond with */
     code: number;

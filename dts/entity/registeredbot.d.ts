@@ -1,6 +1,6 @@
-import { Model } from 'sequelize-typescript';
-import { MirroredVideo } from '.';
-export declare class RegisteredBot extends Model<RegisteredBot> {
+import { MirroredVideo } from "./mirroredvideo";
+export declare class RegisteredBot {
+    id: number;
     username: string;
     developer: string;
     token: string;

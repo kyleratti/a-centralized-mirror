@@ -1,5 +1,5 @@
-import { Database } from './db/database';
-export declare var database: Database;
+import "reflect-metadata";
+export declare var db: import("typeorm").Connection;
 export declare class WebServer {
     private app;
     private port;

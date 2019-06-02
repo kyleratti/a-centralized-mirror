@@ -1,31 +1,30 @@
-import { Router } from 'express';
-import HttpStatus from 'http-status-codes';
-import { RegisteredBot, MirroredVideo, CommentReply } from '../models';
-import { CommentStatus } from '../models/commentreply';
+import { Router } from "express";
+import HttpStatus from "http-status-codes";
+import { RegisteredBot, MirroredVideo, CommentReply } from "../entity";
 
 const router: Router = Router();
 
-const SUCCESS_MSG = 'a-mirror-bot will update the relevant comment shortly.';
+const SUCCESS_MSG = "a-mirror-bot will update the relevant comment shortly.";
 
 export interface ResponseData {
-    /** The HTTP status code to respond with */
-    code: number;
+  /** The HTTP status code to respond with */
+  code: number;
 
-    /** The message to respond with */
-    message: string;
+  /** The message to respond with */
+  message: string;
 
-    /** The data to respond with, if any */
-    data?: object;
+  /** The data to respond with, if any */
+  data?: object;
 }
 
 function response(res, data: ResponseData): Express.Application {
-    return res.status(data.code).send({
-        status: {
-            code: data.code,
-            message: data.message
-        },
-        data: data.data
-    });
+  return res.status(data.code).send({
+    status: {
+      code: data.code,
+      message: data.message
+    },
+    data: data.data
+  });
 }
 
 /**
@@ -34,104 +33,101 @@ function response(res, data: ResponseData): Express.Application {
 
  */
 function authorized(req) {
-    return new Promise((success, fail) => {
-        if (!req.body || !req.body.auth || !req.body.auth.token || !req.body.auth.botToken) return fail('Auth parameters not provided');
+  return new Promise((success, fail) => {
+    if (
+      !req.body ||
+      !req.body.auth ||
+      !req.body.auth.token ||
+      !req.body.auth.botToken
+    )
+      return fail("Auth parameters not provided");
 
-        RegisteredBot.findOne({
-            where: {
-                token: req.body.auth.botToken
-            }
-        })
-            .then((data) => {
-                return (data !== null && req.body.auth.apiToken === process.env.API_TOKEN) ? success(data) : fail('Unauthorized');
-            })
-            .catch(fail);
-    });
+    // TODO: Verify the request has a valid bot token
+  });
 }
 
-router.post('/video/update', (req, res) => {
-    authorized(req)
-        .then((bot: RegisteredBot) => {
-            let data = req.body.data;
+router.post("/video/update", (req, res) => {
+  authorized(req).then((bot: RegisteredBot) => {
+    let data = req.body.data;
 
-            MirroredVideo.insertOrUpdate({
-                redditPostId: data.redditPostId,
-                url: data.url
-            })
-                .then(() => {
-                    return response(res, {
-                        code: HttpStatus.OK,
-                        message: `Successfully updated mirror in database. ${SUCCESS_MSG}`
-                    });
-                })
-                .catch((err) => {
-                    return response(res, {
-                        code: HttpStatus.INTERNAL_SERVER_ERROR,
-                        message: `Error updating mirror: ${err}`
-                    });
-                });
+    /*MirroredVideo.insertOrUpdate({
+        redditPostId: data.redditPostId,
+        url: data.url
+      })
+        .then(() => {
+          return response(res, {
+            code: HttpStatus.OK,
+            message: `Successfully updated mirror in database. ${SUCCESS_MSG}`
+          });
         })
-        .catch((err) => {
-            console.log(err);
+        .catch(err => {
+          return response(res, {
+            code: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: `Error updating mirror: ${err}`
+          });
+        });
+    })
+    .catch(err => {
+      console.log(err);
 
-            return response(res, {
-                code: HttpStatus.UNAUTHORIZED,
-                message: err
-            });
-        })
+      return response(res, {
+        code: HttpStatus.UNAUTHORIZED,
+        message: err
+      });*/
+  });
 });
 
-router.delete('/video/delete', (req, res) => {
-    authorized(req)
-        .then((bot: RegisteredBot) => {
-            MirroredVideo.destroy({
-                where: {
-                    botId: bot.id
-                }
-            })
-                .then(() => {
-                    return response(res, {
-                        code: HttpStatus.OK,
-                        message: `Successfully deleted mirrored video from database. ${SUCCESS_MSG}`
-                    });
-                })
-                .catch((err) => {
-                    return response(res, {
-                        code: HttpStatus.INTERNAL_SERVER_ERROR,
-                        message: err
-                    });
-                })
-        })
-        .catch((err) => {
-            console.error(err);
-
-            return response(res, {
-                code: HttpStatus.UNAUTHORIZED,
-                message: err
-            });
-        });
-})
-
-router.post('/reddit/updateposts', (req, res) => {
-    // TODO: check for API + CRONTAB authentication
-    CommentReply.findAll({
+router.delete("/video/delete", (req, res) => {
+  authorized(req)
+    .then((bot: RegisteredBot) => {
+      /*MirroredVideo.destroy({
         where: {
-            status: CommentStatus.AwaitingUpdate
-        },
-        group: "redditPostId"
-    })
-        .then((data) => {
-            // TODO: assemble array based on post ID
-            // TODO: loop through array
-            // TODO: select all comments based on postId?
-            // TODO: generate new reply, send to reddit
+          botId: bot.id
+        }
+      })
+        .then(() => {
+          return response(res, {
+            code: HttpStatus.OK,
+            message: `Successfully deleted mirrored video from database. ${SUCCESS_MSG}`
+          });
         })
-        .catch((err) => {
-            return response(res, {
-                code: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: `Error updating reddit posts: ${err}`
-            });
-        });
+        .catch(err => {
+          return response(res, {
+            code: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: err
+          });
+        });*/
+    })
+    .catch(err => {
+      console.error(err);
+
+      return response(res, {
+        code: HttpStatus.UNAUTHORIZED,
+        message: err
+      });
+    });
+});
+
+router.post("/reddit/updateposts", (req, res) => {
+  // TODO: check for API + CRONTAB authentication
+  /*CommentReply.findAll({
+    where: {
+      status: CommentStatus.AwaitingUpdate
+    },
+    group: "redditPostId"
+  })
+    .then(data => {
+      // TODO: assemble array based on post ID
+      // TODO: loop through array
+      // TODO: select all comments based on postId?
+      // TODO: generate new reply, send to reddit
+    })
+    .catch(err => {
+      return response(res, {
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error updating reddit posts: ${err}`
+      });
+    });*/
 });
 
 export const ApiController: Router = router;

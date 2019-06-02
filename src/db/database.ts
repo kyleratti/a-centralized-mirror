@@ -1,28 +1,12 @@
-import { Sequelize } from 'sequelize-typescript';
-import Bluebird from 'bluebird';
+import { getConnectionManager, Connection } from "typeorm";
 
-import { CommentReply, MirroredVideo, RegisteredBot } from '../models';
+let db = getConnectionManager().create({
+  type: "sqlite",
+  database: process.env.DATABASE_LOCATION || "./db/database.sqlite",
+  synchronize: true,
+  logging: true,
+  entities: [__dirname + "/entity/*.js"],
+  migrations: [__dirname + "/migration/*.js"]
+});
 
-export class Database {
-    private dbLocation: String;
-    public db: Sequelize;
-
-    constructor(dbLocation: string) {
-        let db = new Sequelize({
-            database: dbLocation,
-            dialect: 'sqlite',
-            username: 'root',
-            password: '',
-            storage: dbLocation,
-            logging: true
-        });
-        db.addModels([CommentReply, MirroredVideo, RegisteredBot]);
-
-        this.dbLocation = dbLocation;
-        this.db = db;
-    }
-
-    connect() {
-        return this.db.authenticate();
-    }
-}
+export const database: Connection = db;
