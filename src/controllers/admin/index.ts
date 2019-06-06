@@ -1,4 +1,4 @@
 export * from "./api";
-export * from "./api.bots";
-export * from "./api.commentreply";
-export * from "./api.mirroredvideos";
+export * from "./bots";
+export * from "./commentreply";
+export * from "./mirroredvideos";

@@ -1,1 +1,1 @@
-export * from "./api.mirroredvideos";
+export * from "./mirroredvideos";
