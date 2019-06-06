@@ -1,8 +1,8 @@
 import { Request, Response, Router } from "express";
 import HttpStatus from "http-status-codes";
-import { response } from "..";
-import { MirroredVideo, RegisteredBot, CommentReply } from "../../entity";
 import { authorized } from ".";
+import { response } from "..";
+import { CommentReply } from "../../entity";
 
 const router: Router = Router();
 

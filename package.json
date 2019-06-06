@@ -4,7 +4,7 @@
   "description": "A centralized API for posting video mirrors",
   "main": "lib/index.js",
   "scripts": {
-    "build": "npm run clean && tsc -p src",
+    "build": "tsc -p src",
     "clean": "rimraf ./lib/* && rimraf ./dts/*",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
