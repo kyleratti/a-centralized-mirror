@@ -1,15 +1,21 @@
 import {
-  Entity,
+  AfterInsert,
+  AfterUpdate,
+  BaseEntity,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
+  Index,
+  ManyToOne,
   PrimaryGeneratedColumn,
-  ManyToOne
+  UpdateDateColumn
 } from "typeorm";
+import { CommentReplyStatus } from "../structures";
+import { CommentReply } from "./commentreply";
 import { RegisteredBot } from "./registeredbot";
 
 @Entity()
-export class MirroredVideo {
+export class MirroredVideo extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,14 +25,42 @@ export class MirroredVideo {
   })
   url: string;
 
-  @ManyToOne(type => RegisteredBot, bot => bot.mirroredVideos)
+  @Column()
+  @Index()
+  redditPostId: string;
+
+  @ManyToOne(type => RegisteredBot, bot => bot.mirroredVideos, {
+    eager: true
+  })
   bot: RegisteredBot;
 
-  // TODO: add a belongs-to relationship to the reddit comment
-
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @UpdateDateColumn()
   updatedAt: Date;
+
+  @AfterInsert()
+  @AfterUpdate()
+  async updateCommentReplyStatus() {
+    try {
+      let comment = await CommentReply.findOne({
+        where: {
+          redditPostId: this.redditPostId
+        }
+      });
+
+      if (comment) {
+        comment.status = CommentReplyStatus.Outdated;
+        await comment.save();
+      } else {
+        comment = await new CommentReply();
+        comment.redditPostId = this.redditPostId;
+        comment.status = CommentReplyStatus.Outdated;
+        await comment.save();
+      }
+    } catch (err) {
+      return console.error(`Error on AfterUpdate call: ${err}`);
+    }
+  }
 }

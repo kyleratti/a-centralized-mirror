@@ -1,13 +1,16 @@
 import {
-  Entity,
+  BaseEntity,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  PrimaryGeneratedColumn
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
 } from "typeorm";
+import { CommentReplyStatus } from "../structures";
 
 @Entity()
-export class CommentReply {
+export class CommentReply extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -17,14 +20,13 @@ export class CommentReply {
   })
   redditPostId: string;
 
-  // TODO: add a has-many relationship to mirrored videos
+  @Column("int")
+  @Index()
+  status: CommentReplyStatus;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column({ type: "timestamp", nullable: true })
-  deletedAt: Date;
 }

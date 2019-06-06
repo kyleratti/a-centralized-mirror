@@ -4,12 +4,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
-  OneToMany
+  OneToMany,
+  BaseEntity
 } from "typeorm";
 import { MirroredVideo } from "./mirroredvideo";
 
 @Entity()
-export class RegisteredBot {
+export class RegisteredBot extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -34,14 +35,9 @@ export class RegisteredBot {
   @OneToMany(type => MirroredVideo, mirroredvideo => mirroredvideo.bot)
   mirroredVideos: MirroredVideo[];
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column({ type: "timestamp", nullable: true })
-  deletedAt: Date;
-
-  // TODO: add a has-many relationship to mirrored videos
 }

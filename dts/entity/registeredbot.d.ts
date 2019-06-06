@@ -1,5 +1,6 @@
+import { BaseEntity } from "typeorm";
 import { MirroredVideo } from "./mirroredvideo";
-export declare class RegisteredBot {
+export declare class RegisteredBot extends BaseEntity {
     id: number;
     username: string;
     developer: string;
@@ -7,5 +8,4 @@ export declare class RegisteredBot {
     mirroredVideos: MirroredVideo[];
     createdAt: Date;
     updatedAt: Date;
-    deletedAt: Date;
 }

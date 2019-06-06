@@ -7,4 +7,4 @@ export interface ResponseData {
     /** The data to respond with, if any */
     data?: object;
 }
-export declare const ApiController: Router;
+export declare const PublicApi: Router;

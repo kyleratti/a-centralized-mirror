@@ -2,7 +2,15 @@ import "reflect-metadata";
 import express from "express";
 import bodyParser from "body-parser";
 import { database } from "./db";
-import { ApiController } from "./controllers";
+import {
+  BotsAdminApi,
+  MirroredVideosAdminApi,
+  CommentReplyAdminApi
+} from "./controllers/admin";
+import { BotApi } from "./controllers/bot";
+import { config } from "dotenv";
+
+config();
 
 export var db = database;
 
@@ -17,7 +25,11 @@ export class WebServer {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
 
-    app.use("/", ApiController);
+    app.use("/admin/bots", BotsAdminApi);
+    app.use("/admin/commentreplies", CommentReplyAdminApi);
+    app.use("/admin/mirroredvideos", MirroredVideosAdminApi);
+
+    app.use("/mirroredvideos", BotApi);
 
     this.app = app;
     this.port = port;

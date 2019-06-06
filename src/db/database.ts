@@ -5,8 +5,8 @@ let db = getConnectionManager().create({
   database: process.env.DATABASE_LOCATION || "./db/database.sqlite",
   synchronize: true,
   logging: true,
-  entities: [__dirname + "/entity/*.js"],
-  migrations: [__dirname + "/migration/*.js"]
+  entities: [__dirname + "/../entity/**{.ts,.js}"],
+  migrations: [__dirname + "/../migration/**{.ts,.js}"]
 });
 
 export const database: Connection = db;
