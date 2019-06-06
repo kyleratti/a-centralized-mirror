@@ -4,4 +4,4 @@ import { Request, Response } from "express";
  * @param req The request to evaluate
 
  */
-export declare function authorized(req: Request, res: Response): Promise<{}>;
+export declare function authorized(req: Request, res: Response): Promise<unknown>;
