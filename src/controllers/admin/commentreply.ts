@@ -6,84 +6,97 @@ import { CommentReply } from "../../entity";
 
 const router: Router = Router();
 
-router.get("/get", async (req: Request, res: Response) => {
-  authorized(req, res)
-    .then(async () => {
-      let reqData = req.body.data;
-      let reqRedditPostId = reqData.redditPostId;
-      let comment = await CommentReply.findOne({
+router.get("/get", (req: Request, res: Response) => {
+  authorized(req, res, async () => {
+    let reqData = req.body.data;
+    let reqRedditPostId = reqData.redditPostId;
+    let comment;
+
+    try {
+      comment = await CommentReply.findOne({
         redditPostId: reqRedditPostId
       });
-
-      if (comment)
-        return response(res, {
-          status: HttpStatus.OK,
-          message: `OK`,
-          data: {
-            id: comment.id,
-            redditPostId: comment.redditPostId,
-            status: comment.status,
-            createdAt: comment.createdAt,
-            updatedAt: comment.updatedAt
-          }
-        });
-    })
-    .catch(err => {
+    } catch (err) {
       return response(res, {
-        status: HttpStatus.NOT_FOUND,
-        message: `Comment reply not found`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving comment reply information`
+      });
+    }
+
+    if (comment)
+      return response(res, {
+        status: HttpStatus.OK,
+        message: `OK`,
         data: {
-          error: err
-        }
-      });
-    });
-});
-
-router.get("/getall", async (req: Request, res: Response) => {
-  authorized(req, res)
-    .then(async () => {
-      let comments = await CommentReply.find({
-        order: {
-          createdAt: "ASC"
-        }
-      });
-      let commentsData = [];
-
-      comments.forEach(comment => {
-        commentsData.push({
           id: comment.id,
           redditPostId: comment.redditPostId,
           status: comment.status,
           createdAt: comment.createdAt,
           updatedAt: comment.updatedAt
-        });
-      });
-
-      return response(res, {
-        status: HttpStatus.OK,
-        message: `OK`,
-        data: {
-          commentReplies: commentsData
         }
       });
-    })
-    .catch(err => {
+    else
       return response(res, {
         status: HttpStatus.NOT_FOUND,
-        message: `No comment replies found`,
-        data: {
-          error: err
+        message: `Comment reply not found`
+      });
+  });
+});
+
+router.get("/getall", (req: Request, res: Response) => {
+  authorized(req, res, async () => {
+    let comments;
+
+    try {
+      comments = await CommentReply.find({
+        order: {
+          createdAt: "ASC"
         }
       });
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving comment replies information`
+      });
+    }
+
+    let commentsData = [];
+
+    comments.forEach(comment => {
+      commentsData.push({
+        id: comment.id,
+        redditPostId: comment.redditPostId,
+        status: comment.status,
+        createdAt: comment.createdAt,
+        updatedAt: comment.updatedAt
+      });
     });
+
+    return response(res, {
+      status: HttpStatus.OK,
+      message: `OK`,
+      data: {
+        commentReplies: commentsData
+      }
+    });
+  });
 });
 
 router.post("/update", (req: Request, res) => {
-  authorized(req, res).then(async () => {
+  authorized(req, res, async () => {
     let reqData = req.body.data;
     let reqRedditPostId = reqData.redditPostId;
     let reqStatus = reqData.status;
-    let comment = await CommentReply.findOne({ redditPostId: reqRedditPostId });
+    let comment;
+
+    try {
+      comment = await CommentReply.findOne({ redditPostId: reqRedditPostId });
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving comment reply information`
+      });
+    }
 
     if (!comment)
       return response(res, {
@@ -95,7 +108,15 @@ router.post("/update", (req: Request, res) => {
       });
 
     comment.status = reqStatus;
-    await comment.save();
+
+    try {
+      await comment.save();
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error saving updated comment`
+      });
+    }
 
     return response(res, {
       status: HttpStatus.OK,

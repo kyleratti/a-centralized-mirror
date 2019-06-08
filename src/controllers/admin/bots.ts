@@ -7,96 +7,113 @@ import { RegisteredBot } from "../../entity";
 const router: Router = Router();
 
 router.get("/get", async (req: Request, res: Response) => {
-  authorized(req, res)
-    .then(async () => {
-      let reqData = req.body.data;
-      let username = reqData.username;
-      let bot = await RegisteredBot.findOne({ username: username });
+  authorized(req, res, async () => {
+    let reqData = req.body.data;
+    let username = reqData.username;
+    let bot;
 
-      if (bot)
-        return response(res, {
-          status: HttpStatus.OK,
-          message: `OK`,
-          data: {
-            username: bot.username,
-            developer: bot.developer,
-            token: bot.token
-          }
-        });
-    })
-    .catch(err => {
+    try {
+      bot = await RegisteredBot.findOne({ username: username });
+    } catch (err) {
       return response(res, {
-        status: HttpStatus.NOT_FOUND,
-        message: `Bot not found`,
-        data: {
-          error: err
-        }
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving bot information`
       });
-    });
-});
+    }
 
-router.get("/getall", async (req: Request, res: Response) => {
-  authorized(req, res)
-    .then(async () => {
-      let bots = await RegisteredBot.find({
-        order: {
-          username: "ASC"
-        }
-      });
-      let bot_data = [];
-
-      bots.forEach(bot => {
-        bot_data.push({
-          id: bot.id,
-          username: bot.username,
-          developer: bot.developer,
-          token: bot.token,
-          createdAt: bot.createdAt,
-          updatedAt: bot.updatedAt
-        });
-      });
-
+    if (bot)
       return response(res, {
         status: HttpStatus.OK,
         message: `OK`,
         data: {
-          bots: bot_data
+          username: bot.username,
+          developer: bot.developer,
+          token: bot.token
         }
       });
-    })
-    .catch(err => {
+    else
       return response(res, {
         status: HttpStatus.NOT_FOUND,
         message: `Bot not found`,
         data: {
-          error: err
+          username: username
         }
       });
+  });
+});
+
+router.get("/getall", async (req: Request, res: Response) => {
+  authorized(req, res, async () => {
+    let bots;
+
+    try {
+      bots = await RegisteredBot.find({
+        order: {
+          username: "ASC"
+        }
+      });
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving information for bots`
+      });
+    }
+
+    let bot_data = [];
+
+    bots.forEach(bot => {
+      bot_data.push({
+        id: bot.id,
+        username: bot.username,
+        developer: bot.developer,
+        token: bot.token,
+        createdAt: bot.createdAt,
+        updatedAt: bot.updatedAt
+      });
     });
+
+    return response(res, {
+      status: HttpStatus.OK,
+      message: `OK`,
+      data: {
+        bots: bot_data
+      }
+    });
+  });
 });
 
 router.put("/add", (req: Request, res) => {
-  authorized(req, res)
-    .then(async () => {
-      let reqData = req.body.data;
-      let username = reqData.username;
-      let developer = reqData.developer;
-      let token = reqData.token;
-      let bot = await RegisteredBot.findOne({ username: username });
+  authorized(req, res, async () => {
+    let reqData = req.body.data;
+    let username = reqData.username;
+    let developer = reqData.developer;
+    let token = reqData.token;
+    let bot;
 
-      if (bot)
-        return response(res, {
-          status: HttpStatus.BAD_REQUEST,
-          message: `Bot is already registered; please issue an update instead`,
-          data: {
-            username: username
-          }
-        });
+    try {
+      bot = await RegisteredBot.findOne({ username: username });
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving bot information`
+      });
+    }
 
-      let newBot = new RegisteredBot();
-      newBot.username = username;
-      newBot.developer = developer;
-      newBot.token = token;
+    if (bot)
+      return response(res, {
+        status: HttpStatus.BAD_REQUEST,
+        message: `Bot is already registered; please issue an update instead`,
+        data: {
+          username: username
+        }
+      });
+
+    let newBot = new RegisteredBot();
+    newBot.username = username;
+    newBot.developer = developer;
+    newBot.token = token;
+
+    try {
       await newBot.save();
 
       return response(res, {
@@ -107,38 +124,45 @@ router.put("/add", (req: Request, res) => {
           developer: developer
         }
       });
-    })
-    .catch(err => {
+    } catch (err) {
       return response(res, {
-        status: HttpStatus.NOT_FOUND,
-        message: `Bot not found`,
-        data: {
-          error: err
-        }
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error creating bot`
       });
-    });
+    }
+  });
 });
 
 router.post("/update", (req: Request, res) => {
-  authorized(req, res).then(async () => {
+  authorized(req, res, async () => {
     let reqData = req.body.data;
     let reqUsername = reqData.username;
     let reqDeveloper = reqData.developer;
     let reqToken = reqData.token;
-    let bot = await RegisteredBot.findOne({ username: reqUsername });
-    let username = bot.username;
+    let bot;
 
-    let messages = [];
-    let data = {};
+    try {
+      bot = await RegisteredBot.findOne({ username: reqUsername });
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving bot information`
+      });
+    }
 
     if (!bot)
       return response(res, {
         status: HttpStatus.BAD_REQUEST,
         message: `Bot does not exist`,
         data: {
-          username: username
+          username: reqUsername
         }
       });
+
+    let username = bot.username;
+
+    let messages = [];
+    let data = {};
 
     if (reqDeveloper) {
       bot.developer = reqDeveloper;
@@ -152,33 +176,41 @@ router.post("/update", (req: Request, res) => {
       data["newToken"] = reqToken;
     }
 
-    bot
-      .save()
-      .then(() => {
-        return response(res, {
-          status: HttpStatus.OK,
-          message: messages.join(", "),
-          data: data
-        });
-      })
-      .catch(err => {
-        return response(res, {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: `Error saving changes to bot`,
-          data: {
-            username: username,
-            error: err
-          }
-        });
+    try {
+      bot.save();
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error updating bot`,
+        data: {
+          username: username,
+          error: err
+        }
       });
+    }
+
+    return response(res, {
+      status: HttpStatus.OK,
+      message: messages.join(", "),
+      data: data
+    });
   });
 });
 
 router.delete("/delete", (req: Request, res) => {
-  authorized(req, res).then(async () => {
+  authorized(req, res, async () => {
     let reqData = req.body.data;
     let username = reqData.username;
-    let bot = await RegisteredBot.findOne({ username: username });
+    let bot;
+
+    try {
+      bot = await RegisteredBot.findOne({ username: username });
+    } catch (err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error retrieving bot information`
+      });
+    }
 
     if (!bot)
       return response(res, {
@@ -189,27 +221,22 @@ router.delete("/delete", (req: Request, res) => {
         }
       });
 
-    bot
-      .remove()
-      .then(() => {
-        return response(res, {
-          status: HttpStatus.OK,
-          message: "Successfully removed bot",
-          data: {
-            username: username
-          }
-        });
-      })
-      .catch(err => {
-        return response(res, {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: "Error removing bot",
-          data: {
-            username: username,
-            error: err
-          }
-        });
+    try {
+      bot.remove();
+    } catch (err) {
+      return response(err, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error deleting bot`
       });
+    }
+
+    return response(res, {
+      status: HttpStatus.OK,
+      message: "Successfully removed bot",
+      data: {
+        username: username
+      }
+    });
   });
 });
 
