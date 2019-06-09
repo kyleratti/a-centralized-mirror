@@ -16,6 +16,11 @@ router.get("/get", async (req: Request, res: Response) => {
     try {
       mirroredVideo = await MirroredVideo.findOne({ url: reqUrl });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating mirrored video`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving mirrored video`
@@ -53,6 +58,11 @@ router.get("/getall", async (req: Request, res: Response) => {
         }
       });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating mirrored videos`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retriving mirrored videos information`
@@ -92,6 +102,11 @@ router.put("/add", async (req: Request, res) => {
     try {
       bot = await RegisteredBot.findOne({ username: reqBotUsername });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating bot`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving bot information`
@@ -105,6 +120,11 @@ router.put("/add", async (req: Request, res) => {
     try {
       mirroredVideo.save();
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating mirrored video`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error creating mirrored video`
@@ -132,6 +152,11 @@ router.post("/update", async (req: Request, res) => {
   try {
     bot = await RegisteredBot.findOne({ username: reqUsername });
   } catch (err) {
+    req.log.fatal({
+      msg: `Error locating bot`,
+      error: err
+    });
+
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: `Error retrieving bot information`
@@ -143,8 +168,6 @@ router.post("/update", async (req: Request, res) => {
       status: HttpStatus.BAD_REQUEST,
       message: `Bot does not exist`
     });
-
-  let username = bot.username;
 
   let messages = [];
   let data = {};
@@ -164,6 +187,11 @@ router.post("/update", async (req: Request, res) => {
   try {
     bot.save();
   } catch (err) {
+    req.log.fatal({
+      msg: `Error saving updated mirrored video`,
+      error: err
+    });
+
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: `Error saving updated mirrored video`
@@ -185,6 +213,11 @@ router.delete("/delete", async (req: Request, res) => {
   try {
     bot = await RegisteredBot.findOne({ username: username });
   } catch (err) {
+    req.log.fatal({
+      msg: `Error locating bot`,
+      error: err
+    });
+
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: `Error retrieving bot information`
@@ -203,6 +236,11 @@ router.delete("/delete", async (req: Request, res) => {
   try {
     bot.remove();
   } catch (err) {
+    req.log.fatal({
+      msg: `Error removing bot`,
+      error: err
+    });
+
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: `Error removing bot`

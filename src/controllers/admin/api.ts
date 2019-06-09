@@ -13,18 +13,24 @@ export function authorized(req: Request, res: Response, success: Function) {
     !req.headers["cf-connecting-ip"] ||
     req.headers["cf-connecting-ip"] !== process.env.API_ADMIN_IP
   ) {
-    //req.log.error("");
+    req.log.error(`Authentication attempted from non-Cloudflare IP address`);
+
     return response(res, {
       status: HttpStatus.UNAUTHORIZED,
       message: "Authentication not permitted"
     });
   }
 
-  if (!req.body || !req.body.auth || !req.body.auth.adminToken)
+  if (!req.body || !req.body.auth || !req.body.auth.adminToken) {
+    req.log.error(`Authentication attempted without authentication tokens`);
+
     return response(res, {
       status: HttpStatus.UNAUTHORIZED,
       message: "Auth parameters not provided"
     });
+  }
+
+  req.log.debug(`Received valid admin authentication`);
 
   success();
 }

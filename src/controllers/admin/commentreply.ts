@@ -17,6 +17,11 @@ router.get("/get", (req: Request, res: Response) => {
         redditPostId: reqRedditPostId
       });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating comment reply`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving comment reply information`
@@ -54,6 +59,11 @@ router.get("/getall", (req: Request, res: Response) => {
         }
       });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating comment reply`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving comment replies information`
@@ -92,6 +102,11 @@ router.post("/update", (req: Request, res) => {
     try {
       comment = await CommentReply.findOne({ redditPostId: reqRedditPostId });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating comment reply`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving comment reply information`
@@ -112,6 +127,11 @@ router.post("/update", (req: Request, res) => {
     try {
       await comment.save();
     } catch (err) {
+      req.log.fatal({
+        msg: `Error saving updated comment`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error saving updated comment`

@@ -15,6 +15,11 @@ router.get("/get", async (req: Request, res: Response) => {
     try {
       bot = await RegisteredBot.findOne({ username: username });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating bot`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving bot information`
@@ -34,10 +39,7 @@ router.get("/get", async (req: Request, res: Response) => {
     else
       return response(res, {
         status: HttpStatus.NOT_FOUND,
-        message: `Bot not found`,
-        data: {
-          username: username
-        }
+        message: `Bot not found`
       });
   });
 });
@@ -53,6 +55,11 @@ router.get("/getall", async (req: Request, res: Response) => {
         }
       });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating bot`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving information for bots`
@@ -93,6 +100,11 @@ router.put("/add", (req: Request, res) => {
     try {
       bot = await RegisteredBot.findOne({ username: username });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating bot`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving bot information`
@@ -102,10 +114,7 @@ router.put("/add", (req: Request, res) => {
     if (bot)
       return response(res, {
         status: HttpStatus.BAD_REQUEST,
-        message: `Bot is already registered; please issue an update instead`,
-        data: {
-          username: username
-        }
+        message: `Bot is already registered; please issue an update instead`
       });
 
     let newBot = new RegisteredBot();
@@ -125,6 +134,11 @@ router.put("/add", (req: Request, res) => {
         }
       });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating bot`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error creating bot`
@@ -144,6 +158,11 @@ router.post("/update", (req: Request, res) => {
     try {
       bot = await RegisteredBot.findOne({ username: reqUsername });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating bot`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving bot information`
@@ -153,13 +172,8 @@ router.post("/update", (req: Request, res) => {
     if (!bot)
       return response(res, {
         status: HttpStatus.BAD_REQUEST,
-        message: `Bot does not exist`,
-        data: {
-          username: reqUsername
-        }
+        message: `Bot does not exist`
       });
-
-    let username = bot.username;
 
     let messages = [];
     let data = {};
@@ -181,11 +195,7 @@ router.post("/update", (req: Request, res) => {
     } catch (err) {
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error updating bot`,
-        data: {
-          username: username,
-          error: err
-        }
+        message: `Error saving updated bot`
       });
     }
 
@@ -206,6 +216,11 @@ router.delete("/delete", (req: Request, res) => {
     try {
       bot = await RegisteredBot.findOne({ username: username });
     } catch (err) {
+      req.log.fatal({
+        msg: `Error locating bot`,
+        error: err
+      });
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `Error retrieving bot information`
@@ -215,10 +230,7 @@ router.delete("/delete", (req: Request, res) => {
     if (!bot)
       return response(res, {
         status: HttpStatus.BAD_REQUEST,
-        message: `Bot does not exist`,
-        data: {
-          username: username
-        }
+        message: `Bot does not exist`
       });
 
     try {

@@ -14,5 +14,6 @@
     "declarationDir": "../dts",
     "sourceMap": true
   },
-  "exclude": []
+  "exclude": [],
+  "typeRoots": ["types", "node_modules/@types"]
 }
