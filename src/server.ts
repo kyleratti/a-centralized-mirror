@@ -1,18 +1,24 @@
-import "reflect-metadata";
-import express from "express";
 import bodyParser from "body-parser";
-import { database } from "./db";
+import { config } from "dotenv";
+import express from "express";
+import expressPinoLogger from "express-pino-logger";
+import pino from "pino";
+import "reflect-metadata";
 import {
   BotsAdminApi,
-  MirroredVideosAdminApi,
-  CommentReplyAdminApi
+  CommentReplyAdminApi,
+  MirroredVideosAdminApi
 } from "./controllers/admin";
 import { BotApi } from "./controllers/bot";
-import { config } from "dotenv";
+import { database } from "./db";
 
 config();
 
 export var db = database;
+const logger = pino({
+  name: "a-centralized-mirror",
+  level: "debug"
+});
 
 export class WebServer {
   private app: express.Application;
@@ -21,6 +27,8 @@ export class WebServer {
   constructor() {
     let app = express();
     let port = Number(process.env.PORT) || 3010;
+
+    app.use(expressPinoLogger({ logger: logger, level: "debug" }));
 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
