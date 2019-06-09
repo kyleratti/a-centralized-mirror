@@ -1,47 +1,35 @@
 # a-centralized-mirror
 
-This is a centralized API and mirror bot for subs that utilize multiple mirror bots.
+Typically, subreddits want mirror links stickied to the top of each thread so readers can find live mirrors without having to filter through comments themselves.
 
-## How it works
+The **a-centralized-mirror** service will maintain a single stickied comment with a list of links to the mirrors. Registered bots can update their status (new/updated/removed mirror) on-demand and **a-mirror-bot** will update the stickied comment accordingly. Here's a general overview of how it works:
 
-Typically, subreddits want mirror links stickied to the top of each thread so visitors can find live mirrors without having to scroll through all of the comments. Unfortunately, reddit limits sticky comments to one per thread, so only one mirror can appear on the top.
+1. **some-other-mirror-bot** downloads a video to mirror
+2. **some-other-mirror-bot** submits an API request to this service
+3. **a-mirror-bot** posts/updates the stickied comment on the post
 
-**a-mirror-bot** will maintain a single stickied comment with a list of links to the mirrors. Bots can update their status whenever and the bot will update the link accordingly.
+# Subreddit Moderators
 
-## Limitations
+This bot will only be activated on subreddits where the moderators have already approved its functionality and an agreement is in place.
 
-Subreddits must make **a-mirror-bot** a moderator for this bot to work. Without this in place, reddit's spam filters and rate limiters will make the bot almost useless. Also, the bot won't be able to sticky its own posts, so...what's the point?
+If you're a moderator of a subreddit and your community is interested in having its mirror bots use a single stickied list of mirrors, please [contact the developer](https://reddit.com/message/compose/?to=a-mirror-bot&subject=a-mirror-bot%20-%20new%20subreddit%20support) for additional information.
 
-# Subreddit mods
+If you're looking for a new or additional mirror _bot_ and not a mirror listing _service_, please see the [**a-mirror-bot** service](https://amirror.link/source) project.
 
-If your sub is interested in having its mirror bots use **a-mirror-bot** to maintain a single stickied list of mirrors, please [contact the developer](https://reddit.com/message/compose/?to=Clutch_22&subject=a-mirror-bot%20-%20new%20subreddit%20support).
+# Bot Developers
 
-# Bot devleopers
+If you're interested in integrating your bot with this service, please take a moment to read over [our wiki](https://centralized.amirror.link/source/wiki). You will find additional information and an overview of our API.
 
-Our API is very straightforward to use (or at least we think so). Please [see our wiki](https://github.com/kyleratti/a-centralized-mirror/wiki) for more details.
-
-You will need to [contact the developer](https://reddit.com/message/compose/?to=Clutch_22&subject=a-mirror-bot%20-%20api%20access) to receive your API access tokens and register your bot. In your message, please include:
+You will need to [contact the developer](https://reddit.com/message/compose/?to=a-mirror-bot&subject=a-mirror-bot%20-%20api%20access) to register your bot and receive your unique API access tokens. In your message, please include:
 
 ```
 bot username:
-developer:
+developer username:
 active subreddits:
-do the mods of those subreddits know about this bot?
 ```
 
-# Bot Logic
-
-## New Mirror
-
-1. Hit API
-2. Insert comment or update w/ AwaitingUpdate status
-3. Crontab runs, checks for all commentreplies with AwaitingUpdate status
-4. Modify associated post
-5. Mark request as completed
-6. WebHook when completed?
+If you are integrating **a-centralized-mirror** into your mirror service, it's recommended that you add error handling for times that the service may be unavailable. This may include **queuing and retrying requests** at an occasionally until they succeed or **bypassing the service and manually posting the mirror link** using your own bot. This service is run as a hobby and does not come with any SLA, though we aim to provide a high level of service.
 
 # And a standing ovation to...
 
-I absolutely _cannot_ thank **[RoboPhred](https://github.com/robophred)** enough for this help with this project and every single project I've worked on for the past decade. You are, without a doubt, the smartest man I'll ever know and the only reason I can program in any of the languages I know. Your patience with me over the years is nothing short of astounding.
-
-Here's to you man!
+I absolutely _cannot_ thank **[RoboPhred](https://github.com/robophred)** enough for this help with this project and every single project I've worked on for the past decade. You are, without a doubt, the smartest man I'll ever know and the only reason I can program at all. Thank you so very much for your patience over the past _decade_ of mentorship you've provided me.
