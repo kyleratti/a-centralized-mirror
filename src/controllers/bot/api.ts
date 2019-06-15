@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
+import HttpStatus from "http-status-codes";
 import { RegisteredBot } from "../../entity";
 import { response } from "../api";
-import HttpStatus from "http-status-codes";
 
 /**
  * Checks if the specified request is authorized
  * @param req The request to evaluate
-
+ * @param res The response
+ * @param success The function called if the request is successfully authorized
  */
 export async function authorized(
   req: Request,

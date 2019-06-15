@@ -7,7 +7,8 @@ import {
   OneToMany,
   BaseEntity
 } from "typeorm";
-import { MirroredVideo } from "./mirroredvideo";
+import { AvailableMirror } from "./availablemirror";
+import { cpus } from "os";
 
 @Entity()
 export class RegisteredBot extends BaseEntity {
@@ -32,8 +33,8 @@ export class RegisteredBot extends BaseEntity {
   })
   token: string;
 
-  @OneToMany(type => MirroredVideo, mirroredvideo => mirroredvideo.bot)
-  mirroredVideos: MirroredVideo[];
+  @OneToMany(type => AvailableMirror, mirroredvideo => mirroredvideo.bot)
+  mirroredVideos: AvailableMirror[];
 
   @CreateDateColumn()
   createdAt: Date;

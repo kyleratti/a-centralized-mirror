@@ -14,11 +14,20 @@ export class CommentReply extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  // FIXME: this and redditPostId_Reply should be done better and I am ashamed
+  /** The reddit post ID */
   @Column({
     unique: true,
     nullable: false
   })
-  redditPostId: string;
+  redditPostId_Parent: string;
+
+  /** The reddit post ID of the comment posted and tracked by the mirror bot, if any */
+  @Column({
+    unique: true,
+    nullable: true
+  })
+  redditPostId_Reply: string;
 
   @Column("int")
   @Index()

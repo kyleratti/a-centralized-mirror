@@ -1,8 +1,8 @@
 import { BaseEntity } from "typeorm";
 import { RegisteredBot } from "./registeredbot";
-export declare class MirroredVideo extends BaseEntity {
+export declare class AvailableMirror extends BaseEntity {
     id: number;
-    url: string;
+    mirrorUrl: string;
     redditPostId: string;
     bot: RegisteredBot;
     createdAt: Date;

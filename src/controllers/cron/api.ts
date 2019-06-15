@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import HttpStatus from "http-status-codes";
-import { response } from "..";
+import { response } from "../api";
 
 /**
  * Checks if the specified request is authorized
@@ -22,7 +22,7 @@ export function authorized(req: Request, res: Response, success: Function) {
     });
   }
 
-  if (!req.body || !req.body.auth || !req.body.auth.adminToken) {
+  if (!req.body || !req.body.auth || !req.body.auth.cronToken) {
     req.log.error(`Authentication attempted without authentication tokens`);
 
     return response(res, {
@@ -31,7 +31,7 @@ export function authorized(req: Request, res: Response, success: Function) {
     });
   }
 
-  req.log.debug(`Received valid admin authentication`);
+  req.log.debug(`Received valid crontab authentication`);
 
   success();
 }

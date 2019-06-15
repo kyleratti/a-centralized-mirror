@@ -14,7 +14,7 @@ router.get("/get", (req: Request, res: Response) => {
 
     try {
       comment = await CommentReply.findOne({
-        redditPostId: reqRedditPostId
+        redditPostId_Parent: reqRedditPostId
       });
     } catch (err) {
       req.log.fatal({
@@ -50,7 +50,7 @@ router.get("/get", (req: Request, res: Response) => {
 
 router.get("/getall", (req: Request, res: Response) => {
   authorized(req, res, async () => {
-    let comments;
+    let comments: CommentReply[];
 
     try {
       comments = await CommentReply.find({
@@ -75,7 +75,8 @@ router.get("/getall", (req: Request, res: Response) => {
     comments.forEach(comment => {
       commentsData.push({
         id: comment.id,
-        redditPostId: comment.redditPostId,
+        redditPostId_Parent: comment.redditPostId_Parent,
+        redditPostId_Reply: comment.redditPostId_Reply,
         status: comment.status,
         createdAt: comment.createdAt,
         updatedAt: comment.updatedAt
@@ -100,7 +101,9 @@ router.post("/update", (req: Request, res) => {
     let comment;
 
     try {
-      comment = await CommentReply.findOne({ redditPostId: reqRedditPostId });
+      comment = await CommentReply.findOne({
+        redditPostId_Parent: reqRedditPostId
+      });
     } catch (err) {
       req.log.fatal({
         msg: `Error locating comment reply`,

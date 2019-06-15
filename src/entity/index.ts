@@ -1,3 +1,3 @@
 export * from "./commentreply";
-export * from "./mirroredvideo";
+export * from "./availablemirror";
 export * from "./registeredbot";

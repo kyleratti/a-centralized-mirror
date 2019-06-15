@@ -2,7 +2,7 @@ import { Router } from "express";
 import HttpStatus from "http-status-codes";
 import { authorized } from ".";
 import { response } from "..";
-import { MirroredVideo } from "../../entity";
+import { AvailableMirror } from "../../entity";
 import {
   CreateMirrorRequest,
   DeleteRequest,
@@ -13,15 +13,15 @@ const router: Router = Router();
 
 const SUCCESS_MSG = "a-mirror-bot will update the associated comment shortly.";
 
-async function updateVideo(mirroredVideo: MirroredVideo, url: string) {
-  mirroredVideo.url = url;
+async function updateVideo(mirroredVideo: AvailableMirror, url: string) {
+  mirroredVideo.mirrorUrl = url;
   await mirroredVideo.save();
 }
 
 async function createVideo(data: CreateMirrorRequest) {
-  let newMirroredVideo = new MirroredVideo();
+  let newMirroredVideo = new AvailableMirror();
   newMirroredVideo.redditPostId = data.redditPostId;
-  newMirroredVideo.url = data.url;
+  newMirroredVideo.mirrorUrl = data.url;
   newMirroredVideo.bot = data.bot;
   await newMirroredVideo.save();
 }
@@ -35,7 +35,7 @@ router.post("/update", async (req, res) => {
     let mirroredVideo;
 
     try {
-      mirroredVideo = await MirroredVideo.findOne({
+      mirroredVideo = await AvailableMirror.findOne({
         where: {
           redditPostId: redditPostId,
           bot: bot
@@ -93,10 +93,10 @@ router.delete("/delete", async (req, res) => {
     let mirroredVideo;
 
     try {
-      mirroredVideo = await MirroredVideo.findOne({
+      mirroredVideo = await AvailableMirror.findOne({
         where: {
           redditPostId: redditPostId,
-          url: url,
+          mirrorUrl: url,
           bot: bot
         }
       });

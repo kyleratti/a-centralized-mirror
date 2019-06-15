@@ -4,5 +4,5 @@ export declare class WebServer {
     private app;
     private port;
     constructor();
-    start(): void;
+    start(): Promise<void>;
 }

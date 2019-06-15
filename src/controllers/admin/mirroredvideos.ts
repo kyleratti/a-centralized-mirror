@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import HttpStatus from "http-status-codes";
 import { authorized } from ".";
 import { response } from "..";
-import { MirroredVideo, RegisteredBot } from "../../entity";
+import { AvailableMirror, RegisteredBot } from "../../entity";
 import { EventListenerTypes } from "typeorm/metadata/types/EventListenerTypes";
 
 const router: Router = Router();
@@ -14,7 +14,7 @@ router.get("/get", async (req: Request, res: Response) => {
     let mirroredVideo;
 
     try {
-      mirroredVideo = await MirroredVideo.findOne({ url: reqUrl });
+      mirroredVideo = await AvailableMirror.findOne({ mirrorUrl: reqUrl });
     } catch (err) {
       req.log.fatal({
         msg: `Error locating mirrored video`,
@@ -49,10 +49,10 @@ router.get("/get", async (req: Request, res: Response) => {
 
 router.get("/getall", async (req: Request, res: Response) => {
   authorized(req, res, async () => {
-    let mirroredVideos;
+    let mirroredVideos: AvailableMirror[];
 
     try {
-      mirroredVideos = await MirroredVideo.find({
+      mirroredVideos = await AvailableMirror.find({
         order: {
           createdAt: "ASC"
         }
@@ -74,7 +74,8 @@ router.get("/getall", async (req: Request, res: Response) => {
     mirroredVideos.forEach(mirroredVideo => {
       mirroredVideoData.push({
         id: mirroredVideo.id,
-        url: mirroredVideo.url,
+        redditPostId: mirroredVideo.redditPostId,
+        mirrorUrl: mirroredVideo.mirrorUrl,
         botUsername: mirroredVideo.bot.username,
         createdAt: mirroredVideo.createdAt,
         updatedAt: mirroredVideo.updatedAt
@@ -113,8 +114,8 @@ router.put("/add", async (req: Request, res) => {
       });
     }
 
-    let mirroredVideo = new MirroredVideo();
-    mirroredVideo.url = reqUrl;
+    let mirroredVideo = new AvailableMirror();
+    mirroredVideo.mirrorUrl = reqUrl;
     mirroredVideo.bot = bot;
 
     try {

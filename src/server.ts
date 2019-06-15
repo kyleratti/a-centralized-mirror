@@ -10,6 +10,7 @@ import {
   MirroredVideosAdminApi
 } from "./controllers/admin";
 import { BotApi } from "./controllers/bot";
+import { CommentReplyCronApi } from "./controllers/cron";
 import { database } from "./db";
 
 config();
@@ -37,20 +38,25 @@ export class WebServer {
     app.use("/admin/commentreplies", CommentReplyAdminApi);
     app.use("/admin/mirroredvideos", MirroredVideosAdminApi);
 
+    app.use("/cron/commentreply", CommentReplyCronApi);
+
     app.use("/mirroredvideos", BotApi);
 
     this.app = app;
     this.port = port;
   }
 
-  start() {
-    db.connect()
-      .then(_conn => {
-        console.log(`database successfully started`);
-      })
-      .catch(err => {
-        console.error(`unable to start database: ${err}`);
+  async start() {
+    try {
+      await db.connect();
+
+      logger.info(`database sucecssfully started`);
+    } catch (err) {
+      return logger.fatal({
+        msg: `unable to start database`,
+        err: err
       });
+    }
 
     this.app.listen(this.port, () => {
       console.log(

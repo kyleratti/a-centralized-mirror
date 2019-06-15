@@ -15,7 +15,7 @@ import { CommentReply } from "./commentreply";
 import { RegisteredBot } from "./registeredbot";
 
 @Entity()
-export class MirroredVideo extends BaseEntity {
+export class AvailableMirror extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,7 +23,7 @@ export class MirroredVideo extends BaseEntity {
     unique: true,
     nullable: false
   })
-  url: string;
+  mirrorUrl: string;
 
   @Column()
   @Index()
@@ -46,7 +46,7 @@ export class MirroredVideo extends BaseEntity {
     try {
       let comment = await CommentReply.findOne({
         where: {
-          redditPostId: this.redditPostId
+          redditPostId_Parent: this.redditPostId
         }
       });
 
@@ -55,7 +55,7 @@ export class MirroredVideo extends BaseEntity {
         await comment.save();
       } else {
         comment = await new CommentReply();
-        comment.redditPostId = this.redditPostId;
+        comment.redditPostId_Parent = this.redditPostId;
         comment.status = CommentReplyStatus.Outdated;
         await comment.save();
       }
