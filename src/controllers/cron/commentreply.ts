@@ -52,50 +52,51 @@ function getFormattedMirrors(mirrors: AvailableMirror[]) {
   return TEMPLATE_COMMENTREPLY.replace("%s", formattedMirrors.join("\n"));
 }
 
-function processCommentUpdates(comment: CommentReply) {
-  return new Promise<CommentReply>(async (success, fail) => {
-    let post: Submission;
+async function processCommentUpdates(comment: CommentReply) {
+  let post: Submission;
 
+  // @ts-ignore
+  // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
+  post = redditapi.getSubmission(comment.redditPostId_Parent);
+  let mirrors: AvailableMirror[];
+
+  mirrors = await AvailableMirror.find({
+    where: {
+      redditPostId: comment.redditPostId_Parent
+    },
+    order: {
+      createdAt: "ASC"
+    }
+  });
+
+  let commentBody = getFormattedMirrors(mirrors);
+
+  let reply;
+  if (comment.redditPostId_Reply) {
     // @ts-ignore
     // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-    post = redditapi.getSubmission(comment.redditPostId_Parent);
-    let mirrors: AvailableMirror[];
+    reply = await redditapi.getComment(comment.redditPostId_Reply).fetch();
+    await reply.edit(commentBody);
+    await reply.refresh();
+  } else {
+    // @ts-ignore
+    // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
+    reply = await post.reply(commentBody);
+  }
 
-    mirrors = await AvailableMirror.find({
-      where: {
-        redditPostId: comment.redditPostId_Parent
-      },
-      order: {
-        createdAt: "ASC"
-      }
+  if (await isSubredditMod(reply.subreddit)) {
+    // @ts-ignore
+    // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
+    await reply.distinguish({
+      status: true,
+      sticky: !(await hasStickiedReplies(comment.redditPostId_Parent))
     });
+  }
 
-    let replyBody = getFormattedMirrors(mirrors);
-
-    let reply;
-    if (comment.redditPostId_Reply) {
-      reply = redditapi.getComment(comment.redditPostId_Reply);
-    } else {
-      // @ts-ignore
-      // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-      let postedReply = await post.reply(replyBody);
-      reply = redditapi.getComment(postedReply.id);
-    }
-
-    if (await isSubredditMod(reply.subreddit)) {
-      // @ts-ignore
-      // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-      await reply.distinguish({
-        status: true,
-        sticky: !(await hasStickiedReplies(comment.redditPostId_Parent))
-      });
-    }
-
-    comment.redditPostId_Reply = reply.id;
-    comment.status = CommentReplyStatus.Current;
-    await comment.save();
-    success(comment);
-  });
+  comment.redditPostId_Reply = reply.id;
+  comment.status = CommentReplyStatus.Current;
+  await comment.save();
+  return comment;
 }
 
 router.post("/sync", (req: Request, res: Response) => {
