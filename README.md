@@ -28,7 +28,11 @@ developer username:
 active subreddits:
 ```
 
-If you are integrating **a-centralized-mirror** into your mirror service, it's recommended that you add error handling for times that the service may be unavailable. This may include **queuing and retrying requests** at an occasionally until they succeed or **bypassing the service and manually posting the mirror link** using your own bot. This service is run as a hobby and does not come with any SLA, though we aim to provide a high level of service.
+## Implementation
+
+If you are integrating **a-centralized-mirror** into your mirror service, it's highly recommended that you add error handling for cases where the service may be unavailable or have an error in processing your request. Consider **queuing and retrying requests** occasionally until they succeed or **bypassing the service entirely and manually posting the mirror link** using your own bot.
+
+This service is provided as a fun hobby and does not come with any SLA.
 
 # And a standing ovation to...
 
