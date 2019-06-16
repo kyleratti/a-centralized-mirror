@@ -8,6 +8,22 @@ The **a-centralized-mirror** service will maintain a single stickied comment wit
 2. **some-other-mirror-bot** submits an API request to this service
 3. **a-mirror-bot** posts/updates the stickied comment on the post
 
+## Example Posts
+
+A post maintained by **a-mirror-bot** will look similar to the following:
+
+> The following mirrors are available:
+>
+> - [Mirror #1](https://youtube.com/) (provided by /u/a-mirror-bot)
+>
+> **Note:** this listing is provided for convenience only; if you have issues using one of the mirrors listed here, please address them directly with the bot developer
+>
+> ---
+>
+> [^share ^your ^thoughts](https://centralized.amirror.link/thoughts) ^| [^look ^at ^my ^programming](https://centralized.amirror.link/source)
+
+Mirrors are listed in the order in which they're sent to the mirror service.
+
 # Subreddit Moderators
 
 This bot will only be activated on subreddits where the moderators have already approved its functionality and an agreement is in place.
