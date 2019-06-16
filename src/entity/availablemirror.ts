@@ -1,5 +1,6 @@
 import {
   AfterInsert,
+  AfterRemove,
   AfterUpdate,
   BaseEntity,
   Column,
@@ -42,6 +43,7 @@ export class AvailableMirror extends BaseEntity {
 
   @AfterInsert()
   @AfterUpdate()
+  @AfterRemove()
   async updateCommentReplyStatus() {
     try {
       let comment = await CommentReply.findOne({

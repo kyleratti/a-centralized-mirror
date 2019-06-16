@@ -52,6 +52,18 @@ function getFormattedMirrors(mirrors: AvailableMirror[]) {
   return TEMPLATE_COMMENTREPLY.replace("%s", formattedMirrors.join("\n"));
 }
 
+async function deleteComment(comment: CommentReply) {
+  // @ts-ignore
+  // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
+  let reply = await redditapi.getComment(comment.redditPostId_Reply).fetch();
+  await reply.delete();
+
+  comment.redditPostId_Reply = null;
+  comment.status = CommentReplyStatus.Current;
+  await comment.save();
+  return comment;
+}
+
 async function processCommentUpdates(comment: CommentReply) {
   let post: Submission;
 
@@ -68,6 +80,8 @@ async function processCommentUpdates(comment: CommentReply) {
       createdAt: "ASC"
     }
   });
+
+  if (mirrors.length <= 0) return deleteComment(comment);
 
   let commentBody = getFormattedMirrors(mirrors);
 
