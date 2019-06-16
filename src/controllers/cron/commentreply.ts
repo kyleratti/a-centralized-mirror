@@ -26,73 +26,60 @@ async function isSubredditMod(subreddit: Subreddit) {
   return false;
 }
 
-function processCommentUpdates(
-  req: Request,
-  res: Response,
-  comment: CommentReply
-) {
-  return new Promise<CommentReply>(async () => {
+async function hasStickiedReplies(subredditId: string) {
+  let subreddit = redditapi.getSubmission(subredditId);
+  subreddit.comments.forEach(comment => {
+    if (comment.stickied) return true;
+  });
+
+  return false;
+}
+
+function getFormattedMirrors(mirrors: AvailableMirror[]) {
+  let formattedMirrors: string[] = [];
+
+  for (let i = 0; i < mirrors.length; i++) {
+    const mirror = mirrors[i];
+
+    let mirrorUrl = mirror.mirrorUrl;
+    let botUsername = mirror.bot.username;
+
+    formattedMirrors.push(
+      `* [Mirror #${i + 1}](${mirrorUrl}) (provided by /u/${botUsername})`
+    );
+  }
+
+  return TEMPLATE_COMMENTREPLY.replace("%s", formattedMirrors.join("\n"));
+}
+
+function processCommentUpdates(comment: CommentReply) {
+  return new Promise<CommentReply>(async (success, fail) => {
     let post: Submission;
 
-    try {
-      // @ts-ignore
-      // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-      post = await redditapi.getSubmission(comment.redditPostId_Parent).fetch();
-    } catch (err) {
-      req.log.fatal(err);
-
-      return response(res, {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving post from reddit`
-      });
-    }
+    // @ts-ignore
+    // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
+    post = redditapi.getSubmission(comment.redditPostId_Parent);
     let mirrors: AvailableMirror[];
 
-    try {
-      mirrors = await AvailableMirror.find({
-        where: {
-          redditPostId: comment.redditPostId_Parent
-        },
-        order: {
-          createdAt: "ASC"
-        }
-      });
-    } catch (err) {
-      req.log.fatal(`Error retrieving mirrored videos for post`);
+    mirrors = await AvailableMirror.find({
+      where: {
+        redditPostId: comment.redditPostId_Parent
+      },
+      order: {
+        createdAt: "ASC"
+      }
+    });
 
-      return response(res, {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving mirrored videos for post`
-      });
-    }
-    let formattedMirrors: string[] = [];
+    let replyBody = getFormattedMirrors(mirrors);
 
-    for (let i = 0; i < mirrors.length; i++) {
-      const mirror = mirrors[i];
-
-      let mirrorUrl = mirror.mirrorUrl;
-      let botUsername = mirror.bot.username;
-
-      formattedMirrors.push(
-        `* [Mirror #${i + 1}](${mirrorUrl}) (provided by /u/${botUsername})`
-      );
-    }
-    let replyBody = TEMPLATE_COMMENTREPLY.replace(
-      "%s",
-      formattedMirrors.join("\n")
-    );
-    let reply: Submission;
+    let reply;
     if (comment.redditPostId_Reply) {
-      // @ts-ignore
-      // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-      reply = await redditapi.getComment(comment.redditPostId_Reply).fetch();
+      reply = redditapi.getComment(comment.redditPostId_Reply);
     } else {
       // @ts-ignore
       // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-      let postedReply: Submission = await post.reply(replyBody);
-      // @ts-ignore
-      // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-      reply = await redditapi.getComment(postedReply.id).fetch();
+      let postedReply = await post.reply(replyBody);
+      reply = redditapi.getComment(postedReply.id);
     }
 
     if (await isSubredditMod(reply.subreddit)) {
@@ -100,17 +87,14 @@ function processCommentUpdates(
       // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
       await reply.distinguish({
         status: true,
-        sticky: true
+        sticky: !(await hasStickiedReplies(comment.redditPostId_Parent))
       });
-
-      // TODO: sticky post (ONLY IF ANOTHER POST IS NOT STICKIED)
-      // FIXME: this doesn't actually check if the post has a sticky first
     }
 
     comment.redditPostId_Reply = reply.id;
     comment.status = CommentReplyStatus.Current;
     await comment.save();
-    return comment;
+    success(comment);
   });
 }
 
@@ -143,13 +127,21 @@ router.post("/sync", (req: Request, res: Response) => {
         message: `All comments are up-to-date`
       });
 
-    await comments.forEach(async comment => {
-      await processCommentUpdates(req, res, comment);
-    });
+    for (const comment of comments) {
+      try {
+        await processCommentUpdates(comment);
+      } catch (err) {
+        req.log.fatal(err);
+
+        return response(res, {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: `Error processing comment updates`
+        });
+      }
+    }
 
     let numPostsUpdated = comments.length;
 
-    // FIXME: this returns before line 142 runs
     return response(res, {
       status: OK,
       message: `Updated ${numPostsUpdated} comment(s)`,
