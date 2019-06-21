@@ -11,11 +11,16 @@ import { CommentReplyStatus } from "../../structures";
 
 const router: Router = Router();
 
+/** The template string used in comment replies */
 const TEMPLATE_COMMENTREPLY: string = fs.readFileSync(
   "./templates/commentreply.md",
   "utf-8"
 );
 
+/**
+ * Checks if a-mirror-bot is a moderator of the specified subreddit
+ * @param subreddit The subreddit to check
+ */
 async function isSubredditMod(subreddit: Subreddit) {
   let mods = await subreddit.getModerators();
 
@@ -26,16 +31,24 @@ async function isSubredditMod(subreddit: Subreddit) {
   return false;
 }
 
-async function hasStickiedReplies(subredditId: string) {
-  let subreddit = redditapi.getSubmission(subredditId);
-  subreddit.comments.forEach(comment => {
+/**
+ * Checks if the specified submission already has stickied comments
+ * @param submissionId The submission ID to check
+ */
+async function hasStickiedReplies(submissionId: string) {
+  let submission = redditapi.getSubmission(submissionId);
+  submission.comments.forEach(comment => {
     if (comment.stickied) return true;
   });
 
   return false;
 }
 
-function getFormattedMirrors(mirrors: AvailableMirror[]) {
+/**
+ * Generates a formatted comment reply string containing all available mirrors
+ * @param mirrors An array of AvailableMirror objects
+ */
+function generateFormattedMirrors(mirrors: AvailableMirror[]): string {
   let formattedMirrors: string[] = [];
 
   for (let i = 0; i < mirrors.length; i++) {
@@ -52,6 +65,10 @@ function getFormattedMirrors(mirrors: AvailableMirror[]) {
   return TEMPLATE_COMMENTREPLY.replace("%s", formattedMirrors.join("\n"));
 }
 
+/**
+ * Deletes the comment reply from a submission
+ * @param comment The reddit CommentReply to delete
+ */
 async function deleteComment(comment: CommentReply) {
   // @ts-ignore
   // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
@@ -64,6 +81,10 @@ async function deleteComment(comment: CommentReply) {
   return comment;
 }
 
+/**
+ * Processes updates on the specified CommentReply, posting or editing the existing post as necessary
+ * @param comment The CommentReply to process updates on
+ */
 async function processCommentUpdates(comment: CommentReply) {
   let post: Submission;
 
@@ -83,7 +104,7 @@ async function processCommentUpdates(comment: CommentReply) {
 
   if (mirrors.length <= 0) return deleteComment(comment);
 
-  let commentBody = getFormattedMirrors(mirrors);
+  let commentBody = generateFormattedMirrors(mirrors);
 
   let reply;
   if (comment.redditPostId_Reply) {
