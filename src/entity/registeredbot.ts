@@ -1,14 +1,13 @@
 import {
-  Entity,
+  BaseEntity,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  PrimaryGeneratedColumn,
+  Entity,
   OneToMany,
-  BaseEntity
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { AvailableMirror } from "./availablemirror";
-import { cpus } from "os";
 
 @Entity()
 export class RegisteredBot extends BaseEntity {
