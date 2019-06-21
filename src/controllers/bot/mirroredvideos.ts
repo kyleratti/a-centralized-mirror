@@ -2,12 +2,11 @@ import { Router } from "express";
 import HttpStatus from "http-status-codes";
 import { authorized } from ".";
 import { response } from "..";
-import { AvailableMirror, CommentReply } from "../../entity";
+import { AvailableMirror } from "../../entity";
 import {
   CreateMirrorRequest,
   DeleteRequest,
-  UpdateRequest,
-  CommentReplyStatus
+  UpdateRequest
 } from "../../structures";
 
 const router: Router = Router();
