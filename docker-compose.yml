@@ -10,5 +10,3 @@ services:
       - 3010:3010
     volumes:
       - ./data:/data
-    stdin_open: true
-    tty: true
