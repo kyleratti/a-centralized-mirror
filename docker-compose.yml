@@ -1,12 +1,14 @@
 version: "3"
 
 services:
-  centralized_mirror:
+  web:
     build: .
     environment:
       - "NODE_PATH=/app/node_modules"
+      - "dotenv_config_path=/data/.env"
     ports:
       - 3010:3010
-    # volume mounts are possible
-    # volumes:
-    # ./my-local-folder:/my-volume-target
+    volumes:
+      - ./data:/data
+    stdin_open: true
+    tty: true
