@@ -1,10 +1,5 @@
-import { config } from "dotenv";
-
-config({
-  debug: process.env.ENVIRONMENT == "DEBUG"
-});
-
 import bodyParser from "body-parser";
+import { config } from "dotenv";
 import express from "express";
 import expressPinoLogger from "express-pino-logger";
 import pino from "pino";
@@ -17,6 +12,10 @@ import {
 import { BotApi } from "./controllers/bot";
 import { CommentReplyCronApi } from "./controllers/cron";
 import { database } from "./db";
+
+config({
+  debug: process.env.ENVIRONMENT == "DEBUG"
+});
 
 export var db = database;
 const logger = pino({
