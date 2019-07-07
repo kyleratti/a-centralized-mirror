@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  centralized_mirror:
+    build: .
+    environment:
+      - "NODE_PATH=/app/node_modules"
+    ports:
+      - 3010:3010
+    # volume mounts are possible
+    # volumes:
+    # ./my-local-folder:/my-volume-target
