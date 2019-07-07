@@ -13,7 +13,9 @@ import { BotApi } from "./controllers/bot";
 import { CommentReplyCronApi } from "./controllers/cron";
 import { database } from "./db";
 
-config();
+config({
+  debug: process.env.ENVIRONMENT == "DEBUG"
+});
 
 export var db = database;
 const logger = pino({
