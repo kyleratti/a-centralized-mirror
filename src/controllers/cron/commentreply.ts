@@ -11,9 +11,11 @@ import { CommentReplyStatus } from "../../structures";
 
 const router: Router = Router();
 
+const TEMPLATES_LOCATION = process.env.TEMPLATES_LOCATION;
+
 /** The template string used in comment replies */
 const TEMPLATE_COMMENTREPLY: string = fs.readFileSync(
-  "./templates/commentreply.md",
+  `${TEMPLATES_LOCATION}/commentreply.md`,
   "utf-8"
 );
 
