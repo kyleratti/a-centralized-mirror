@@ -1,8 +1,11 @@
-import { getConnectionManager, Connection } from "typeorm";
+import path from "path";
+import { Connection, getConnectionManager } from "typeorm";
 
 let db = getConnectionManager().create({
   type: "sqlite",
-  database: process.env.DATABASE_LOCATION || "./db/database.sqlite",
+  database: path.resolve(
+    process.env.DATABASE_LOCATION || "data/database.sqlite3"
+  ),
   synchronize: true,
   logging: true,
   entities: [__dirname + "/../entity/**{.ts,.js}"],
