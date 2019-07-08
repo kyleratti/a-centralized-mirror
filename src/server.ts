@@ -60,7 +60,7 @@ export class WebServer {
       });
     }
 
-    this.app.listen(this.port, "localhost", () => {
+    this.app.listen(this.port, () => {
       console.log(
         `listening for centralized api requests at http://127.0.0.1:${
           this.port
