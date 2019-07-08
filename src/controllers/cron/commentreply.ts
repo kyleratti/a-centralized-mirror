@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import fs from "fs";
 import HttpStatus, { OK } from "http-status-codes";
+import path from "path";
 import { Submission, Subreddit } from "snoowrap";
 import { authorized } from ".";
 import { response } from "..";
@@ -15,7 +16,7 @@ const TEMPLATES_LOCATION = process.env.TEMPLATES_LOCATION;
 
 /** The template string used in comment replies */
 const TEMPLATE_COMMENTREPLY: string = fs.readFileSync(
-  `${TEMPLATES_LOCATION}/commentreply.md`,
+  path.resolve(`${TEMPLATES_LOCATION}/commentreply.md`),
   "utf-8"
 );
 
