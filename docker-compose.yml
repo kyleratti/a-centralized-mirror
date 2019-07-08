@@ -5,7 +5,6 @@ services:
     build: .
     environment:
       - "NODE_PATH=/app/node_modules/"
-      - "dotenv_config_path=/data/.env"
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "PORT=${PORT}"
       - "API_TOKEN=${API_TOKEN}"
