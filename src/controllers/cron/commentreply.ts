@@ -14,7 +14,7 @@ const router: Router = Router();
 
 /** The template string used in comment replies */
 const TEMPLATE_COMMENTREPLY: string = fs.readFileSync(
-  path.resolve("template/commentreply.md"),
+  path.resolve("templates/commentreply.md"),
   "utf-8"
 );
 

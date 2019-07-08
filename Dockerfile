@@ -16,4 +16,5 @@ COPY --from=app-build /app-src/lib/ /app/lib/
 EXPOSE 3010
 VOLUME /data
 
-CMD [ "node", "-r", "dotenv/config", "/app/lib/index.js" ]
+WORKDIR /app
+CMD [ "node", "-r", "dotenv/config", "lib/index.js" ]
