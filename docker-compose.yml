@@ -4,9 +4,22 @@ services:
   web:
     build: .
     environment:
-      - "NODE_PATH=/app/node_modules"
+      - "NODE_PATH=/app/node_modules/"
       - "dotenv_config_path=/data/.env"
+      - "ENVIRONMENT=${ENVIRONMENT}"
+      - "PORT=${PORT}"
+      - "API_TOKEN=${API_TOKEN}"
+      - "API_ADMIN_TOKEN=${API_ADMIN_TOKEN}"
+      - "API_ADMIN_IP=${API_ADMIN_IP}"
+      - "API_CRONTAB_TOKEN=${API_CRONTAB_TOKEN}"
+      - "API_CRONTAB_IP=${API_CRONTAB_IP}"
+      - "DATABASE_LOCATION=${DATABASE_LOCATION}"
+      - "TEMPLATES_LOCATION=${TEMPLATES_LOCATION}"
+      - "REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}"
+      - "REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}"
+      - "REDDIT_USERNAME=${REDDIT_USERNAME}"
+      - "REDDIT_PASSWORD=${REDDIT_PASSWORD}"
     ports:
       - 3010:3010
     volumes:
-      - ./data:/data
+      - "/data"
