@@ -31,6 +31,15 @@ export function authorized(req: Request, res: Response, success: Function) {
     });
   }
 
+  if (req.body.auth.adminToken != process.env.API_ADMIN_TOKEN) {
+    req.log.error(`Authentication failed`);
+
+    return response(res, {
+      status: HttpStatus.UNAUTHORIZED,
+      message: "Invalid credentials"
+    });
+  }
+
   req.log.debug(`Received valid admin authentication`);
 
   success();
