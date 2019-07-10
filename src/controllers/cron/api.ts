@@ -18,12 +18,12 @@ export function authorized(req: Request, res: Response, success: Function) {
     });
   }
 
-  if (true) {
-    req.log.error("Attempted unimplemented cron authentication");
+  if (req.headers["x-acm-cron-token"] !== process.env.API_CRONTAB_TOKEN) {
+    req.log.fatal(`Authentication failed with invaild crontab access token`);
 
     return response(res, {
-      status: HttpStatus.NOT_IMPLEMENTED,
-      message: "Functionality not supported yet"
+      status: HttpStatus.UNAUTHORIZED,
+      message: "Invalid access token"
     });
   }
 
