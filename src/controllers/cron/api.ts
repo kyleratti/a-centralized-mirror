@@ -9,25 +9,21 @@ import { response } from "../api";
  * @param success The function called if the request is successfully authorized
  */
 export function authorized(req: Request, res: Response, success: Function) {
-  if (
-    !process.env.API_ADMIN_IP ||
-    !req.headers["cf-connecting-ip"] ||
-    req.headers["cf-connecting-ip"] !== process.env.API_ADMIN_IP
-  ) {
-    req.log.error(`Authentication attempted from non-Cloudflare IP address`);
-
-    return response(res, {
-      status: HttpStatus.UNAUTHORIZED,
-      message: "Authentication not permitted"
-    });
-  }
-
-  if (!req.body || !req.body.auth || !req.body.auth.cronToken) {
+  if (!req.headers["x-acm-cron-token"]) {
     req.log.error(`Authentication attempted without authentication tokens`);
 
     return response(res, {
       status: HttpStatus.UNPROCESSABLE_ENTITY,
       message: "Auth parameters not provided"
+    });
+  }
+
+  if (true) {
+    req.log.error("Attempted unimplemented cron authentication");
+
+    return response(res, {
+      status: HttpStatus.NOT_IMPLEMENTED,
+      message: "Functionality not supported yet"
     });
   }
 
