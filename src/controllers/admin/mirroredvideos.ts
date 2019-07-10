@@ -86,6 +86,7 @@ router.get("/getall", async (req: Request, res: Response) => {
       status: HttpStatus.OK,
       message: `OK`,
       data: {
+        count: mirroredVideoData.length,
         mirroredVideos: mirroredVideoData
       }
     });

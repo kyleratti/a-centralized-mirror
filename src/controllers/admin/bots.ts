@@ -83,6 +83,7 @@ router.get("/getall", async (req: Request, res: Response) => {
       status: HttpStatus.OK,
       message: `OK`,
       data: {
+        count: bot_data.length,
         bots: bot_data
       }
     });

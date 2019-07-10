@@ -87,6 +87,7 @@ router.get("/getall", (req: Request, res: Response) => {
       status: HttpStatus.OK,
       message: `OK`,
       data: {
+        count: commentsData.length,
         commentReplies: commentsData
       }
     });
