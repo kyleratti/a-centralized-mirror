@@ -15,10 +15,9 @@ export async function authorized(
   success: Function
 ) {
   if (
-    !req.body ||
-    !req.body.auth ||
-    !req.body.auth.token ||
-    !req.body.auth.botToken
+    !req.headers ||
+    !req.headers["x-acm-api-token"] ||
+    !req.headers["x-acm-bot-token"]
   ) {
     req.log.fatal(`Authentication attempted without authentication tokens`);
 
@@ -28,7 +27,7 @@ export async function authorized(
     });
   }
 
-  let authToken = req.body.auth.token;
+  let authToken = req.headers["x-acm-api-token"];
 
   if (process.env.API_TOKEN !== authToken) {
     req.log.fatal(`Authentication failed with invaild API access token`);
@@ -39,7 +38,7 @@ export async function authorized(
     });
   }
 
-  let botToken = req.body.auth.botToken;
+  let botToken = req.headers["x-acm-bot-token"];
 
   let bot = await RegisteredBot.findOne({
     where: {
