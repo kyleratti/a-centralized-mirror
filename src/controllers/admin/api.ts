@@ -9,19 +9,6 @@ import { response } from "..";
  * @param success The function called if the request is successfully authorized
  */
 export function authorized(req: Request, res: Response, success: Function) {
-  if (
-    !process.env.API_ADMIN_IP ||
-    !req.headers["cf-connecting-ip"] ||
-    req.headers["cf-connecting-ip"] !== process.env.API_ADMIN_IP
-  ) {
-    req.log.error(`Authentication attempted from non-Cloudflare IP address`);
-
-    return response(res, {
-      status: HttpStatus.UNAUTHORIZED,
-      message: "Authentication not permitted"
-    });
-  }
-
   if (!req.headers["x-acm-admin-token"]) {
     req.log.error(`Authentication attempted without authentication tokens`);
 
