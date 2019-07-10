@@ -22,7 +22,7 @@ export function authorized(req: Request, res: Response, success: Function) {
     });
   }
 
-  if (!req.body || !req.body.auth || !req.body.auth.adminToken) {
+  if (!req.headers["x-acm-admin-token"]) {
     req.log.error(`Authentication attempted without authentication tokens`);
 
     return response(res, {
@@ -31,7 +31,7 @@ export function authorized(req: Request, res: Response, success: Function) {
     });
   }
 
-  if (req.body.auth.adminToken != process.env.API_ADMIN_TOKEN) {
+  if (req.headers["x-acm-admin-token"] != process.env.API_ADMIN_TOKEN) {
     req.log.error(`Authentication failed`);
 
     return response(res, {
