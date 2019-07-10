@@ -9,7 +9,7 @@ import { response } from "../api";
  * @param success The function called if the request is successfully authorized
  */
 export function authorized(req: Request, res: Response, success: Function) {
-  if (!req.headers["x-acm-cron-token"]) {
+  if (!req.headers["x-acm-crontab-token"]) {
     req.log.error(`Authentication attempted without authentication tokens`);
 
     return response(res, {
@@ -18,7 +18,7 @@ export function authorized(req: Request, res: Response, success: Function) {
     });
   }
 
-  if (req.headers["x-acm-cron-token"] !== process.env.API_CRONTAB_TOKEN) {
+  if (req.headers["x-acm-crontab-token"] !== process.env.API_CRONTAB_TOKEN) {
     req.log.fatal(`Authentication failed with invaild crontab access token`);
 
     return response(res, {
