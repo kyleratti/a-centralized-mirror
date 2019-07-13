@@ -2,7 +2,9 @@ version: "3"
 
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: build/web.Dockerfile
     environment:
       - "NODE_PATH=/app/node_modules/"
       - "ENVIRONMENT=${ENVIRONMENT}"
@@ -22,3 +24,11 @@ services:
     restart: always
     volumes:
       - "/data"
+  crontab:
+    build:
+      context: .
+      dockerfile: build/crontab.Dockerfile
+    environment:
+      - "PORT=${PORT}"
+      - "API_CRONTAB_TOKEN=${API_CRONTAB_TOKEN}"
+    restart: always
