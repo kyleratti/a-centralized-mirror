@@ -20,7 +20,7 @@ A post maintained by **a-mirror-bot** will look similar to the following:
 >
 > ---
 >
-> [^share ^your ^thoughts](https://centralized.amirror.link/thoughts) ^| [^look ^at ^my ^programming](https://centralized.amirror.link/source)
+> [^share ^your ^thoughts](https://api.amirror.link/thoughts) ^| [^look ^at ^my ^programming](https://api.amirror.link/source)
 
 Mirrors are listed in the order in which they're sent to the mirror service.
 
@@ -34,9 +34,9 @@ If you're looking for a new or additional mirror _bot_ and not a mirror listing 
 
 # Bot Developers
 
-If you're interested in integrating your bot with this service, please take a moment to read over [our wiki](https://centralized.amirror.link/source/wiki). You will find additional information and an overview of our API.
+If you're interested in integrating your bot with this service, please take a moment to read over [our wiki](https://api.amirror.link/source/wiki). You will find additional information and an overview of our API.
 
-You will need to [contact the developer](https://reddit.com/message/compose/?to=a-mirror-bot&subject=a-mirror-bot%20-%20api%20access) to register your bot and receive your unique API access tokens. In your message, please include:
+You will need to [contact the developer](https://reddit.com/message/compose/?to=a-mirror-bot&subject=a-realized-mirror%20-%20api%20access) to register your bot and receive your unique API access tokens. In your message, please include:
 
 ```
 bot username:
