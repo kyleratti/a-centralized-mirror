@@ -30,7 +30,7 @@ This bot will only be activated on subreddits where the moderators have already 
 
 If you're a moderator of a subreddit and your community is interested in having its mirror bots use a single stickied list of mirrors, please [contact the developer](https://reddit.com/message/compose/?to=a-mirror-bot&subject=a-mirror-bot%20-%20new%20subreddit%20support&message=bot%20username:%20%60mybot%60%0Adeveloper%20username:%20%60thebot_developer%60%0Aactive%20subreddits:%20%60/r/MySubreddit%60) for additional information.
 
-If you're looking for a new or additional mirror _bot_ and not a mirror listing _service_, please see the [**a-mirror-bot** service](https://amirror.link/source) project.
+If you're looking for a new or additional mirror _bot_ and not a mirror listing _service_, please see the **tuckbot** project.
 
 # Bot Developers
 
