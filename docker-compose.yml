@@ -20,7 +20,7 @@ services:
       - "REDDIT_USERNAME=${REDDIT_USERNAME}"
       - "REDDIT_PASSWORD=${REDDIT_PASSWORD}"
     ports:
-      - 3010:3010
+      - 80:3010
     restart: always
     volumes:
       - "/data"
