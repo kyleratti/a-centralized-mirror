@@ -6,4 +6,4 @@ The following mirrors are available:
 
 ---
 
-[^share ^your ^thoughts](https://centralized.amirror.link/thoughts) ^| [^look ^at ^my ^programming](https://centralized.amirror.link/source)
+[^share ^your ^thoughts](https://amirror.link/thoughts) ^| [^look ^at ^my ^programming](https://amirror.link/source)
