@@ -38,7 +38,7 @@ async function isSubredditMod(subreddit: Subreddit) {
  */
 async function hasStickiedReplies(submissionId: string) {
   let submission = redditapi.getSubmission(submissionId);
-  submission.comments.forEach(comment => {
+  submission.comments.fetchAll().forEach(comment => {
     if (comment.stickied) return true;
   });
 
