@@ -2,7 +2,7 @@ FROM alpine:latest AS app-src
 RUN apk add --no-cache git
 RUN mkdir /app-src
 WORKDIR /app-src
-RUN git clone https://github.com/kyleratti/a-centralized-mirror.git .
+RUN git clone --depth=1 https://github.com/kyleratti/a-centralized-mirror.git .
 
 FROM alpine:latest
 RUN apk add --no-cache curl
