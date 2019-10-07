@@ -23,13 +23,11 @@ const TEMPLATE_COMMENTREPLY: string = fs.readFileSync(
  * @param subreddit The subreddit to check
  */
 async function isSubredditMod(subreddit: Subreddit) {
-  let mods = await subreddit.getModerators();
-
-  mods.forEach(mod => {
-    if (mod.name === configuration.reddit.username) return true;
-  });
-
-  return false;
+  return (
+    (await subreddit.getModerators({
+      name: configuration.reddit.username
+    })).length > 0
+  );
 }
 
 /**
@@ -38,6 +36,7 @@ async function isSubredditMod(subreddit: Subreddit) {
  */
 async function hasStickiedReplies(submissionId: string) {
   let submission = redditapi.getSubmission(submissionId);
+
   submission.comments.fetchAll().forEach(comment => {
     if (comment.stickied) return true;
   });
