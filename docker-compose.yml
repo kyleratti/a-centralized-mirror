@@ -23,7 +23,7 @@ services:
       - 3010:3010
     restart: always
     volumes:
-      - "/data"
+      - acm-data:/data
   crontab:
     build:
       context: .
@@ -32,3 +32,5 @@ services:
       - "PORT=${PORT}"
       - "API_CRONTAB_TOKEN=${API_CRONTAB_TOKEN}"
     restart: always
+volumes:
+  acm-data:

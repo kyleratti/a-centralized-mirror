@@ -7,7 +7,6 @@ RUN npm install
 RUN npm run build
 
 FROM node:10-alpine AS app-runtime
-RUN mkdir /data
 RUN mkdir /app
 COPY --from=app-build /app-src/node_modules/ /app/node_modules/
 COPY --from=app-build /app-src/templates/ /app/templates/
