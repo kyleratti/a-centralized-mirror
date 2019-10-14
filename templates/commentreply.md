@@ -1,8 +1,8 @@
-The following mirrors are available:
+The following mirrored copies of this video are available:
 
 %s
 
-**Note:** this listing is provided for convenience only; if you have issues using one of the mirrors listed here, please address them directly with the bot developer
+**Note:** if you have issues using any of the above links, please contact the user listed next to the mirror. I do not host any of the content listed.
 
 ---
 
