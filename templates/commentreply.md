@@ -1,8 +1,8 @@
-The following mirrored copies of this video are available:
+The following re-uploads of this video are available:
 
 %s
 
-**Note:** if you have issues using any of the above links, please contact the user listed next to the mirror. I do not host any of the content listed.
+**Note:** this is a bot providing a directory service. If you have trouble with any of the links above, please contact the user who provided them.
 
 ---
 
