@@ -6,4 +6,4 @@ The following re-uploads of this video are available:
 
 ---
 
-[^look ^at ^my ^programming](https://amirror.link/source)
+[^(look at my programming)](https://amirror.link/source)
