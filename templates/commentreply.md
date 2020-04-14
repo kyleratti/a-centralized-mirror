@@ -1,4 +1,4 @@
-The following re-uploads of this video are available:
+The following alternative links are available:
 
 %s
 
