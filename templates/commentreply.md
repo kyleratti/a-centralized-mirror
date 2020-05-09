@@ -6,4 +6,4 @@ The following alternative links are available:
 
 ---
 
-[^(source code)](https://amirror.link/source)
+[^(source code)](https://amirror.link/source) ^| [^(want to add your own mirror bot? let's talk)](https://amirror.link/lets-talk)
