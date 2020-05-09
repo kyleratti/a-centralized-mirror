@@ -6,4 +6,4 @@ The following alternative links are available:
 
 ---
 
-[^(look at my programming)](https://amirror.link/source)
+[^(source code)](https://amirror.link/source)
