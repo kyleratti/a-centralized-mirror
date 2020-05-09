@@ -27,7 +27,7 @@
     "load-json-file": "^6.2.0",
     "reflect-metadata": "^0.1.13",
     "snoowrap": "^1.21.0",
-    "sqlite3": "^4.0.9",
+    "sqlite3": "^4.2.0",
     "typeorm": "^0.2.24"
   },
   "devDependencies": {
