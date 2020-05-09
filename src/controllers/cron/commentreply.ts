@@ -123,6 +123,12 @@ async function processCommentUpdates(comment: CommentReply) {
     // @ts-ignore
     // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
     reply = await post.reply(commentBody);
+
+    if (await isSubredditMod(reply.subreddit)) {
+      // @ts-ignore
+      // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
+      await reply.lock();
+    }
   }
 
   if (await isSubredditMod(reply.subreddit)) {
@@ -132,10 +138,6 @@ async function processCommentUpdates(comment: CommentReply) {
       status: true,
       sticky: !(await hasStickiedReplies(comment.redditPostId_Parent)),
     });
-
-    // @ts-ignore
-    // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
-    await reply.lock();
   }
 
   comment.redditPostId_Reply = reply.id;
