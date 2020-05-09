@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import fs from "fs";
 import HttpStatus, { OK } from "http-status-codes";
 import path from "path";
-import { Submission, Subreddit } from "snoowrap";
+import { Comment as RedditComment, Submission, Subreddit } from "snoowrap";
 import { authorized } from ".";
 import { response } from "..";
 import * as configuration from "../../configuration";
@@ -24,9 +24,11 @@ const TEMPLATE_COMMENTREPLY: string = fs.readFileSync(
  */
 async function isSubredditMod(subreddit: Subreddit) {
   return (
-    (await subreddit.getModerators({
-      name: configuration.reddit.username
-    })).length > 0
+    (
+      await subreddit.getModerators({
+        name: configuration.reddit.username,
+      })
+    ).length > 0
   );
 }
 
@@ -37,7 +39,7 @@ async function isSubredditMod(subreddit: Subreddit) {
 async function hasStickiedReplies(submissionId: string) {
   let submission = redditapi.getSubmission(submissionId);
 
-  submission.comments.fetchAll().forEach(comment => {
+  submission.comments.fetchAll().forEach((comment) => {
     if (comment.stickied) return true;
   });
 
@@ -95,23 +97,27 @@ async function processCommentUpdates(comment: CommentReply) {
 
   mirrors = await AvailableMirror.find({
     where: {
-      redditPostId: comment.redditPostId_Parent
+      redditPostId: comment.redditPostId_Parent,
     },
     order: {
-      createdAt: "ASC"
-    }
+      createdAt: "ASC",
+    },
   });
 
   if (mirrors.length <= 0) return deleteComment(comment);
 
   let commentBody = generateFormattedMirrors(mirrors);
 
-  let reply;
+  let reply: RedditComment;
   if (comment.redditPostId_Reply) {
     // @ts-ignore
     // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
     reply = await redditapi.getComment(comment.redditPostId_Reply).fetch();
+    // @ts-ignore
+    // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
     await reply.edit(commentBody);
+    // @ts-ignore
+    // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
     await reply.refresh();
   } else {
     // @ts-ignore
@@ -124,8 +130,12 @@ async function processCommentUpdates(comment: CommentReply) {
     // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
     await reply.distinguish({
       status: true,
-      sticky: !(await hasStickiedReplies(comment.redditPostId_Parent))
+      sticky: !(await hasStickiedReplies(comment.redditPostId_Parent)),
     });
+
+    // @ts-ignore
+    // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
+    await reply.lock();
   }
 
   comment.redditPostId_Reply = reply.id;
@@ -141,26 +151,26 @@ router.post("/sync", (req: Request, res: Response) => {
     try {
       comments = await CommentReply.find({
         where: {
-          status: CommentReplyStatus.Outdated
+          status: CommentReplyStatus.Outdated,
         },
         order: {
-          updatedAt: "ASC"
+          updatedAt: "ASC",
         },
-        take: 10 // A limit is specified as not to launch a mini-DoS attack against reddit's API
+        take: 10, // A limit is specified as not to launch a mini-DoS attack against reddit's API
       });
     } catch (err) {
       req.log.fatal(`Error retrieving outdated comment replies`);
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving outdated comment replies`
+        message: `Error retrieving outdated comment replies`,
       });
     }
 
     if (!comments || comments.length <= 0)
       return response(res, {
         status: HttpStatus.OK,
-        message: `All comments are up-to-date`
+        message: `All comments are up-to-date`,
       });
 
     for (const comment of comments) {
@@ -171,7 +181,7 @@ router.post("/sync", (req: Request, res: Response) => {
 
         return response(res, {
           status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: `Error processing comment updates`
+          message: `Error processing comment updates`,
         });
       }
     }
@@ -182,8 +192,8 @@ router.post("/sync", (req: Request, res: Response) => {
       status: OK,
       message: `Updated ${numPostsUpdated} comment(s)`,
       data: {
-        numPostsUpdated: comments.length
-      }
+        numPostsUpdated: comments.length,
+      },
     });
   });
 });
