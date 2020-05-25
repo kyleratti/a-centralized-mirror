@@ -1,6 +1,6 @@
 ---
 name: New Bot Access
-about: Request access for your bot
+about: Request API access for your bot
 title: ''
 labels: new bot access
 assignees: kyleratti
