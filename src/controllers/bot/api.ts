@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { isWebUri } from "valid-url";
 import { RegisteredBot } from "../../entity";
 
 export function hasAuthHeaders(req: Request) {
@@ -33,10 +34,16 @@ export async function isAuthorized(req: Request) {
 export function isValidRequest(req: Request) {
   const [redditPostId, url] = [req.body.data.redditPostId, req.body.data.url];
 
-  if (!url || url.length < "https://a".length)
-    throw `Invalid 'url' payload received. Please check your request and try again.`;
+  if (!url)
+    throw `Missing 'url' key on payload. Please check your request and try again.`;
 
-  if (!redditPostId || redditPostId.length < 4)
+  if (!isWebUri(url))
+    throw `Invalid 'url' key on payload. Please check your request and try again. If this is an error, please open an issue.`;
+
+  if (!redditPostId)
+    throw `Missing 'redditPostId' on payload. Please check your request and try again`;
+
+  if (redditPostId.length < 4)
     throw `Invalid 'redditPsotId' payload received. Please check your req uest and try again.`;
 
   return true;
