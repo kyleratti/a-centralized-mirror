@@ -2,7 +2,7 @@
 name: New Bot Access
 about: Request API access for your bot
 title: ''
-labels: new bot access
+labels: api access
 assignees: kyleratti
 
 ---
