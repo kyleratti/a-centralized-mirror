@@ -1,5 +1,5 @@
 import snoowrap from "snoowrap";
-import * as configuration from "./configuration";
+import * as configuration from "../configuration";
 
 export const redditapi = new snoowrap({
   userAgent: "a-centralized-mirror",

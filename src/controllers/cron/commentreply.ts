@@ -7,7 +7,7 @@ import { authorized } from ".";
 import { response } from "..";
 import * as configuration from "../../configuration";
 import { AvailableMirror, CommentReply } from "../../entity";
-import { redditapi } from "../../services/redditapi";
+import { redditapi } from "../../services";
 import { CommentReplyStatus } from "../../structures";
 
 const router: Router = Router();
