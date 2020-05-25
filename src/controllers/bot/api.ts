@@ -31,7 +31,7 @@ export async function isAuthorized(req: Request) {
 }
 
 export function isValidRequest(req: Request) {
-  const [redditPostId, url] = [req.params.redditPostId, req.params.url];
+  const [redditPostId, url] = [req.body.data.redditPostId, req.body.data.url];
 
   if (!url || url.length < "https://a".length)
     throw `Invalid 'url' payload received. Please check your request and try again.`;
