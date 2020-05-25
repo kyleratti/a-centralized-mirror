@@ -71,7 +71,9 @@ router.post("/update", async (req, res) => {
         bot: bot,
       },
     });
-  } catch (_err) {
+  } catch (err) {
+    req.log.error(err);
+
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: `An error occurred trying to retrieve your mirror's data`,
@@ -81,7 +83,9 @@ router.post("/update", async (req, res) => {
   if (mirroredVideo) {
     try {
       await updateVideo(mirroredVideo, url);
-    } catch (_err) {
+    } catch (err) {
+      req.log.error(err);
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `An error occurred updating your mirror in the database`,
@@ -99,7 +103,9 @@ router.post("/update", async (req, res) => {
         url: url,
         bot: bot,
       });
-    } catch (_err) {
+    } catch (err) {
+      req.log.error(err);
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `An error occurred creating your mirror in the database`,
@@ -128,7 +134,9 @@ router.delete("/delete", async (req, res) => {
         bot: bot,
       },
     });
-  } catch (_err) {
+  } catch (err) {
+    req.log.error(err);
+
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: `An error occurred trying to retrieve your mirror's data`,
@@ -138,7 +146,9 @@ router.delete("/delete", async (req, res) => {
   if (mirroredVideo) {
     try {
       await mirroredVideo.remove();
-    } catch (_err) {
+    } catch (err) {
+      req.log.error(err);
+
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `An error occurred trying to remove your mirror`,
@@ -156,27 +166,5 @@ router.delete("/delete", async (req, res) => {
     });
   }
 });
-
-/* router.post("/reddit/updateposts", (req, res) => {
-  // TODO: check for API + CRONTAB authentication
-  /*CommentReply.findAll({
-    where: {
-      status: CommentStatus.AwaitingUpdate
-    },
-    group: "redditPostId"
-  })
-    .then(data => {
-      // TODO: assemble array based on post ID
-      // TODO: loop through array
-      // TODO: select all comments based on postId?
-      // TODO: generate new reply, send to reddit
-    })
-    .catch(err => {
-      return response(res, {
-        code: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error updating reddit posts: ${err}`
-      });
-    });
-}); */
 
 export const BotApi: Router = router;
