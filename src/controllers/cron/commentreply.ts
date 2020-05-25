@@ -111,6 +111,7 @@ async function processCommentUpdates(comment: CommentReply) {
   let commentBody = generateFormattedMirrors(mirrors);
 
   let reply: RedditComment;
+  let success = false;
   if (comment.redditPostId_Reply) {
     // @ts-ignore
     // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
@@ -121,6 +122,7 @@ async function processCommentUpdates(comment: CommentReply) {
     // @ts-ignore
     // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
     await reply.refresh();
+    success = true;
   } else {
     // This should fix trying to reply to backlogged items that are too old to be commented on
     if (
@@ -140,6 +142,8 @@ async function processCommentUpdates(comment: CommentReply) {
       // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
       await reply.lock();
     }
+
+    success = true;
   }
 
   if (await isSubredditMod(reply.subreddit)) {
@@ -152,9 +156,10 @@ async function processCommentUpdates(comment: CommentReply) {
   }
 
   comment.redditPostId_Reply = reply.id;
-  comment.status = reply?.id
-    ? CommentReplyStatus.Current
-    : CommentReplyStatus.Outdated;
+  comment.status =
+    reply?.id && success
+      ? CommentReplyStatus.Current
+      : CommentReplyStatus.Outdated;
   await comment.save();
   return comment;
 }
