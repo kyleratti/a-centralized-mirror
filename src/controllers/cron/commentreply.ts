@@ -123,7 +123,9 @@ async function processCommentUpdates(comment: CommentReply) {
     await reply.refresh();
   } else {
     // This should fix trying to reply to backlogged items that are too old to be commented on
-    if (moment(post.created_utc).isBefore(moment().subtract(6, "months"))) {
+    if (
+      moment.unix(post.created_utc).isBefore(moment().subtract(6, "months"))
+    ) {
       comment.status = CommentReplyStatus.Expired;
       await comment.save();
       return comment;
