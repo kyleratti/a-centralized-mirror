@@ -2,7 +2,8 @@ FROM node:10-alpine AS app-build
 RUN apk add --no-cache git
 RUN mkdir -p /app-src
 WORKDIR /app-src
-RUN git clone --depth=1 https://github.com/kyleratti/a-centralized-mirror.git .
+COPY src/ /app-src/src/
+COPY package.json /app-src/
 RUN npm install
 RUN npm run build
 
