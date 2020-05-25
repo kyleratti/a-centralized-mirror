@@ -183,6 +183,9 @@ router.post("/sync", (req: Request, res: Response) => {
       try {
         await processCommentUpdates(comment);
       } catch (err) {
+        req.log.fatal(
+          `Failed processing reddit post ${comment.redditPostId_Parent} (reply: ${comment.redditPostId_Reply})`
+        );
         req.log.fatal(err);
 
         return response(res, {
