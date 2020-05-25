@@ -9,6 +9,7 @@ import * as configuration from "../../configuration";
 import { AvailableMirror, CommentReply } from "../../entity";
 import { redditapi } from "../../redditapi";
 import { CommentReplyStatus } from "../../structures";
+import moment from "moment";
 
 const router: Router = Router();
 
@@ -92,7 +93,8 @@ async function processCommentUpdates(comment: CommentReply) {
 
   // @ts-ignore
   // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-  post = redditapi.getSubmission(comment.redditPostId_Parent);
+  post = await redditapi.getSubmission(comment.redditPostId_Parent).fetch();
+
   let mirrors: AvailableMirror[];
 
   mirrors = await AvailableMirror.find({
@@ -120,6 +122,13 @@ async function processCommentUpdates(comment: CommentReply) {
     // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
     await reply.refresh();
   } else {
+    // This should fix trying to reply to backlogged items that are too old to be commented on
+    if (moment(post.created_utc).isBefore(moment().subtract(6, "months"))) {
+      comment.status = CommentReplyStatus.Expired;
+      await comment.save();
+      return comment;
+    }
+
     // @ts-ignore
     // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
     reply = await post.reply(commentBody);
@@ -150,12 +159,12 @@ async function processCommentUpdates(comment: CommentReply) {
 
 router.post("/sync", (req: Request, res: Response) => {
   authorized(req, res, async () => {
-    let comments: CommentReply[];
+    let outdatedComments: CommentReply[];
 
     // FIXME: add proper error handling
 
     try {
-      comments = await CommentReply.find({
+      outdatedComments = await CommentReply.find({
         where: {
           status: CommentReplyStatus.Outdated,
         },
@@ -173,13 +182,13 @@ router.post("/sync", (req: Request, res: Response) => {
       });
     }
 
-    if (!comments || comments.length <= 0)
+    if (!outdatedComments || outdatedComments.length <= 0)
       return response(res, {
         status: HttpStatus.OK,
         message: `All comments are up-to-date`,
       });
 
-    for (const comment of comments) {
+    for (const comment of outdatedComments) {
       try {
         await processCommentUpdates(comment);
       } catch (err) {
@@ -195,13 +204,13 @@ router.post("/sync", (req: Request, res: Response) => {
       }
     }
 
-    let numPostsUpdated = comments.length;
+    let numPostsUpdated = outdatedComments.length;
 
     return response(res, {
       status: OK,
       message: `Updated ${numPostsUpdated} comment(s)`,
       data: {
-        numPostsUpdated: comments.length,
+        numPostsUpdated: outdatedComments.length,
       },
     });
   });
