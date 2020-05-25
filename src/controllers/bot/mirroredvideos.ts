@@ -1,7 +1,9 @@
 import { Router } from "express";
 import HttpStatus from "http-status-codes";
+import { Submission } from "snoowrap";
 import { response } from "..";
-import { AvailableMirror, RegisteredBot } from "../../entity";
+import { AvailableMirror, CommentReply, RegisteredBot } from "../../entity";
+import { redditapi } from "../../services/redditapi";
 import {
   CreateMirrorRequest,
   DeleteRequest,
@@ -61,6 +63,51 @@ router.post("/update", async (req, res) => {
   const bot = res.locals.bot as RegisteredBot;
   const data = req.body.data as UpdateRequest;
   const [redditPostId, url] = [data.redditPostId, data.url];
+
+  let commentReply: CommentReply;
+
+  try {
+    commentReply = await CommentReply.findOne({
+      where: {
+        redditPostId_Parent: redditPostId,
+      },
+    });
+  } catch (err) {
+    req.log.error(err);
+
+    return response(res, {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: `An error occured trying to retrieve your mirror's data (current reply failure)`,
+    });
+  }
+
+  // if this IS the first time getting a request to mirror a post,
+  // verify it's not too old to reply to/not archived
+  if (!commentReply) {
+    // @ts-ignore
+    const redditPost: Submission = await redditapi
+      .getSubmission(redditPostId)
+      .fetch();
+
+    if (redditPost.archived) {
+      req.log.info({
+        message: `Denied request to add a mirror to an archived post`,
+        data: {
+          redditPostId: redditPostId,
+          bot: bot,
+          url: url,
+        },
+      });
+
+      return response(res, {
+        status: HttpStatus.BAD_REQUEST,
+        message: `Submission is archived and isn't already mirrored, so it cannot be replied to`,
+        data: {
+          redditPostId: redditPostId,
+        },
+      });
+    }
+  }
 
   let mirroredVideo: AvailableMirror;
 
