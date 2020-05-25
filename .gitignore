@@ -62,5 +62,6 @@ typings/
 
 db/
 lib/
+dts/
 config/
 data/
