@@ -107,7 +107,7 @@ router.get("/outdated", (req: Request, res: Response) => {
         order: {
           updatedAt: "ASC",
         },
-        take: 10, // A limit is specified as not to launch a mini-DoS attack against reddit's API
+        take: 25, // A limit is specified as not to launch a mini-DoS attack against reddit's API
       });
     } catch (err) {
       req.log.fatal(`Error retrieving outdated comment replies`);
