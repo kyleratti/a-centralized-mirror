@@ -6,7 +6,8 @@
   "scripts": {
     "prebuild": "npm run clean",
     "build": "tsc -p src",
-    "clean": "rimraf ./lib/* && rimraf ./dts/*"
+    "clean": "rimraf ./lib/* && rimraf ./dts/*",
+    "start": "node -r dotenv/config lib/index.js"
   },
   "repository": {
     "type": "git",
