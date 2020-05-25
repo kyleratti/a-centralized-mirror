@@ -1,8 +1,8 @@
 export enum CommentReplyStatus {
   /** Indicates the comment is current and not in need of updates */
-  Current,
+  Current = 0,
   /** Indicates the comment is outdated and needs to be updated */
-  Outdated,
+  Outdated = 1,
   /** Indicates the parent is expired and cannot be updated anymore */
-  Expired,
+  Expired = 2,
 }
