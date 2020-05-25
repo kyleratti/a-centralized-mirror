@@ -1,5 +1,5 @@
 ---
-name: New Bot Access
+name: Request API Access
 about: Request API access for your bot
 title: ''
 labels: api access
