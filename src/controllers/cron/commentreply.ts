@@ -141,7 +141,9 @@ async function processCommentUpdates(comment: CommentReply) {
   }
 
   comment.redditPostId_Reply = reply.id;
-  comment.status = CommentReplyStatus.Current;
+  comment.status = reply?.id
+    ? CommentReplyStatus.Current
+    : CommentReplyStatus.Outdated;
   await comment.save();
   return comment;
 }
