@@ -14,7 +14,7 @@ export function authorized(req: Request, res: Response, success: Function) {
 
     return response(res, {
       status: HttpStatus.UNPROCESSABLE_ENTITY,
-      message: "Auth parameters not provided"
+      message: "Auth parameters not provided",
     });
   }
 
@@ -23,7 +23,7 @@ export function authorized(req: Request, res: Response, success: Function) {
 
     return response(res, {
       status: HttpStatus.UNAUTHORIZED,
-      message: "Invalid access token"
+      message: "Invalid access token",
     });
   }
 

@@ -5,7 +5,7 @@ import {
   Entity,
   Index,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { CommentReplyStatus } from "../structures";
 
@@ -18,14 +18,14 @@ export class CommentReply extends BaseEntity {
   /** The reddit post ID */
   @Column({
     unique: true,
-    nullable: false
+    nullable: false,
   })
   redditPostId_Parent: string;
 
   /** The reddit post ID of the comment posted and tracked by the mirror bot, if any */
   @Column({
     unique: true,
-    nullable: true
+    nullable: true,
   })
   redditPostId_Reply: string;
 

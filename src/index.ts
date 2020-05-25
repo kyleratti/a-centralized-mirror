@@ -1,4 +1,4 @@
-import { WebServer } from './server';
+import { WebServer } from "./server";
 
 let svr = new WebServer();
 svr.start();

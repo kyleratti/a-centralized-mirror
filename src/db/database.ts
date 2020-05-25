@@ -9,7 +9,7 @@ let db = getConnectionManager().create({
   synchronize: true,
   logging: true,
   entities: [__dirname + "/../entity/**{.ts,.js}"],
-  migrations: [__dirname + "/../migration/**{.ts,.js}"]
+  migrations: [__dirname + "/../migration/**{.ts,.js}"],
 });
 
 export const database: Connection = db;

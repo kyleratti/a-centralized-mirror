@@ -9,7 +9,7 @@ import {
   Index,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { CommentReplyStatus } from "../structures";
 import { CommentReply } from "./commentreply";
@@ -22,7 +22,7 @@ export class AvailableMirror extends BaseEntity {
 
   @Column({
     unique: true,
-    nullable: false
+    nullable: false,
   })
   mirrorUrl: string;
 
@@ -30,8 +30,8 @@ export class AvailableMirror extends BaseEntity {
   @Index()
   redditPostId: string;
 
-  @ManyToOne(type => RegisteredBot, bot => bot.mirroredVideos, {
-    eager: true
+  @ManyToOne((type) => RegisteredBot, (bot) => bot.mirroredVideos, {
+    eager: true,
   })
   bot: RegisteredBot;
 
@@ -48,8 +48,8 @@ export class AvailableMirror extends BaseEntity {
     try {
       let comment = await CommentReply.findOne({
         where: {
-          redditPostId_Parent: this.redditPostId
-        }
+          redditPostId_Parent: this.redditPostId,
+        },
       });
 
       if (comment) {

@@ -17,12 +17,12 @@ router.get("/get", async (req: Request, res: Response) => {
     } catch (err) {
       req.log.fatal({
         msg: `Error locating bot`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving bot information`
+        message: `Error retrieving bot information`,
       });
     }
 
@@ -33,13 +33,13 @@ router.get("/get", async (req: Request, res: Response) => {
         data: {
           username: bot.username,
           developer: bot.developer,
-          token: bot.token
-        }
+          token: bot.token,
+        },
       });
     else
       return response(res, {
         status: HttpStatus.NOT_FOUND,
-        message: `Bot not found`
+        message: `Bot not found`,
       });
   });
 });
@@ -51,31 +51,31 @@ router.get("/getall", async (req: Request, res: Response) => {
     try {
       bots = await RegisteredBot.find({
         order: {
-          username: "ASC"
-        }
+          username: "ASC",
+        },
       });
     } catch (err) {
       req.log.fatal({
         msg: `Error locating bot`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving information for bots`
+        message: `Error retrieving information for bots`,
       });
     }
 
     let bot_data = [];
 
-    bots.forEach(bot => {
+    bots.forEach((bot) => {
       bot_data.push({
         id: bot.id,
         username: bot.username,
         developer: bot.developer,
         token: bot.token,
         createdAt: bot.createdAt,
-        updatedAt: bot.updatedAt
+        updatedAt: bot.updatedAt,
       });
     });
 
@@ -84,8 +84,8 @@ router.get("/getall", async (req: Request, res: Response) => {
       message: `OK`,
       data: {
         count: bot_data.length,
-        bots: bot_data
-      }
+        bots: bot_data,
+      },
     });
   });
 });
@@ -103,19 +103,19 @@ router.put("/add", (req: Request, res) => {
     } catch (err) {
       req.log.fatal({
         msg: `Error locating bot`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving bot information`
+        message: `Error retrieving bot information`,
       });
     }
 
     if (bot)
       return response(res, {
         status: HttpStatus.BAD_REQUEST,
-        message: `Bot is already registered; please issue an update instead`
+        message: `Bot is already registered; please issue an update instead`,
       });
 
     let newBot = new RegisteredBot();
@@ -131,18 +131,18 @@ router.put("/add", (req: Request, res) => {
         message: `Successfully created new bot`,
         data: {
           username: username,
-          developer: developer
-        }
+          developer: developer,
+        },
       });
     } catch (err) {
       req.log.fatal({
         msg: `Error locating bot`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error creating bot`
+        message: `Error creating bot`,
       });
     }
   });
@@ -161,19 +161,19 @@ router.post("/update", (req: Request, res) => {
     } catch (err) {
       req.log.fatal({
         msg: `Error locating bot`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving bot information`
+        message: `Error retrieving bot information`,
       });
     }
 
     if (!bot)
       return response(res, {
         status: HttpStatus.BAD_REQUEST,
-        message: `Bot does not exist`
+        message: `Bot does not exist`,
       });
 
     let messages = [];
@@ -196,14 +196,14 @@ router.post("/update", (req: Request, res) => {
     } catch (err) {
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error saving updated bot`
+        message: `Error saving updated bot`,
       });
     }
 
     return response(res, {
       status: HttpStatus.OK,
       message: messages.join(", "),
-      data: data
+      data: data,
     });
   });
 });
@@ -219,19 +219,19 @@ router.delete("/delete", (req: Request, res) => {
     } catch (err) {
       req.log.fatal({
         msg: `Error locating bot`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving bot information`
+        message: `Error retrieving bot information`,
       });
     }
 
     if (!bot)
       return response(res, {
         status: HttpStatus.BAD_REQUEST,
-        message: `Bot does not exist`
+        message: `Bot does not exist`,
       });
 
     try {
@@ -239,7 +239,7 @@ router.delete("/delete", (req: Request, res) => {
     } catch (err) {
       return response(err, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error deleting bot`
+        message: `Error deleting bot`,
       });
     }
 
@@ -247,8 +247,8 @@ router.delete("/delete", (req: Request, res) => {
       status: HttpStatus.OK,
       message: "Successfully removed bot",
       data: {
-        username: username
-      }
+        username: username,
+      },
     });
   });
 });

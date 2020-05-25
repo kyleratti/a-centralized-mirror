@@ -8,8 +8,8 @@ export function response(
   return res.status(data.status).send({
     status: {
       status: data.status,
-      message: data.message
+      message: data.message,
     },
-    data: data.data
+    data: data.data,
   });
 }

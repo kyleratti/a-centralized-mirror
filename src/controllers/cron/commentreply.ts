@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import fs from "fs";
 import HttpStatus, { OK } from "http-status-codes";
+import moment from "moment";
 import path from "path";
 import { Comment as RedditComment, Submission, Subreddit } from "snoowrap";
 import { authorized } from ".";
@@ -9,7 +10,6 @@ import * as configuration from "../../configuration";
 import { AvailableMirror, CommentReply } from "../../entity";
 import { redditapi } from "../../redditapi";
 import { CommentReplyStatus } from "../../structures";
-import moment from "moment";
 
 const router: Router = Router();
 

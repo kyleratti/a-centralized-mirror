@@ -6,5 +6,5 @@ export const redditapi = new snoowrap({
   clientId: configuration.reddit.clientId,
   clientSecret: configuration.reddit.clientSecret,
   username: configuration.reddit.username,
-  password: configuration.reddit.password
+  password: configuration.reddit.password,
 });

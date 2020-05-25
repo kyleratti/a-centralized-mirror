@@ -3,7 +3,6 @@ import HttpStatus from "http-status-codes";
 import { authorized } from ".";
 import { response } from "..";
 import { AvailableMirror, RegisteredBot } from "../../entity";
-import { EventListenerTypes } from "typeorm/metadata/types/EventListenerTypes";
 
 const router: Router = Router();
 
@@ -18,12 +17,12 @@ router.get("/get", async (req: Request, res: Response) => {
     } catch (err) {
       req.log.fatal({
         msg: `Error locating mirrored video`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving mirrored video`
+        message: `Error retrieving mirrored video`,
       });
     }
 
@@ -36,13 +35,13 @@ router.get("/get", async (req: Request, res: Response) => {
           url: mirroredVideo.url,
           botUsername: mirroredVideo.bot.username,
           createdAt: mirroredVideo.createdAt,
-          updatedAt: mirroredVideo.updatedAt
-        }
+          updatedAt: mirroredVideo.updatedAt,
+        },
       });
     else
       return response(res, {
         status: HttpStatus.NOT_FOUND,
-        message: `Mirrored video not found`
+        message: `Mirrored video not found`,
       });
   });
 });
@@ -54,31 +53,31 @@ router.get("/getall", async (req: Request, res: Response) => {
     try {
       mirroredVideos = await AvailableMirror.find({
         order: {
-          createdAt: "ASC"
-        }
+          createdAt: "ASC",
+        },
       });
     } catch (err) {
       req.log.fatal({
         msg: `Error locating mirrored videos`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retriving mirrored videos information`
+        message: `Error retriving mirrored videos information`,
       });
     }
 
     let mirroredVideoData = [];
 
-    mirroredVideos.forEach(mirroredVideo => {
+    mirroredVideos.forEach((mirroredVideo) => {
       mirroredVideoData.push({
         id: mirroredVideo.id,
         redditPostId: mirroredVideo.redditPostId,
         mirrorUrl: mirroredVideo.mirrorUrl,
         botUsername: mirroredVideo.bot.username,
         createdAt: mirroredVideo.createdAt,
-        updatedAt: mirroredVideo.updatedAt
+        updatedAt: mirroredVideo.updatedAt,
       });
     });
 
@@ -87,8 +86,8 @@ router.get("/getall", async (req: Request, res: Response) => {
       message: `OK`,
       data: {
         count: mirroredVideoData.length,
-        mirroredVideos: mirroredVideoData
-      }
+        mirroredVideos: mirroredVideoData,
+      },
     });
   });
 });
@@ -106,12 +105,12 @@ router.put("/add", async (req: Request, res) => {
     } catch (err) {
       req.log.fatal({
         msg: `Error locating bot`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error retrieving bot information`
+        message: `Error retrieving bot information`,
       });
     }
 
@@ -124,12 +123,12 @@ router.put("/add", async (req: Request, res) => {
     } catch (err) {
       req.log.fatal({
         msg: `Error locating mirrored video`,
-        error: err
+        error: err,
       });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error creating mirrored video`
+        message: `Error creating mirrored video`,
       });
     }
 
@@ -138,8 +137,8 @@ router.put("/add", async (req: Request, res) => {
       message: `Successfully created new mirrored video`,
       data: {
         url: reqUrl,
-        botUsername: bot.username
-      }
+        botUsername: bot.username,
+      },
     });
   });
 });
@@ -156,19 +155,19 @@ router.post("/update", async (req: Request, res) => {
   } catch (err) {
     req.log.fatal({
       msg: `Error locating bot`,
-      error: err
+      error: err,
     });
 
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: `Error retrieving bot information`
+      message: `Error retrieving bot information`,
     });
   }
 
   if (!bot)
     return response(res, {
       status: HttpStatus.BAD_REQUEST,
-      message: `Bot does not exist`
+      message: `Bot does not exist`,
     });
 
   let messages = [];
@@ -191,19 +190,19 @@ router.post("/update", async (req: Request, res) => {
   } catch (err) {
     req.log.fatal({
       msg: `Error saving updated mirrored video`,
-      error: err
+      error: err,
     });
 
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: `Error saving updated mirrored video`
+      message: `Error saving updated mirrored video`,
     });
   }
 
   return response(res, {
     status: HttpStatus.OK,
     message: messages.join(", "),
-    data: data
+    data: data,
   });
 });
 
@@ -217,12 +216,12 @@ router.delete("/delete", async (req: Request, res) => {
   } catch (err) {
     req.log.fatal({
       msg: `Error locating bot`,
-      error: err
+      error: err,
     });
 
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: `Error retrieving bot information`
+      message: `Error retrieving bot information`,
     });
   }
 
@@ -231,8 +230,8 @@ router.delete("/delete", async (req: Request, res) => {
       status: HttpStatus.BAD_REQUEST,
       message: `Bot does not exist`,
       data: {
-        username: username
-      }
+        username: username,
+      },
     });
 
   try {
@@ -240,20 +239,20 @@ router.delete("/delete", async (req: Request, res) => {
   } catch (err) {
     req.log.fatal({
       msg: `Error removing bot`,
-      error: err
+      error: err,
     });
 
     return response(res, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: `Error removing bot`
+      message: `Error removing bot`,
     });
   }
   return response(res, {
     status: HttpStatus.OK,
     message: "Successfully removed bot",
     data: {
-      username: username
-    }
+      username: username,
+    },
   });
 });
 

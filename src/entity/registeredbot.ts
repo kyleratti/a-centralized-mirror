@@ -5,7 +5,7 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { AvailableMirror } from "./availablemirror";
 
@@ -16,23 +16,23 @@ export class RegisteredBot extends BaseEntity {
 
   @Column({
     unique: true,
-    nullable: false
+    nullable: false,
   })
   username: string;
 
   @Column({
     unique: true,
-    nullable: false
+    nullable: false,
   })
   developer: string;
 
   @Column({
     unique: true,
-    nullable: false
+    nullable: false,
   })
   token: string;
 
-  @OneToMany(type => AvailableMirror, mirroredvideo => mirroredvideo.bot)
+  @OneToMany((type) => AvailableMirror, (mirroredvideo) => mirroredvideo.bot)
   mirroredVideos: AvailableMirror[];
 
   @CreateDateColumn()

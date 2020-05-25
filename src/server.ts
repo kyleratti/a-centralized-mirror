@@ -7,20 +7,20 @@ import "reflect-metadata";
 import {
   BotsAdminApi,
   CommentReplyAdminApi,
-  MirroredVideosAdminApi
+  MirroredVideosAdminApi,
 } from "./controllers/admin";
 import { BotApi } from "./controllers/bot";
 import { CommentReplyCronApi } from "./controllers/cron";
 import { database } from "./db";
 
 config({
-  debug: process.env.ENVIRONMENT == "DEBUG"
+  debug: process.env.ENVIRONMENT == "DEBUG",
 });
 
 export var db = database;
 const logger = pino({
   name: "a-centralized-mirror",
-  level: "debug"
+  level: "debug",
 });
 
 export class WebServer {
@@ -56,15 +56,13 @@ export class WebServer {
     } catch (err) {
       return logger.fatal({
         msg: `unable to start database`,
-        err: err
+        err: err,
       });
     }
 
     this.app.listen(this.port, () => {
       console.log(
-        `listening for centralized api requests at http://127.0.0.1:${
-          this.port
-        }`
+        `listening for centralized api requests at http://127.0.0.1:${this.port}`
       );
     });
   }
