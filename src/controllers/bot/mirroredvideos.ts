@@ -59,6 +59,7 @@ router.all("/*", async (req, res, next) => {
   next();
 });
 
+// TODO: clean up this spaghetti code
 router.post("/update", async (req, res) => {
   const bot = res.locals.bot as RegisteredBot;
   const data = req.body.data as UpdateRequest;
