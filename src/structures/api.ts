@@ -23,20 +23,17 @@ export interface CreateMirrorRequest {
   bot: RegisteredBot;
 }
 
-/** Data structure for delete requests */
-export interface DeleteRequest {
+/** Data structure for video API requests */
+export interface ApiRequest {
   /** The unique ID to the reddit post */
   redditPostId: string;
 
   /** The URL to the mirrored video */
   url: string;
 }
+
+/** Data structure for delete requests */
+export interface DeleteRequest extends ApiRequest {}
 
 /** Data structure for update requests */
-export interface UpdateRequest {
-  /** The unique ID to the reddit post */
-  redditPostId: string;
-
-  /** The URL to the mirrored video */
-  url: string;
-}
+export interface UpdateRequest extends ApiRequest {}

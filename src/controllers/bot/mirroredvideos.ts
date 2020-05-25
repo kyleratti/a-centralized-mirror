@@ -1,13 +1,13 @@
 import { Router } from "express";
 import HttpStatus from "http-status-codes";
-import { authorized } from ".";
 import { response } from "..";
 import { AvailableMirror } from "../../entity";
 import {
   CreateMirrorRequest,
   DeleteRequest,
-  UpdateRequest
+  UpdateRequest,
 } from "../../structures";
+import { hasAuthHeaders, isAuthorized, isValidRequest } from "./api";
 
 const router: Router = Router();
 
@@ -26,108 +26,135 @@ async function createVideo(data: CreateMirrorRequest) {
   await newMirroredVideo.save();
 }
 
+router.all("/*", async (req, res, next) => {
+  try {
+    hasAuthHeaders(req);
+  } catch (err) {
+    return response(res, {
+      status: HttpStatus.UNPROCESSABLE_ENTITY,
+      message: err,
+    });
+  }
+
+  try {
+    res.locals.bot = await isAuthorized(req);
+  } catch (err) {
+    return response(res, {
+      status: HttpStatus.UNAUTHORIZED,
+      message: err,
+    });
+  }
+
+  try {
+    isValidRequest(req);
+  } catch (err) {
+    return response(res, {
+      status: HttpStatus.UNPROCESSABLE_ENTITY,
+      message: err,
+    });
+  }
+
+  next();
+});
+
 router.post("/update", async (req, res) => {
-  authorized(req, res, async bot => {
-    let data = req.body.data as UpdateRequest;
-    let redditPostId = data.redditPostId;
-    let url = data.url;
+  const bot = res.locals.bot;
+  const data = req.body.data as UpdateRequest;
+  const [redditPostId, url] = [data.redditPostId, data.url];
 
-    let mirroredVideo;
+  let mirroredVideo: AvailableMirror;
 
+  try {
+    mirroredVideo = await AvailableMirror.findOne({
+      where: {
+        redditPostId: redditPostId,
+        bot: bot,
+      },
+    });
+  } catch (_err) {
+    return response(res, {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: `An error occurred trying to retrieve your mirror's data`,
+    });
+  }
+
+  if (mirroredVideo) {
     try {
-      mirroredVideo = await AvailableMirror.findOne({
-        where: {
-          redditPostId: redditPostId,
-          bot: bot
-        }
+      await updateVideo(mirroredVideo, url);
+    } catch (_err) {
+      return response(res, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `An error occurred updating your mirror in the database`,
+      });
+    }
+
+    return response(res, {
+      status: HttpStatus.OK,
+      message: `Successfully updated mirror in database. ${SUCCESS_MSG}`,
+    });
+  } else {
+    try {
+      createVideo({
+        redditPostId: redditPostId,
+        url: url,
+        bot: bot,
       });
     } catch (_err) {
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `An error occurred trying to retrieve your mirror's data`
+        message: `An error occurred creating your mirror in the database`,
       });
     }
 
-    if (mirroredVideo) {
-      try {
-        await updateVideo(mirroredVideo, url);
-      } catch (_err) {
-        return response(res, {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: `An error occurred updating your mirror in the database`
-        });
-      }
-
-      return response(res, {
-        status: HttpStatus.OK,
-        message: `Successfully updated mirror in database. ${SUCCESS_MSG}`
-      });
-    } else {
-      try {
-        createVideo({
-          redditPostId: redditPostId,
-          url: url,
-          bot: bot
-        });
-      } catch (_err) {
-        return response(res, {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: `An error occurred creating your mirror in the database`
-        });
-      }
-
-      return response(res, {
-        status: HttpStatus.OK,
-        message: `Successfully created mirror in database. ${SUCCESS_MSG}`
-      });
-    }
-  });
+    return response(res, {
+      status: HttpStatus.OK,
+      message: `Successfully created mirror in database. ${SUCCESS_MSG}`,
+    });
+  }
 });
 
 router.delete("/delete", async (req, res) => {
-  authorized(req, res, async bot => {
-    let data = req.body.data as DeleteRequest;
-    let redditPostId = data.redditPostId;
-    let url = data.url;
+  const bot = res.locals.bot;
+  const data = req.body.data as DeleteRequest;
+  const [redditPostId, url] = [data.redditPostId, data.url];
 
-    let mirroredVideo;
+  let mirroredVideo: AvailableMirror;
 
+  try {
+    mirroredVideo = await AvailableMirror.findOne({
+      where: {
+        redditPostId: redditPostId,
+        mirrorUrl: url,
+        bot: bot,
+      },
+    });
+  } catch (_err) {
+    return response(res, {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: `An error occurred trying to retrieve your mirror's data`,
+    });
+  }
+
+  if (mirroredVideo) {
     try {
-      mirroredVideo = await AvailableMirror.findOne({
-        where: {
-          redditPostId: redditPostId,
-          mirrorUrl: url,
-          bot: bot
-        }
-      });
+      await mirroredVideo.remove();
     } catch (_err) {
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `An error occurred trying to retrieve your mirror's data`
+        message: `An error occurred trying to remove your mirror`,
       });
     }
 
-    if (mirroredVideo) {
-      try {
-        mirroredVideo.remove();
-      } catch (_err) {
-        return response(res, {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: `An error occurred trying to remove your mirror`
-        });
-      }
-
-      return response(res, {
-        status: HttpStatus.OK,
-        message: `Successfully removed mirror from database. ${SUCCESS_MSG}`
-      });
-    } else {
-      return response(res, {
-        status: HttpStatus.NOT_FOUND,
-        message: `Mirror not found in database`
-      });
-    }
-  });
+    return response(res, {
+      status: HttpStatus.OK,
+      message: `Successfully removed mirror from database. ${SUCCESS_MSG}`,
+    });
+  } else {
+    return response(res, {
+      status: HttpStatus.NOT_FOUND,
+      message: `Mirror not found in database`,
+    });
+  }
 });
 
 /* router.post("/reddit/updateposts", (req, res) => {
