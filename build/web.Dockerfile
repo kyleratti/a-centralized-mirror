@@ -3,6 +3,7 @@ RUN apk add --no-cache git
 RUN mkdir -p /app-src
 WORKDIR /app-src
 COPY src/ /app-src/src/
+COPY templates/ /app-src/templates/
 COPY package.json /app-src/
 RUN npm install
 RUN npm run build
