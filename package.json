@@ -4,9 +4,9 @@
   "description": "A centralized API for posting video mirrors",
   "main": "lib/index.js",
   "scripts": {
+    "prebuild": "npm run clean",
     "build": "tsc -p src",
-    "clean": "rimraf ./lib/* && rimraf ./dts/*",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf ./lib/* && rimraf ./dts/*"
   },
   "repository": {
     "type": "git",
