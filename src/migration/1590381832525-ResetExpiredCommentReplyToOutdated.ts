@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class ResetExpiredCommentReplyToOutdated1590380620
+export class ResetExpiredCommentReplyToOutdated1590381832525
   implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
