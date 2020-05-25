@@ -56,7 +56,7 @@ export class AvailableMirror extends BaseEntity {
         comment.status = CommentReplyStatus.Outdated;
         await comment.save();
       } else {
-        comment = await new CommentReply();
+        comment = new CommentReply();
         comment.redditPostId_Parent = this.redditPostId;
         comment.status = CommentReplyStatus.Outdated;
         await comment.save();
