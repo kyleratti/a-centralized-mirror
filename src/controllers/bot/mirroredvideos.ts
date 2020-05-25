@@ -1,7 +1,7 @@
 import { Router } from "express";
 import HttpStatus from "http-status-codes";
 import { response } from "..";
-import { AvailableMirror } from "../../entity";
+import { AvailableMirror, RegisteredBot } from "../../entity";
 import {
   CreateMirrorRequest,
   DeleteRequest,
@@ -58,7 +58,7 @@ router.all("/*", async (req, res, next) => {
 });
 
 router.post("/update", async (req, res) => {
-  const bot = res.locals.bot;
+  const bot = res.locals.bot as RegisteredBot;
   const data = req.body.data as UpdateRequest;
   const [redditPostId, url] = [data.redditPostId, data.url];
 
@@ -114,7 +114,7 @@ router.post("/update", async (req, res) => {
 });
 
 router.delete("/delete", async (req, res) => {
-  const bot = res.locals.bot;
+  const bot = res.locals.bot as RegisteredBot;
   const data = req.body.data as DeleteRequest;
   const [redditPostId, url] = [data.redditPostId, data.url];
 
