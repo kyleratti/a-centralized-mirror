@@ -1,14 +1,13 @@
 import { Request, Response, Router } from "express";
 import fs from "fs";
 import HttpStatus, { OK } from "http-status-codes";
-import moment from "moment";
 import path from "path";
 import { Comment as RedditComment, Submission, Subreddit } from "snoowrap";
 import { authorized } from ".";
 import { response } from "..";
 import * as configuration from "../../configuration";
 import { AvailableMirror, CommentReply } from "../../entity";
-import { redditapi } from "../../redditapi";
+import { redditapi } from "../../services/redditapi";
 import { CommentReplyStatus } from "../../structures";
 
 const router: Router = Router();
@@ -125,9 +124,7 @@ async function processCommentUpdates(comment: CommentReply) {
     success = true;
   } else {
     // This should fix trying to reply to backlogged items that are too old to be commented on
-    if (
-      moment.unix(post.created_utc).isBefore(moment().subtract(6, "months"))
-    ) {
+    if (post.archived) {
       comment.status = CommentReplyStatus.Expired;
       await comment.save();
       return comment;
