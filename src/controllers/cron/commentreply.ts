@@ -138,6 +138,9 @@ async function processCommentUpdates(comment: CommentReply) {
       // @ts-ignore
       // FIXME: see https://github.com/not-an-aardvark/snoowrap/issues/221
       await reply.lock();
+
+      // @ts-ignore
+      await reply.ignoreReports();
     }
 
     success = true;
