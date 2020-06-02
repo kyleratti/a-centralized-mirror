@@ -174,6 +174,8 @@ router.delete("/delete", async (req, res) => {
 
   let mirroredVideo: AvailableMirror;
 
+  req.log.debug({ bot: bot, data: data });
+
   try {
     mirroredVideo = await AvailableMirror.findOne({
       where: {
