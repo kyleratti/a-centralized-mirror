@@ -209,19 +209,14 @@ router.post("/sync", (req: Request, res: Response) => {
       try {
         await processCommentUpdates(comment);
       } catch (err) {
-        req.log.fatal(
-          `Failed processing reddit post ${comment.redditPostId_Parent} (reply: ${comment.redditPostId_Reply})`
-        );
-        req.log.fatal(err);
-
-        return response(res, {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: `Error processing comment updates`,
+        req.log.fatal({
+          msg: `Failed processing reddit post ${comment.redditPostId_Parent} (reply: ${comment.redditPostId_Reply})`,
+          err: err,
         });
       }
     }
 
-    let numPostsUpdated = outdatedComments.length;
+    const numPostsUpdated = outdatedComments.length;
 
     return response(res, {
       status: OK,
