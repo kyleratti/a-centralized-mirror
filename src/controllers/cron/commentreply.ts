@@ -72,20 +72,24 @@ function generateFormattedMirrors(mirrors: AvailableMirror[]): string {
  * @param comment The reddit CommentReply to delete
  */
 async function deleteComment(comment: CommentReply) {
-  try {
-    // @ts-ignore
-    // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
-    const reply = await redditapi
-      .getComment(comment.redditPostId_Reply)
-      .fetch();
-    await reply.delete();
-  } catch (err) {
-    throw err;
-  }
+  if (comment.redditPostId_Reply) {
+    try {
+      // @ts-ignore
+      // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
+      const reply = await redditapi
+        .getComment(comment.redditPostId_Reply)
+        .fetch();
+      await reply.delete();
+    } catch (err) {
+      throw err;
+    }
 
-  comment.redditPostId_Reply = null;
-  comment.status = CommentReplyStatus.Current;
-  await comment.save();
+    comment.redditPostId_Reply = null;
+    comment.status = CommentReplyStatus.Current;
+    await comment.save();
+  } else {
+    throw `No reddit comment reply found in database; nothing to remove`;
+  }
   return comment;
 }
 
