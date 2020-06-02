@@ -188,7 +188,7 @@ router.post("/sync", (req: Request, res: Response) => {
         order: {
           updatedAt: "ASC",
         },
-        take: 25, // A limit is specified as not to launch a mini-DoS attack against reddit's API
+        take: 15, // A limit is specified as not to launch a mini-DoS attack against reddit's API
       });
     } catch (err) {
       req.log.fatal(`Error retrieving outdated comment replies`);
