@@ -3,6 +3,7 @@ import fs from "fs";
 import HttpStatus, { OK } from "http-status-codes";
 import path from "path";
 import { Comment as RedditComment, Submission, Subreddit } from "snoowrap";
+import { In, Not } from "typeorm";
 import { authorized } from ".";
 import { response } from "..";
 import * as configuration from "../../configuration";
@@ -104,9 +105,7 @@ async function processCommentUpdates(comment: CommentReply) {
   // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
   post = await redditapi.getSubmission(comment.redditPostId_Parent).fetch();
 
-  let mirrors: AvailableMirror[];
-
-  mirrors = await AvailableMirror.find({
+  const mirrors = await AvailableMirror.find({
     where: {
       redditPostId: comment.redditPostId_Parent,
     },
@@ -180,18 +179,45 @@ router.post("/sync", (req: Request, res: Response) => {
 
     // FIXME: add proper error handling
 
+    // I decided to split this up into two queries because there may be a time/definitely was
+    // a time that the bot stopped posting to reddit for an extended period but was still
+    // processing update API requests. Once it comes back online, there is a massive queue
+    // of posts that need processing. During times of high volume of submissions, this can
+    // quickly overwhelm the bot and result in hours if not days before it gets caught up
+    // and starts mirroring new submissions. The compromise is to attack 5 of the oldest
+    // and 5 of the newest, ensuring the backlog is processed while new comments are, too.
+    // Eventually the bot will catch back up and things will work as expected (e.g. within
+    // 60 seconds)
+    const MAX_TO_PROCESS = 10;
+
     try {
-      outdatedComments = await CommentReply.find({
+      const oldestOutdatedComments = await CommentReply.find({
         where: {
           status: CommentReplyStatus.Outdated,
         },
         order: {
           updatedAt: "ASC",
         },
-        take: 10, // A limit is specified as not to launch a mini-DoS attack against reddit's API
+        take: MAX_TO_PROCESS / 2, // A limit is specified as not to launch a mini-DoS attack against reddit's API
       });
+
+      const newestOutdatedComments = await CommentReply.find({
+        where: {
+          status: CommentReplyStatus.Outdated,
+          id: Not(In(oldestOutdatedComments.map((comment) => comment.id))),
+        },
+        order: {
+          updatedAt: "DESC",
+        },
+        take: MAX_TO_PROCESS / 2,
+      });
+
+      outdatedComments = [...oldestOutdatedComments, ...newestOutdatedComments];
     } catch (err) {
-      req.log.fatal(`Error retrieving outdated comment replies`);
+      req.log.fatal({
+        msg: `Error retrieving outdated comment replies`,
+        err: err,
+      });
 
       return response(res, {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
