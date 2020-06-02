@@ -7,7 +7,8 @@
     "prebuild": "npm run clean",
     "build": "tsc -p src",
     "clean": "rimraf ./lib/* && rimraf ./dts/*",
-    "start": "node -r dotenv/config lib/index.js"
+    "start": "node -r dotenv/config lib/index.js",
+    "watch": "tsc -p src --watch"
   },
   "repository": {
     "type": "git",
