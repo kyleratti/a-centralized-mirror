@@ -217,4 +217,38 @@ router.delete("/delete", async (req, res) => {
   }
 });
 
+router.get("/all", async (req, res) => {
+  const bot = res.locals.bot as RegisteredBot;
+
+  let mirrors: AvailableMirror[];
+
+  try {
+    mirrors = await AvailableMirror.find({
+      select: ["mirrorUrl", "redditPostId", "createdAt", "updatedAt"],
+      where: {
+        bot: bot,
+      },
+      order: {
+        createdAt: "DESC",
+      },
+    });
+  } catch (err) {
+    req.log.fatal({
+      msg: `Failed to retrieve all available mirrors for bot`,
+      err: err,
+    });
+  }
+
+  return response(res, {
+    status: HttpStatus.OK,
+    message: `Successfully located ${mirrors.length} mirror${
+      mirrors.length !== 1 ? "s" : ""
+    }`,
+    data: {
+      count: mirrors.length,
+      mirrors: mirrors,
+    },
+  });
+});
+
 export const BotApi: Router = router;
