@@ -70,4 +70,4 @@ Note if this is the first time running the application, you will need to make th
 
 # And a standing ovation to...
 
-I absolutely _cannot_ thank **[RoboPhred](https://github.com/robophred)** enough for this help with this project and every single project I've worked on for the past decade. You are, without a doubt, the smartest man I'll ever know and the only reason I can program at all. Thank you so very much for your patience over the past _decade_ of mentorship you've provided me.
+I absolutely _cannot_ thank **[RoboPhred](https://github.com/robophred)** enough for this help with this project and every single project I've worked on for the past decade. Thank you so very much for your patience over the past _decade_ of mentorship you've provided me.
