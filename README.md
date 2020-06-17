@@ -64,7 +64,7 @@ This service is provided as a fun hobby and does not come with any SLA.
 5. Start the web server with `npm run start`
 6. Make [HTTP requests against the API](https://github.com/kyleratti/a-centralized-mirror/wiki)
 
-For production use, we highly recommend placing a reverse proxy in front of the application.
+For production use, we highly recommend deploying via Docker and placing a reverse proxy in front of the application.
 
 Note if this is the first time running the application, you will need to make the API call to add your bot with a unique token.
 
