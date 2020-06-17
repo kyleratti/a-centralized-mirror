@@ -1,8 +1,8 @@
 # a-centralized-mirror
 
-Typically, subreddits want mirror links of submissions to be stickied to the top of each thread so viewers can find working mirrors without having to filter through comments themselves.
+Typically, subreddits want mirror links of submissions (typically video) to be stickied to the top of each thread so visitors can find working links without having to sift through potentially hundreds of comments themselves.
 
-The **a-centralized-mirror** service maintains a single stickied comment with a list of links to each mirror. Sticky replies are locked to prevent users from using its sticky status to make their comments appear at the top. Registered bots can post, update, or delete their links with this service at any time; the **a-mirror-bot** account will update the stickied comment accordingly. Here's a general overview of how it works:
+The **a-centralized-mirror** service maintains a single stickied comment with a list of links to each mirror. The sticky replies are locked to prevent users from replying directly to the comment and using it to make their comments appear at the top of the thread. Registered bots can post, update, or delete their links with this service at any time; the **a-mirror-bot** account will update the stickied comment accordingly. Here's a general overview of how it works:
 
 1. **handsome-third-party-mirror-bot** downloads a video to mirror
 2. **handsome-third-party-mirror-bot** submits an API request to this service with the link to the video
@@ -27,15 +27,13 @@ Mirrors are listed in the order in which they're sent to the mirror service.
 
 # Subreddit Moderators
 
-Although this bot can function on a subreddit with standard access/without moderator privileges, it works in a much more limited capacity.
+Although this bot can function on a subreddit as a standard user/without moderator privileges, it works in a much more limited capacity. As such, and out of respect for subreddit moderators, this bot will only be activated on subreddits where the moderators have reached out and expressed interest in its services.
 
-Out of respect for subreddit moderators, this bot will only be activated on subreddits where a discussion has been had and an "agreement" is in place.
-
-Additionally, any new bots are subject to review by subreddit moderators before being added to this service.
+Additionally, any new bots are subject to review by that subreddit's moderators before being added to this service.
 
 If you're a moderator of a subreddit and your community is interested in having your mirror bots use a directory listing of mirrors, please [open an issue](https://github.com/kyleratti/a-centralized-mirror/issues/new?assignees=kyleratti&labels=subreddit+partnership&template=subreddit-partnership.md&title=).
 
-If you're looking for a new or additional mirror _bot_ and not a mirror directory listing _service_, please see the [**Tuckbot**](https://github.com/kyleratti/tuckbot-downloader) project.
+If you're looking for a new or additional mirror _hosting service_ and not a mirror directory _listing service_, please see the [**Tuckbot**](https://github.com/kyleratti/tuckbot-downloader) project.
 
 # Bot Developers
 
@@ -50,6 +48,25 @@ If you are integrating **a-centralized-mirror** into your mirror service, it's _
 Consider **queuing and retrying requests** occasionally until they succeed or **bypassing the service entirely and manually posting the mirror link** using your own bot.
 
 This service is provided as a fun hobby and does not come with any SLA.
+
+# Installation
+
+## Prerequisites
+
+- Node `v12` or newer
+
+## Setting Up
+
+1. Clone the repository
+2. Run `npm i` to install dependencies
+3. Configure your `.env` variables (`.env.example` is included)
+4. Build with `npm run build`
+5. Start the web server with `npm run start`
+6. Make [HTTP requests against the API](https://github.com/kyleratti/a-centralized-mirror/wiki)
+
+For production use, we highly recommend placing a reverse proxy in front of the application.
+
+Note if this is the first time running the application, you will need to make the API call to add your bot with a unique token.
 
 # And a standing ovation to...
 
