@@ -43,7 +43,7 @@ If you're interested in integrating your bot with this service, please take a mo
 
 If you've read those resources and would like to integrate, please see the [Add Your Bot](https://github.com/kyleratti/a-centralized-mirror/wiki/Add-Your-Bot) page of the wiki for details on how to do that.
 
-# Implementation
+# Integration
 
 If you are integrating **a-centralized-mirror** into your mirror service, it's _highly_ recommended that you add error handling for cases where the service may be unavailable or there is an error in processing your request. Each endpoint will try to return as descriptive errors as possible, including HTTP status codes and a JSON response.
 
@@ -69,6 +69,14 @@ This service is provided as a fun hobby and does not come with any SLA.
 For production use, we highly recommend deploying via Docker and placing a reverse proxy in front of the application.
 
 Note if this is the first time running the application, you will need to make the API call to add your bot with a unique token.
+
+# To Do
+
+- [ ] Add subreddit allowlist for each registered bot to enforce subreddit boundaries
+- [ ] Add tests via jest.js
+- [ ] Move documentation from the GitHub Wiki to Markdown folders `/docs`
+- [ ] Add more RESTful API with versioning
+- [ ] Increase Elastic Search logging functionality
 
 # And a standing ovation to...
 
