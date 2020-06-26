@@ -1,5 +1,7 @@
 # a-centralized-mirror
 
+[Documentation](https://github.com/kyleratti/a-centralized-mirror/wiki)
+
 Typically, subreddits want mirror links of submissions (typically video) to be stickied to the top of each thread so visitors can find working links without having to sift through potentially hundreds of comments themselves.
 
 The **a-centralized-mirror** service maintains a single stickied comment with a list of links to each mirror. The sticky replies are locked to prevent users from replying directly to the comment and using it to make their comments appear at the top of the thread. Registered bots can post, update, or delete their links with this service at any time; the **a-mirror-bot** account will update the stickied comment accordingly. Here's a general overview of how it works:
@@ -53,7 +55,7 @@ This service is provided as a fun hobby and does not come with any SLA.
 
 ## Prerequisites
 
-- Node `v12` or newer
+- NodeJS `v12` or newer
 
 ## Setting Up
 
