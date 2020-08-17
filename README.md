@@ -2,6 +2,20 @@
 
 [Documentation](https://github.com/kyleratti/a-centralized-mirror/wiki)
 
+- [a-centralized-mirror](#a-centralized-mirror)
+  - [Example Posts](#example-posts)
+- [Subreddit Moderators](#subreddit-moderators)
+- [Bot Developers](#bot-developers)
+- [Integration](#integration)
+- [Installation](#installation)
+  - [Docker Container](#docker-container)
+    - [Setting Up](#setting-up)
+  - [Standard Application](#standard-application)
+    - [Prerequisites](#prerequisites)
+    - [Setting Up](#setting-up-1)
+- [To Do](#to-do)
+- [And a standing ovation to...](#and-a-standing-ovation-to)
+
 Typically, subreddits want mirror links of submissions (typically video) to be stickied to the top of each thread so visitors can find working links without having to sift through potentially hundreds of comments themselves.
 
 The **a-centralized-mirror** service maintains a single stickied comment with a list of links to each mirror. The sticky replies are locked to prevent users from replying directly to the comment and using it to make their comments appear at the top of the thread. Registered bots can post, update, or delete their links with this service at any time; the **a-mirror-bot** account will update the stickied comment accordingly. Here's a general overview of how it works:
@@ -53,11 +67,30 @@ This service is provided as a fun hobby and does not come with any SLA.
 
 # Installation
 
-## Prerequisites
+Note if this is the first time running the application, you will need to make the API call to add your bot with a unique token.
+
+## Docker Container
+
+This service is intended to be deployed via Docker container. For convenience, a `build/crontab.Dockerfile` and `build/web.Dockerfile` are included.
+
+A `docker-compose.yml` file is also included and is the recommended way to start this application. The SQLite database will be stored in the container's `/data` folder, which is a volume automatically created by the `docker-compose.yml` file.
+
+Ensure you set your environment variables appropriately. A `.env.example` file is included.
+
+### Setting Up
+
+1. Clone the repository
+2. Run `docker-compose up`
+
+## Standard Application
+
+**WARNING:** This method is largely untested as we deploy the service via Docker. 
+
+### Prerequisites
 
 - NodeJS `v12` or newer
 
-## Setting Up
+### Setting Up
 
 1. Clone the repository
 2. Run `npm i` to install dependencies
@@ -68,16 +101,14 @@ This service is provided as a fun hobby and does not come with any SLA.
 
 For production use, we highly recommend deploying via Docker and placing a reverse proxy in front of the application.
 
-Note if this is the first time running the application, you will need to make the API call to add your bot with a unique token.
-
 # To Do
 
 - [ ] Add subreddit allowlist for each registered bot to enforce subreddit boundaries
 - [ ] Add tests via jest.js
 - [ ] Move documentation from the GitHub Wiki to Markdown folders `/docs`
-- [ ] Add more RESTful API with versioning
+- [ ] Add more RESTful-comforming API with versioning
 - [ ] Increase Elastic Search logging functionality
 
 # And a standing ovation to...
 
-I absolutely _cannot_ thank **[RoboPhred](https://github.com/robophred)** enough for this help with this project and every single project I've worked on for the past decade. Thank you so very much for your patience over the past _decade_ of mentorship you've provided me.
+I absolutely _cannot_ thank **[RoboPhred](https://github.com/robophred)** enough for the guidance and mentorship with this project and virtually every project I've worked on for the past decade.
