@@ -6,7 +6,7 @@ let db = getConnectionManager().create({
   database: path.resolve(
     process.env.DATABASE_LOCATION || "data/database.sqlite3"
   ),
-  synchronize: true,
+  synchronize: false,
   logging: true,
   entities: [__dirname + "/../entity/**{.ts,.js}"],
   migrations: [__dirname + "/../migration/**{.ts,.js}"],

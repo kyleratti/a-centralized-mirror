@@ -32,6 +32,11 @@ export class RegisteredBot extends BaseEntity {
   })
   token: string;
 
+  @Column({
+    default: 0,
+  })
+  weight: number;
+
   @OneToMany((type) => AvailableMirror, (mirroredvideo) => mirroredvideo.bot)
   mirroredVideos: AvailableMirror[];
 

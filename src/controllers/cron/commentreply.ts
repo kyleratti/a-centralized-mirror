@@ -105,7 +105,7 @@ async function processCommentUpdates(comment: CommentReply) {
   // FIXME: due to an issue with snoowrap typings, the 'await' keyword causes compile errors. see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33139
   post = await redditapi.getSubmission(comment.redditPostId_Parent).fetch();
 
-  const mirrors = await AvailableMirror.find({
+  let mirrors = await AvailableMirror.find({
     where: {
       redditPostId: comment.redditPostId_Parent,
     },
@@ -115,6 +115,14 @@ async function processCommentUpdates(comment: CommentReply) {
   });
 
   if (mirrors.length <= 0) return deleteComment(comment);
+
+  // This is a dirty workaround for sorting mirrors by the
+  // weight of their registered bot. This really should be done
+  // with an SQL query, but I opted to do this instead because
+  // there is already a bunch of Active Record stuff in this
+  // model and I don't want to break pattern. That's probably a
+  // bad reason. In fact, I know it is.
+  mirrors = mirrors.sort((a, b) => a.bot.weight - b.bot.weight);
 
   let commentBody = generateFormattedMirrors(mirrors);
 

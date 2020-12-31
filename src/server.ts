@@ -51,6 +51,9 @@ export class WebServer {
   async start() {
     try {
       await db.connect();
+      await db.query("PRAGMA foreign_keys=OFF");
+      await db.synchronize();
+      await db.query("PRAGMA foreign_keys=ON");
 
       logger.info(`database sucecssfully started`);
     } catch (err) {
