@@ -34,6 +34,7 @@ export class RegisteredBot extends BaseEntity {
 
   @Column({
     default: 0,
+    nullable: true,
   })
   weight: number;
 

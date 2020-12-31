@@ -30,7 +30,7 @@
     "reflect-metadata": "^0.1.13",
     "snoowrap": "^1.21.0",
     "sqlite3": "^4.2.0",
-    "typeorm": "^0.2.25",
+    "typeorm": "^0.2.29",
     "valid-url": "^1.0.9"
   },
   "devDependencies": {

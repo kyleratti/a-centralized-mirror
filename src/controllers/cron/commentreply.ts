@@ -122,7 +122,7 @@ async function processCommentUpdates(comment: CommentReply) {
   // there is already a bunch of Active Record stuff in this
   // model and I don't want to break pattern. That's probably a
   // bad reason. In fact, I know it is.
-  mirrors = mirrors.sort((a, b) => a.bot.weight - b.bot.weight);
+  mirrors.sort((a, b) => a.bot.weight - b.bot.weight);
 
   let commentBody = generateFormattedMirrors(mirrors);
 
