@@ -46,12 +46,19 @@ router.get("/get", async (req: Request, res: Response) => {
 
 router.get("/getall", async (req: Request, res: Response) => {
   authorized(req, res, async () => {
-    let bots;
-
     try {
-      bots = await RegisteredBot.find({
+      const bots = await RegisteredBot.find({
         order: {
           username: "ASC",
+        },
+      });
+
+      return response(res, {
+        status: HttpStatus.OK,
+        message: `OK`,
+        data: {
+          count: bots.length,
+          bots: bots,
         },
       });
     } catch (err) {
@@ -65,28 +72,6 @@ router.get("/getall", async (req: Request, res: Response) => {
         message: `Error retrieving information for bots`,
       });
     }
-
-    let bot_data = [];
-
-    bots.forEach((bot) => {
-      bot_data.push({
-        id: bot.id,
-        username: bot.username,
-        developer: bot.developer,
-        token: bot.token,
-        createdAt: bot.createdAt,
-        updatedAt: bot.updatedAt,
-      });
-    });
-
-    return response(res, {
-      status: HttpStatus.OK,
-      message: `OK`,
-      data: {
-        count: bot_data.length,
-        bots: bot_data,
-      },
-    });
   });
 });
 
