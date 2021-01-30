@@ -10,7 +10,7 @@ router.get("/get", async (req: Request, res: Response) => {
   authorized(req, res, async () => {
     let reqData = req.body.data;
     let reqUrl = reqData.reqUrl;
-    let mirroredVideo;
+    let mirroredVideo: AvailableMirror;
 
     try {
       mirroredVideo = await AvailableMirror.findOne({ mirrorUrl: reqUrl });
@@ -32,8 +32,9 @@ router.get("/get", async (req: Request, res: Response) => {
         message: `OK`,
         data: {
           id: mirroredVideo.id,
-          url: mirroredVideo.url,
+          url: mirroredVideo.mirrorUrl,
           botUsername: mirroredVideo.bot.username,
+          linkType: mirroredVideo.linkType,
           createdAt: mirroredVideo.createdAt,
           updatedAt: mirroredVideo.updatedAt,
         },
@@ -76,6 +77,7 @@ router.get("/getall", async (req: Request, res: Response) => {
         redditPostId: mirroredVideo.redditPostId,
         mirrorUrl: mirroredVideo.mirrorUrl,
         botUsername: mirroredVideo.bot.username,
+        linkType: mirroredVideo.linkType,
         createdAt: mirroredVideo.createdAt,
         updatedAt: mirroredVideo.updatedAt,
       });

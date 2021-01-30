@@ -7,6 +7,7 @@ import { redditapi } from "../../services/redditapi";
 import {
   CreateMirrorRequest,
   DeleteRequest,
+  LinkType,
   UpdateRequest,
 } from "../../structures";
 import { hasAuthHeaders, isAuthorized, isValidRequest } from "./api";
@@ -25,6 +26,7 @@ async function createVideo(data: CreateMirrorRequest) {
   newMirroredVideo.redditPostId = data.redditPostId;
   newMirroredVideo.mirrorUrl = data.url;
   newMirroredVideo.bot = data.bot;
+  newMirroredVideo.linkType = data.linkType;
   await newMirroredVideo.save();
 }
 
@@ -63,7 +65,11 @@ router.all("/*", async (req, res, next) => {
 router.post("/update", async (req, res) => {
   const bot = res.locals.bot as RegisteredBot;
   const data = req.body.data as UpdateRequest;
-  const [redditPostId, url] = [data.redditPostId, data.url];
+  const [redditPostId, url, linkType] = [
+    data.redditPostId,
+    data.url,
+    data.linkType ?? LinkType.Mirror,
+  ];
 
   let commentReply: CommentReply;
 
@@ -146,10 +152,11 @@ router.post("/update", async (req, res) => {
     });
   } else {
     try {
-      createVideo({
-        redditPostId: redditPostId,
-        url: url,
-        bot: bot,
+      await createVideo({
+        redditPostId,
+        url,
+        bot,
+        linkType,
       });
     } catch (err) {
       req.log.error(err);
