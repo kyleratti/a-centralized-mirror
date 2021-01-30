@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { CommentReplyStatus } from "../structures";
+import { CommentReplyStatus, LinkType } from "../structures";
 import { CommentReply } from "./commentreply";
 import { RegisteredBot } from "./registeredbot";
 
@@ -34,6 +34,11 @@ export class AvailableMirror extends BaseEntity {
     eager: true,
   })
   bot: RegisteredBot;
+
+  @Column({
+    default: LinkType.Mirror,
+  })
+  linkType: LinkType;
 
   @CreateDateColumn()
   createdAt: Date;

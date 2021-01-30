@@ -9,7 +9,7 @@ import { response } from "..";
 import * as configuration from "../../configuration";
 import { AvailableMirror, CommentReply } from "../../entity";
 import { redditapi } from "../../services";
-import { CommentReplyStatus } from "../../structures";
+import { CommentReplyStatus, LinkType } from "../../structures";
 
 const router: Router = Router();
 
@@ -47,25 +47,58 @@ async function hasStickiedReplies(submissionId: string) {
   return false;
 }
 
+const generateFormattedDownloads = (downloads: AvailableMirror[]) => {
+  const formattedDownloads = [];
+
+  downloads.forEach((download) => {
+    const [mirrorUrl, botUsername] = [
+      download.mirrorUrl,
+      download.bot.username,
+    ];
+
+    formattedDownloads.push();
+  });
+};
+
 /**
  * Generates a formatted comment reply string containing all available mirrors
  * @param mirrors An array of AvailableMirror objects
  */
-function generateFormattedMirrors(mirrors: AvailableMirror[]): string {
-  let formattedMirrors: string[] = [];
+function generateFormattedMirrors(allMirrors: AvailableMirror[]): string {
+  const [mirrors, downloads] = [
+    allMirrors.filter((obj) => obj.linkType === LinkType.Mirror),
+    allMirrors.filter((obj) => obj.linkType === LinkType.Download),
+  ];
+  const hasMirrorsAndLinks = mirrors.length > 0 && downloads.length > 0;
+  const formattedLinks: string[] = [];
 
-  for (let i = 0; i < mirrors.length; i++) {
-    const mirror = mirrors[i];
+  const appendAll = (links: AvailableMirror[]) =>
+    links.forEach((link, idx) => {
+      const prefix =
+        link.linkType === null || link.linkType === LinkType.Mirror
+          ? "Mirror"
+          : "Download";
+      const [mirrorUrl, botUsername] = [link.mirrorUrl, link.bot.username];
 
-    let mirrorUrl = mirror.mirrorUrl;
-    let botUsername = mirror.bot.username;
+      formattedLinks.push(
+        `* [${prefix} #${
+          idx + 1
+        }](${mirrorUrl}) (provided by /u/${botUsername})`
+      );
+    });
 
-    formattedMirrors.push(
-      `* [Mirror #${i + 1}](${mirrorUrl}) (provided by /u/${botUsername})`
-    );
+  if (mirrors.length > 0) {
+    formattedLinks.push(`**Mirrors**`, `\n`);
+    appendAll(mirrors);
   }
 
-  return TEMPLATE_COMMENTREPLY.replace("%s", formattedMirrors.join("\n"));
+  if (downloads.length > 0) {
+    if (hasMirrorsAndLinks) formattedLinks.push("\n");
+    formattedLinks.push(`**Downloads**`, `\n`);
+    appendAll(downloads);
+  }
+
+  return TEMPLATE_COMMENTREPLY.replace("%s", formattedLinks.join("\n"));
 }
 
 /**

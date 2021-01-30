@@ -1,4 +1,5 @@
 import { RegisteredBot } from "../entity";
+import { LinkType } from "./availablemirror";
 
 /** Data structure for API responses */
 export interface ResponseData {
@@ -21,6 +22,9 @@ export interface CreateMirrorRequest {
 
   /** The bot hosting the mirror */
   bot: RegisteredBot;
+
+  /** The type of link */
+  linkType: LinkType;
 }
 
 /** Data structure for video API requests */
@@ -30,6 +34,9 @@ export interface ApiRequest {
 
   /** The URL to the mirrored video */
   url: string;
+
+  /** The type of link */
+  linkType?: LinkType;
 }
 
 /** Data structure for delete requests */
