@@ -1,0 +1,114 @@
+using System.Reflection;
+using ApplicationData;
+using ApplicationData.Services;
+using BackgroundProcessor;
+using BackgroundProcessor.Templates;
+using Core.AppSettings;
+using Core.DbConnection;
+using Microsoft.AspNetCore.Authorization;
+using SnooBrowser.Util;
+using Swashbuckle.AspNetCore.SwaggerUI;
+using WebApi.AuthHandlers;
+using WebApi.Middleware;
+using WebApi.Models.Swagger;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+ConfigureServices(builder.Services);
+
+builder.Services
+	.AddAuthentication("ApiKey")
+	.AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>("ApiKey", _ => { });
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(opts =>
+{
+	var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	opts.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+	opts.SupportNonNullableReferenceTypes();
+
+	opts.OperationFilter<JsonExceptionResponseOperationFilter>();
+	opts.OperationFilter<UnauthorizedResponseOperationFilter>();
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+	app.UseSwagger();
+	app.UseSwaggerUI(opts =>
+	{
+		opts.SwaggerEndpoint("/swagger/v1/swagger.json", "A Centralized Mirror API: v1");
+		opts.SupportedSubmitMethods(Array.Empty<SubmitMethod>()); // Disable the 'Try it out' button. All endpoints require API keys so it's useless anyway.
+		opts.RoutePrefix = "docs";
+	});
+}
+
+app.UseHttpsRedirection();
+
+app.UseJsonExceptionHandler();
+
+app.MapControllers();
+
+// These MUST be the last thing added, and authentication MUST come first.
+// If these are higher up in the file, the Swagger UI will be behind authorization - which we do not want.
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.Run();
+
+void ConfigureServices(IServiceCollection services)
+{
+	services.AddAuthorization(opts =>
+	{
+		var policy = new AuthorizationPolicyBuilder()
+			.RequireClaim("UserId")
+			//.RequireAuthenticatedUser()
+			.Build();
+		opts.FallbackPolicy = policy;
+	});
+
+	/*services.AddAuthentication(opts =>
+	{
+		opts.DefaultAuthenticateScheme = "";
+		opts.DefaultChallengeScheme = "";
+	});*/
+	
+	ConfigureAppSettings<RawDbSettings, DbSettings>(services, "DbSettings");
+	ConfigureAppSettings<RawRedditSettings, RedditSettings>(services, "RedditSettings");
+
+	services.AddMemoryCache();
+
+	services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+	services.AddSnooBrowserClient<RedditAuthParameterProvider, RedditAccessTokenProvider>();
+
+	services.AddScoped<DbConnection>();
+	services.AddScoped<DbTransactionFactory>();
+	services.AddScoped<ApiKeyProvider>();
+	services.AddScoped<LinkProvider>();
+	services.AddScoped<UserProvider>();
+	services.AddScoped<RedditCommentProvider>();
+
+	services.AddScoped<UserCache>();
+
+	services.AddSingleton<GlobalMemoryCache>();
+	services.AddSingleton<TemplateCache>();
+	services.AddHostedService<BackgroundServiceWorker>();
+}
+
+void ConfigureAppSettings<TRaw, TService>(IServiceCollection services, string sectionName)
+	where TRaw : class
+	where TService : class
+{
+	services.AddOptions<TRaw>()
+		.Bind(builder.Configuration.GetSection(sectionName))
+		.ValidateDataAnnotations()
+		.ValidateOnStart();
+
+	services.AddScoped<TService>();
+}

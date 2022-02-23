@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-BackgroundProcessor-35541A68-9074-4C0A-9003-D5B4779CC1E8</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FruityFoundation.Base" Version="1.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+        <PackageReference Include="SnooBrowser" Version="3.0.3" />
+        <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ApplicationData\ApplicationData.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Templates\CommentReply.md" />
+      <EmbeddedResource Include="Templates\CommentReply.md" />
+    </ItemGroup>
+</Project>
