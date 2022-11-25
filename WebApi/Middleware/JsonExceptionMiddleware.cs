@@ -57,9 +57,8 @@ public class JsonExceptionMiddleware
 	{
 		HttpStatusCode GetStatusCode()
 		{
-			if (ex.Data.Contains("HttpStatusCode") && ex.Data["HttpStatusCode"] is HttpStatusCode)
+			if (ex.Data.Contains("HttpStatusCode") && ex.Data["HttpStatusCode"] is HttpStatusCode statusCode)
 			{
-				var statusCode = (HttpStatusCode)ex.Data["HttpStatusCode"]!;
 				ex.Data.Remove("HttpStatusCode"); // No need to leak this to the client.
 				return statusCode;
 			}
