@@ -455,3 +455,4 @@ $RECYCLE.BIN/
 
 nuget.config
 appsettings.*.json
+dist/

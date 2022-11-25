@@ -1,0 +1,22 @@
+{
+  "changelog": {
+    "header": "Changelog",
+    "sections": [
+      {
+        "type": "feat",
+        "section": "✨ Features",
+        "hidden": false
+      },
+      {
+        "type": "fix",
+        "section": "🐛 Bug Fixes",
+        "hidden": false
+      },
+      {
+        "type": "perf",
+        "section": "🚀 Performance",
+        "hidden": true
+      }
+    ]
+  }
+}

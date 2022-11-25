@@ -1,0 +1,26 @@
+name: "Publish Release"
+
+on:
+  workflow_dispatch
+
+# Allow one run of this workflow per branch and cancel existing runs if triggered again
+concurrency:
+  group: acm-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet publish -c Release --no-restore --output=dist
+      - run: |
+          dotnet tool run versionize
+          echo "RELEASE_VERSION_NUMBER=$(dotnet tool run versionize inspect)" >> $GITHUB_ENV
+          git push --follow-tags
+      - run: gh release create ${{ env.RELEASE_VERSION_NUMBER }} -F CHANGELOG.md
