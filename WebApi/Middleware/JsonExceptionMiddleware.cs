@@ -10,7 +10,7 @@ namespace WebApi.Middleware;
 /// </summary>
 /// <param name="Message">The message of the error.</param>
 /// <param name="StackTrace">The stack trace of the error.</param>
-/// <param name="Data">Data included with the exception, if any.</param>
+/// <param name="Data">A dictionary of data included with the exception, if any.</param>
 /// <param name="InnerException">The inner exception of the same <see cref="CapturedException"/> type, recursive, or <c>null</c> if there isn't one.</param>
 internal record CapturedException(
 	string Message,

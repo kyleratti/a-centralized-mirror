@@ -1,0 +1,7 @@
+﻿#authSection {
+	display: none;
+}
+
+#authSection.visible {
+	display: block;
+}

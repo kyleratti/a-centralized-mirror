@@ -30,6 +30,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Localization.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\DocsTemplate.html" />
   </ItemGroup>
 
   <ItemGroup>

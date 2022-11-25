@@ -31,6 +31,7 @@ public class BackgroundServiceWorker : BackgroundService
 			foreach (var processor in GetProcessors())
 			{
 				_logger.LogDebug("Creating processor {ProcessorName}", processor.FullName);
+				using var loggingScope = _logger.BeginScope($"Background Processor: {processor.Name}");
 
 				var createdProcessor = (IBackgroundProcessor)ActivatorUtilities.CreateInstance(scope.ServiceProvider, processor);
 

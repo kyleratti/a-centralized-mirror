@@ -6,6 +6,7 @@ using BackgroundProcessor.Templates;
 using Core.AppSettings;
 using Core.DbConnection;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SnooBrowser.Util;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
@@ -21,7 +22,11 @@ builder.Services
 	.AddAuthentication("ApiKey")
 	.AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>("ApiKey", _ => { });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(c =>
+{
+	c.Filters.Add(new ProducesAttribute("application/json")); // Only show application/json as the available Media Types in Swagger. 
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opts =>
@@ -37,16 +42,23 @@ builder.Services.AddSwaggerGen(opts =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger(c =>
 {
-	app.UseSwagger();
-	app.UseSwaggerUI(opts =>
-	{
-		opts.SwaggerEndpoint("/swagger/v1/swagger.json", "A Centralized Mirror API: v1");
-		opts.SupportedSubmitMethods(Array.Empty<SubmitMethod>()); // Disable the 'Try it out' button. All endpoints require API keys so it's useless anyway.
-		opts.RoutePrefix = "docs";
-	});
-}
+	c.RouteTemplate = "/{documentname}/swagger.json";
+});
+
+app.UseSwaggerUI(opts =>
+{
+	opts.SwaggerEndpoint("/v1/swagger.json", "A Centralized Mirror API: v1");
+	opts.SupportedSubmitMethods(Array.Empty<SubmitMethod>()); // Disable the 'Try it out' button. All endpoints require API keys so it's useless anyway.
+	opts.RoutePrefix = "docs";
+	opts.DocumentTitle = "A Centralized Mirror API Documentation";
+	opts.EnableDeepLinking();
+	opts.InjectStylesheet("/css/swagger.css");
+	opts.IndexStream = () => Assembly.GetExecutingAssembly().GetManifestResourceStream("WebApi.Resources.DocsTemplate.html");
+});
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
