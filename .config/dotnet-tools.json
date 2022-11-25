@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "versionize": {
+      "version": "1.15.2",
+      "commands": [
+        "versionize"
+      ]
+    }
+  }
+}

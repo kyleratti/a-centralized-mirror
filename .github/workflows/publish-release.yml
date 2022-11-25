@@ -1,0 +1,35 @@
+name: "Publish Release"
+
+on:
+  workflow_dispatch
+
+# Allow one run of this workflow per branch and cancel existing runs if triggered again
+concurrency:
+  group: acm-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '0' # Load entire history
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet publish -c Release --no-restore --output=dist
+      - run: dotnet tool restore
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          dotnet tool run versionize
+          echo "RELEASE_VERSION_NUMBER=$(dotnet tool run versionize inspect)" >> $GITHUB_ENV
+          git push --follow-tags
+          git fetch --tags origin
+      - run: tar -czvf "a-centralized-mirror-v${{ env.RELEASE_VERSION_NUMBER }}.tar.gz" dist
+      - run: gh release create "v${{ env.RELEASE_VERSION_NUMBER }}" --notes-file CHANGELOG.md "a-centralized-mirror-v${{ env.RELEASE_VERSION_NUMBER }}.tar.gz"
+        env:
+          GH_TOKEN: ${{ github.token }}
