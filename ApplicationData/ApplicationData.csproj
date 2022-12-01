@@ -13,8 +13,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FruityFoundation.Base" Version="1.1.1" />
-      <PackageReference Include="FruityFoundation.FsBase" Version="1.0.0" />
+      <PackageReference Include="FruityFoundation.Base" Version="1.1.2" />
+      <PackageReference Include="FruityFoundation.FsBase" Version="1.1.2" />
       <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
       <PackageReference Include="SnooBrowser" Version="3.0.3" />
       <PackageReference Include="System.Linq.Async" Version="6.0.1" />

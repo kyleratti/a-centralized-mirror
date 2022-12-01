@@ -1,7 +1,7 @@
 using ApplicationData;
 using ApplicationData.Services;
 using BackgroundProcessor;
-using SnooBrowser.Util;
+using SnooBrowser.Extensions.DependencyInjection;
 
 IHost host = Host.CreateDefaultBuilder(args)
 	.ConfigureServices(services =>

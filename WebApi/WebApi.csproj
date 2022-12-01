@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SnooBrowser.Extensions.DependencyInjection" Version="3.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="System.Runtime.Caching" Version="7.0.0" />
   </ItemGroup>

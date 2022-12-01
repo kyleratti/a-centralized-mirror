@@ -7,7 +7,7 @@ using Core.AppSettings;
 using Core.DbConnection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SnooBrowser.Util;
+using SnooBrowser.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
 using WebApi.Middleware;
