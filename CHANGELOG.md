@@ -1,4 +1,11 @@
 Changelog
+<a name="2.1.0"></a>
+## [2.1.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.0) (2022-12-2)
+
+### ✨ Features
+
+* add test endpoint for reddit user ([92097cd](https://www.github.com/kyleratti/a-centralized-mirror/commit/92097cd04268004bf2813df47fcb28a871539d72))
+
 <a name="2.0.1"></a>
 ## [2.0.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.0.1) (2022-12-1)
 
