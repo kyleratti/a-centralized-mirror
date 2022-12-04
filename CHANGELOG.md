@@ -1,4 +1,11 @@
 Changelog
+<a name="2.1.3"></a>
+## [2.1.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.3) (2022-12-4)
+
+### 🐛 Bug Fixes
+
+* show build version ([92b61d7](https://www.github.com/kyleratti/a-centralized-mirror/commit/92b61d7066cc68f8d609a8186e259bc4171d7ea5))
+
 <a name="2.1.2"></a>
 ## [2.1.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.2) (2022-12-4)
 
