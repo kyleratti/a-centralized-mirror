@@ -51,7 +51,7 @@ app.UseSwagger(c =>
 
 app.UseSwaggerUI(opts =>
 {
-	opts.SwaggerEndpoint("/v1/swagger.json", "A Centralized Mirror API: v1");
+	opts.SwaggerEndpoint("/v1/swagger.json", $"A Centralized Mirror API: v1 (build {Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "unknown"})");
 	opts.SupportedSubmitMethods(Array.Empty<SubmitMethod>()); // Disable the 'Try it out' button. All endpoints require API keys so it's useless anyway.
 	opts.RoutePrefix = "docs";
 	opts.DocumentTitle = "A Centralized Mirror API Documentation";
