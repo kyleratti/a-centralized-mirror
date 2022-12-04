@@ -1,8 +1,6 @@
-The following alternative links are available:
-
 {0}
 
-**Note:** this is a bot providing a directory service. **If you have trouble with any of the links above, please contact the user who provided them.**
+**Note:** this is a bot providing a directory service. **If you have trouble with any of the links above, please contact the user who provided them!**
 
 ---
 
