@@ -65,12 +65,12 @@ public class LinkProcessor : IBackgroundProcessor
 				if (maybeExistingComment.HasValue)
 				{
 					var result = await _commentBrowser.EditComment(CommentThing.CreateFromShortId(maybeExistingComment.Value), message);
-					await TryDistinguishAndStickyLogFailure(result.CommentId);
+					await TryDistinguishStickyAndLockLogFailure(result.CommentId);
 				}
 				else
 				{
 					var result = await _commentBrowser.SubmitComment(LinkThing.CreateFromShortId(item.RedditPostId), message);
-					await TryDistinguishAndStickyLogFailure(result.CommentId);
+					await TryDistinguishStickyAndLockLogFailure(result.CommentId);
 
 					await RedditCommentProvider.CreateOrUpdateLinkedComment(tx, item.RedditPostId, result.CommentId.ShortId);
 				}
@@ -126,11 +126,12 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 	}
 
-	private async Task TryDistinguishAndStickyLogFailure(CommentThing comment)
+	private async Task TryDistinguishStickyAndLockLogFailure(CommentThing comment)
 	{
 		try
 		{
 			await _commentBrowser.DistinguishComment(comment, DistinguishType.Moderator, isSticky: true);
+			await _commentBrowser.LockComment(comment);
 		}
 		catch (Exception ex)
 		{
