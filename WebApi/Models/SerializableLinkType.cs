@@ -1,15 +1,15 @@
-﻿using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using WebApi.Util;
 
 #pragma warning disable CS1591
 
 namespace WebApi.Models;
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonEnumConverter<SerializableLinkType>))]
 public enum SerializableLinkType
 {
-	[EnumMember(Value = "mirror")]
+	[JsonEnumValue("mirror")]
 	Mirror = 1,
-	[EnumMember(Value = "download")]
+	[JsonEnumValue("download")]
 	Download = 2
 }
