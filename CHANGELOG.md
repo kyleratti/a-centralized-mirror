@@ -1,4 +1,12 @@
 Changelog
+<a name="2.1.1"></a>
+## [2.1.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.1) (2022-12-4)
+
+### 🐛 Bug Fixes
+
+* serialize and deserialize enum members correctly ([c29468f](https://www.github.com/kyleratti/a-centralized-mirror/commit/c29468fffbf4df0571f47d2cd3b2420a0600d74e))
+* show all status code responses in docs ([8f5f3f9](https://www.github.com/kyleratti/a-centralized-mirror/commit/8f5f3f9c95a2a34689b3298c69ebc78a7866f604))
+
 <a name="2.1.0"></a>
 ## [2.1.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.0) (2022-12-2)
 
