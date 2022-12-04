@@ -1,4 +1,11 @@
 Changelog
+<a name="2.1.2"></a>
+## [2.1.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.2) (2022-12-4)
+
+### 🐛 Bug Fixes
+
+* lock comments ([ca63aa5](https://www.github.com/kyleratti/a-centralized-mirror/commit/ca63aa50e36345e1f21be89b61148725877fc76f))
+
 <a name="2.1.1"></a>
 ## [2.1.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.1) (2022-12-4)
 
