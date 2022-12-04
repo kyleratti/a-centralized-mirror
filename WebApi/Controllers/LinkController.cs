@@ -4,8 +4,10 @@ using ApplicationData.Services;
 using DataClasses;
 using FruityFoundation.Base.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using SnooBrowser.Browsers;
 using SnooBrowser.Things;
+using Swashbuckle.AspNetCore.Annotations;
 using WebApi.Models;
 using WebApi.Util;
 
@@ -39,29 +41,33 @@ public class LinkController : ApiController
 	/// </summary>
 	[HttpPost]
 	[Route("")]
-	[ProducesResponseType((int)HttpStatusCode.Created)]
+	[SwaggerResponse((int)HttpStatusCode.Created)]
+	[SwaggerResponse((int)HttpStatusCode.BadRequest,
+		description: "Bad Request. The request could not be processed due to invalid data on the request.",
+		typeof(BadRequestError))]
+	[SwaggerResponse((int)HttpStatusCode.Conflict,
+		description: "Conflict. This user has already provided this combination of reddit post ID, URL, and link type.",
+		typeof(LinkAlreadyExistsError))]
 	public async Task<IActionResult> SubmitLink([FromBody] SubmitLinkRequest linkRequest)
 	{
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
 
 		if ((await _linkProvider.FindLink(UserId, linkRequest.RedditPostId, validUrl.OriginalString, linkKind)).HasValue)
-			return new ConflictObjectResult(new
-			{
-				message = TranslatedStrings.LinkController.LinkAlreadyExists,
-				redditPostId = linkRequest.RedditPostId,
-				url = validUrl.OriginalString,
-				linkType = linkRequest.LinkType
-			});
+			return new ConflictObjectResult(new LinkAlreadyExistsError(
+				Message: TranslatedStrings.LinkController.LinkAlreadyExists,
+				RedditPostId: linkRequest.RedditPostId,
+				Url: validUrl.OriginalString,
+				LinkType: linkRequest.LinkType
+			));
 
 		var maybeSubmission = await _submissionBrowser.GetSubmission(LinkThing.CreateFromShortId(linkRequest.RedditPostId));
 
 		if (!maybeSubmission.Try(out var submission) || submission.IsArchived || submission.IsLocked)
-			return new BadRequestObjectResult(new
-			{
-				message = TranslatedStrings.LinkController.RedditPostIdIsNotValid(linkRequest.RedditPostId),
-				redditPostId = linkRequest.RedditPostId
-			});
+			return new BadRequestObjectResult(new BadRequestError(
+				Message: TranslatedStrings.LinkController.RedditPostIdIsNotValid(linkRequest.RedditPostId),
+				RedditPostId: linkRequest.RedditPostId
+			));
 
 		await _linkProvider.CreateLink(new NewLink(
 			redditPostId: linkRequest.RedditPostId,
@@ -79,27 +85,31 @@ public class LinkController : ApiController
 	/// </summary>
 	[HttpDelete]
 	[Route("")]
-	[ProducesResponseType((int)HttpStatusCode.OK)]
+	[SwaggerResponse((int)HttpStatusCode.OK,
+		description: "OK. The link has been queued for deletion.",
+		typeof(LinkDeleteQueuedSuccessfully))]
+	[SwaggerResponse((int)HttpStatusCode.NotFound,
+		description: "Not Found. This user does not have this combination of reddit post ID, URL, and link type.",
+		typeof(LinkNotFoundError))]
 	public async Task<IActionResult> DeleteLinkByLinkData([FromBody] DeleteLinkRequest linkRequest)
 	{
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
 
 		if (!(await _linkProvider.FindLink(UserId, linkRequest.RedditPostId, validUrl.OriginalString, linkKind)).Try(out var link))
-			return new NotFoundObjectResult(new
-			{
-				message = TranslatedStrings.LinkController.LinkNotFound,
-				redditPostId = linkRequest.RedditPostId,
-				url = validUrl.OriginalString
-			});
+			return new NotFoundObjectResult(new LinkNotFoundError(
+				Message: TranslatedStrings.LinkController.LinkNotFound,
+				RedditPostId: linkRequest.RedditPostId,
+				Url: validUrl.OriginalString
+			));
 
 		await _linkProvider.DeleteLinkById(link.LinkId);
 
-		return new OkObjectResult(new
-		{
-			message = TranslatedStrings.LinkController.LinkDeleted,
-			redditPostId = link.RedditPostId
-		});
+		return new OkObjectResult(new LinkDeleteQueuedSuccessfully(
+			Message: TranslatedStrings.LinkController.LinkDeleted,
+			RedditPostId: link.RedditPostId,
+			Url: link.LinkUrl
+		));
 	}
 
 	/// <summary>
@@ -107,23 +117,27 @@ public class LinkController : ApiController
 	/// </summary>
 	[HttpDelete]
 	[Route("{linkId:int}")]
-	[ProducesResponseType((int)HttpStatusCode.OK)]
+	[SwaggerResponse((int)HttpStatusCode.OK,
+		description: "OK. The link has been queued for deletion.",
+		typeof(LinkDeleteQueuedSuccessfully))]
+	[SwaggerResponse((int)HttpStatusCode.NotFound,
+		description: "Not Found. This user does not have this combination of reddit post ID, URL, and link type.",
+		typeof(LinkIdNotFoundError))]
 	public async Task<IActionResult> DeleteLinkById([FromRoute] int linkId)
 	{
 		if (!(await _linkProvider.FindLinkById(UserId, linkId)).Try(out var link))
-			return new NotFoundObjectResult(new
-			{
-				message = TranslatedStrings.LinkController.LinkIdNotFound(linkId),
-				linkId
-			});
+			return new NotFoundObjectResult(new LinkIdNotFoundError(
+				Message: TranslatedStrings.LinkController.LinkIdNotFound(linkId),
+				LinkId: linkId
+			));
 
 		await _linkProvider.DeleteLinkById(link.LinkId);
 		
-		return new OkObjectResult(new
-		{
-			message = TranslatedStrings.LinkController.LinkDeleted,
-			redditPostId = link.RedditPostId
-		});
+		return new OkObjectResult(new LinkDeleteQueuedSuccessfully(
+			Message: TranslatedStrings.LinkController.LinkDeleted,
+			RedditPostId: link.RedditPostId,
+			Url: link.LinkUrl
+		));
 	}
 
 	/// <summary>
@@ -155,7 +169,7 @@ public class LinkController : ApiController
 			};
 
 		return uri;
-		}
+	}
 
 	private static LinkKind GetLinkKindOrFail(SerializableLinkType serializableLinkType) => serializableLinkType switch
 	{
@@ -163,4 +177,57 @@ public class LinkController : ApiController
 		SerializableLinkType.Download => LinkKind.Download,
 		_ => throw new ArgumentOutOfRangeException(nameof(serializableLinkType), serializableLinkType, "Unknown link type")
 	};
+
+	/// <summary>
+	/// The error message returned when the submitted request has invalid data that must be corrected before it can be processed.
+	/// </summary>
+	/// <param name="Message">The error message.</param>
+	/// <param name="RedditPostId">The reddit post ID.</param>
+	private record BadRequestError(
+		[property:JsonProperty("message")] string Message,
+		[property:JsonProperty("redditPostId")] string RedditPostId);
+
+	/// <summary>
+	/// The data model returned when a link is successfully queued for deletion.
+	/// </summary>
+	/// <param name="Message">The message from the server.</param>
+	/// <param name="RedditPostId">The reddit post ID.</param>
+	/// <param name="Url">The link that will be deleted from the list of links on the post.</param>
+	private record LinkDeleteQueuedSuccessfully(
+		[property:JsonProperty("message")] string Message,
+		[property:JsonProperty("redditPostId")] string RedditPostId,
+		[property:JsonProperty("url")] string Url);
+
+	/// <summary>
+	/// The data model returned when a link specific link on a reddit post is not found but the API consumer expected it to be.
+	/// </summary>
+	/// <param name="Message">The message from the server.</param>
+	/// <param name="RedditPostId">The reddit post ID.</param>
+	/// <param name="Url">The provided URL.</param>
+	private record LinkNotFoundError(
+		[property:JsonProperty("message")] string Message,
+		[property:JsonProperty("redditPostId")] string RedditPostId,
+		[property:JsonProperty("url")] string Url);
+
+	/// <summary>
+	/// The data model returned when the API consumer provided a specific link ID to delete but that link ID did not exist.
+	/// </summary>
+	/// <param name="Message">The message from the server.</param>
+	/// <param name="LinkId">The provided link ID.</param>
+	private record LinkIdNotFoundError(
+		[property:JsonProperty("message")] string Message,
+		[property:JsonProperty("linkId")] int LinkId);
+
+	/// <summary>
+	/// The error message returned when the provided link already exists for the specified reddit post ID.
+	/// </summary>
+	/// <param name="Message">The error message from the API.</param>
+	/// <param name="RedditPostId">The reddit post ID.</param>
+	/// <param name="Url">The URL that was submitted.</param>
+	/// <param name="LinkType">The type of link that was submitted.</param>
+	private record LinkAlreadyExistsError(
+		[property: JsonProperty("message")] string Message,
+		[property: JsonProperty("redditPostId")] string RedditPostId,
+		[property: JsonProperty("url")] string Url,
+		[property: JsonProperty("linkType")] SerializableLinkType? LinkType);
 }

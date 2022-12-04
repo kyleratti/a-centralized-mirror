@@ -37,6 +37,8 @@ builder.Services.AddSwaggerGen(opts =>
 
 	opts.OperationFilter<JsonExceptionResponseOperationFilter>();
 	opts.OperationFilter<UnauthorizedResponseOperationFilter>();
+	opts.EnableAnnotations();
+	opts.UseInlineDefinitionsForEnums();
 });
 
 var app = builder.Build();
