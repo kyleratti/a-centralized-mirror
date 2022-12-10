@@ -4,6 +4,7 @@ using DataClasses;
 using FruityFoundation.Base.Extensions;
 using FruityFoundation.Base.Structures;
 using Npgsql;
+using ResultMonad;
 
 namespace ApplicationData.Services;
 
@@ -92,29 +93,48 @@ public class LinkProvider
 		await tx.CommitAsync();
 	}
 
-	public async Task<int> CreateLink(NewLink link)
+	public abstract record CreateLinkError
 	{
-		await using var tx = await _db.CreateTransactionAsync();
-		var linkIdResult = (int?)await tx.ExecuteSqlScalarAsync(
-			@"INSERT INTO app.links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
-				VALUES (@redditPostId, @linkUrl, @linkType, NOW(), false, @userId)
-				RETURNING link_id",
-			new NpgsqlParameter[]
-			{
-				new("@redditPostId", link.RedditPostId),
-				new("@linkUrl", link.LinkUrl),
-				new("@linkType", link.LinkType.RawValue),
-				new("@userId", link.OwnerUserId)
-			});
+		public T Switch<T>(Func<T> linkAlreadyExists) => this switch
+		{
+			LinkAlreadyExists => linkAlreadyExists(),
+			_ => throw new NotImplementedException($"Type not implemented: {GetType().FullName}")
+		};
+	}
 
-		if (!linkIdResult.ToMaybe().Try(out var linkId))
-			throw new ApplicationException("Failed to create link");
+	public record LinkAlreadyExists : CreateLinkError;
 
-		await QueueRedditPostIdForUpdate(tx, link.RedditPostId);
+	public async Task<Result<int, CreateLinkError>> CreateLink(NewLink link)
+	{
+		try
+		{
+			await using var tx = await _db.CreateTransactionAsync();
+			var linkIdResult = (int?)await tx.ExecuteSqlScalarAsync("""
+			INSERT INTO app.links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
+			VALUES (@redditPostId, @linkUrl, @linkType, NOW(), false, @userId)
+			RETURNING link_id
+			""",
+				new NpgsqlParameter[]
+				{
+					new("@redditPostId", link.RedditPostId),
+					new("@linkUrl", link.LinkUrl),
+					new("@linkType", link.LinkType.RawValue),
+					new("@userId", link.OwnerUserId)
+				});
 
-		await tx.CommitAsync();
+			if (!linkIdResult.ToMaybe().Try(out var linkId))
+				throw new ApplicationException("Failed to create link");
 
-		return linkId;
+			await QueueRedditPostIdForUpdate(tx, link.RedditPostId);
+
+			await tx.CommitAsync();
+
+			return Result.Ok<int, CreateLinkError>(linkId);
+		}
+		catch (PostgresException ex) when (ex is { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "UQ_reddit_post_id_link_url_link_type_is_deleted_owner" })
+		{
+			return Result.Fail<int, CreateLinkError>(new LinkAlreadyExists());
+		}
 	}
 
 	public async Task<IReadOnlyCollection<Link>> GetAllLinksByUserId(int userId)

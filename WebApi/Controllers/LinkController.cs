@@ -53,14 +53,6 @@ public class LinkController : ApiController
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
 
-		if ((await _linkProvider.FindLink(UserId, linkRequest.RedditPostId, validUrl.OriginalString, linkKind)).HasValue)
-			return new ConflictObjectResult(new LinkAlreadyExistsError(
-				Message: TranslatedStrings.LinkController.LinkAlreadyExists,
-				RedditPostId: linkRequest.RedditPostId,
-				Url: validUrl.OriginalString,
-				LinkType: linkRequest.LinkType
-			));
-
 		var maybeSubmission = await _submissionBrowser.GetSubmission(LinkThing.CreateFromShortId(linkRequest.RedditPostId));
 
 		if (!maybeSubmission.Try(out var submission) || submission.IsArchived || submission.IsLocked)
@@ -69,12 +61,23 @@ public class LinkController : ApiController
 				RedditPostId: linkRequest.RedditPostId
 			));
 
-		await _linkProvider.CreateLink(new NewLink(
+		var createResult = await _linkProvider.CreateLink(new NewLink(
 			redditPostId: linkRequest.RedditPostId,
 			linkUrl: validUrl.OriginalString,
 			linkKind,
 			ownerUserId: UserId
 		));
+
+		if (!createResult.TrySuccess(out _, out var error))
+		{
+			return error!.Switch(
+				linkAlreadyExists: () => new ConflictObjectResult(new LinkAlreadyExistsError(
+					Message: TranslatedStrings.LinkController.LinkAlreadyExists,
+					RedditPostId: linkRequest.RedditPostId,
+					Url: validUrl.OriginalString,
+					LinkType: linkRequest.LinkType
+				)));
+		}
 
 		// We are technically violating the HTTP spec here but not sending back the location of the resource we just created, but oh well.
 		return new StatusCodeResult((int)HttpStatusCode.Created);
