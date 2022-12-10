@@ -1,4 +1,11 @@
 Changelog
+<a name="2.1.5"></a>
+## [2.1.5](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.5) (2022-12-10)
+
+### 🐛 Bug Fixes
+
+* handle race condition when posting link ([11c1871](https://www.github.com/kyleratti/a-centralized-mirror/commit/11c1871e16280774681bc9e56c106249f5d55535))
+
 <a name="2.1.4"></a>
 ## [2.1.4](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.4) (2022-12-4)
 
