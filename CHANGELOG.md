@@ -1,4 +1,11 @@
 Changelog
+<a name="2.1.6"></a>
+## [2.1.6](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.6) (2022-12-12)
+
+### 🐛 Bug Fixes
+
+* more race condition handling ([ea11a54](https://www.github.com/kyleratti/a-centralized-mirror/commit/ea11a5476fced56fbc396396ee3dc2718164852b))
+
 <a name="2.1.5"></a>
 ## [2.1.5](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.5) (2022-12-10)
 
