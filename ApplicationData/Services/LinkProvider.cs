@@ -81,7 +81,7 @@ public class LinkProvider
 
 	public async Task DeleteLinkById(int linkId)
 	{
-		await using var tx = await _db.CreateTransactionAsync();
+		await using var tx = await _db.CreateTransactionAsync(System.Data.IsolationLevel.Serializable);
 		var redditPostId = (string)await tx.ExecuteSqlScalarAsync(
 			@"
 				UPDATE app.links SET is_deleted = true WHERE link_id = @linkId AND is_deleted = false
@@ -108,7 +108,7 @@ public class LinkProvider
 	{
 		try
 		{
-			await using var tx = await _db.CreateTransactionAsync();
+			await using var tx = await _db.CreateTransactionAsync(System.Data.IsolationLevel.Serializable);
 			var linkIdResult = (int?)await tx.ExecuteSqlScalarAsync("""
 			INSERT INTO app.links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
 			VALUES (@redditPostId, @linkUrl, @linkType, NOW(), false, @userId)

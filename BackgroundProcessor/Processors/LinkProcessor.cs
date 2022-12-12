@@ -50,7 +50,7 @@ public class LinkProcessor : IBackgroundProcessor
 		{
 			var links = await _linkProvider.GetLinksByRedditPostId(item.RedditPostId, cancellationToken).ToArrayAsync(cancellationToken);
 			var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(item.RedditPostId);
-			var tx = await _dbTxFactory.CreateTransaction();
+			var tx = await _dbTxFactory.CreateTransaction(System.Data.IsolationLevel.Serializable);
 
 			if (!links.Any())
 			{

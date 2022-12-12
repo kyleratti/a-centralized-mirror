@@ -99,10 +99,10 @@ module private DbConnection_impl =
             return! cmd.ExecuteReaderAsync ()
         }
 
-    let createTransactionAsync (db : NpgsqlConnection) =
+    let createTransactionAsync (db : NpgsqlConnection) (isolationLevel : IsolationLevel) =
         task {
             let! _ = db |> connectToDbIfNotConnectedAsync
-            let! tx = db.BeginTransactionAsync ()
+            let! tx = db.BeginTransactionAsync (isolationLevel)
             return new DbTransactionWrapper (tx)
         }
 
@@ -130,8 +130,9 @@ type DbConnection (settings : DbSettings) =
         (sql, queryParams)
         ||> DbConnection_impl.executeReaderAsync db
 
-    member _.CreateTransactionAsync () : DbTransactionWrapper Task =
-        DbConnection_impl.createTransactionAsync db
+    member _.CreateTransactionAsync (isolationLevel : IsolationLevel) : DbTransactionWrapper Task =
+        isolationLevel
+        |> DbConnection_impl.createTransactionAsync db
 
     interface IDbConnection with
         member this.ExecuteSqlNonQuery sql queryParams = task { return! this.ExecuteSqlNonQueryAsync(sql, queryParams) }
@@ -143,4 +144,4 @@ type DbConnection (settings : DbSettings) =
             db.Dispose ()
 
 type DbTransactionFactory (db : DbConnection) =
-    member _.CreateTransaction () : DbTransactionWrapper Task = DbConnection_impl.createTransactionAsync db.__RawDb
+    member _.CreateTransaction (isolationLevel : IsolationLevel) : DbTransactionWrapper Task = isolationLevel |> DbConnection_impl.createTransactionAsync db.__RawDb
