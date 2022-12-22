@@ -1,4 +1,11 @@
 Changelog
+<a name="2.2.0"></a>
+## [2.2.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.2.0) (2022-12-22)
+
+### ✨ Features
+
+* public endpoint to list links on a reddit post id ([9176aeb](https://www.github.com/kyleratti/a-centralized-mirror/commit/9176aeb5a9af8173f2be31c554239fca09ed9d0b))
+
 <a name="2.1.6"></a>
 ## [2.1.6](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.1.6) (2022-12-12)
 
