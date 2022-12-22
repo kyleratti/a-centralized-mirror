@@ -79,6 +79,27 @@ public class LinkProvider
 		);
 	}
 
+	public async Task<IReadOnlyCollection<Link>> FindAllLinksByPostId(string redditPostId)
+	{
+		 var links = (await _db.ExecuteReaderAsync(
+			$@"SELECT l.link_id, l.reddit_post_id, l.link_url, l.link_type, l.created_at, l.owner
+				FROM app.links l
+				WHERE
+					l.reddit_post_id = @redditPostId
+					AND l.is_deleted = false",
+			new NpgsqlParameter[] { new("@redditPostId", redditPostId) }))
+			.SelectAsync(reader => new Link(
+				linkId: reader.GetInt32(0),
+				redditPostId: reader.GetString(1),
+				linkUrl: reader.GetString(2),
+				linkType: ParseRawLinkType(reader.GetInt16(3)),
+				createdAt: reader.GetDateTime(4),
+				ownerId: reader.GetInt32(5)
+			));
+
+		 return await links.ToArrayAsync();
+	}
+
 	public async Task DeleteLinkById(int linkId)
 	{
 		await using var tx = await _db.CreateTransactionAsync(System.Data.IsolationLevel.Serializable);

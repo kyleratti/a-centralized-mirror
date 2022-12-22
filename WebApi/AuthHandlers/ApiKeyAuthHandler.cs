@@ -5,6 +5,7 @@ using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using ApplicationData.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using WebApi.Middleware;
 using WebApi.Util;
@@ -40,6 +41,10 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 	protected override async Task<AuthenticateResult> HandleAuthenticateAsync() =>
 		await JsonExceptionMiddleware.InvokeWithExceptionHandler(Request.HttpContext, async () =>
 		{
+			// For endpoints with IAllowAnonymous, skip the authentication check.
+			if (Context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() != null)
+				return AuthenticateResult.NoResult();
+
 			if (!Request.Headers.TryGetValue("Authorization", out var authorization))
 				return AuthenticateResult.Fail("No authorization key provided");
 
