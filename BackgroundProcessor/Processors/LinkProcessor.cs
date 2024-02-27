@@ -1,6 +1,6 @@
-﻿using ApplicationData.Services;
+﻿using System.Data;
+using ApplicationData.Services;
 using BackgroundProcessor.Templates;
-using Core.DbConnection;
 using DataClasses;
 using FruityFoundation.Base.Extensions;
 using SnooBrowser.Browsers;
@@ -19,7 +19,7 @@ public class LinkProcessor : IBackgroundProcessor
 	private readonly CommentBrowser _commentBrowser;
 	private readonly UserCache _userCache;
 	private readonly TemplateCache _templateCache;
-	private readonly DbTransactionFactory _dbTxFactory;
+	private readonly IDbConnection _dbConnection;
 
 	public LinkProcessor(
 		ILogger<LinkProcessor> logger,
@@ -28,7 +28,8 @@ public class LinkProcessor : IBackgroundProcessor
 		CommentBrowser commentBrowser,
 		UserCache userCache,
 		TemplateCache templateCache,
-		DbTransactionFactory dbTxFactory)
+		IDbConnection dbConnection
+	)
 	{
 		_logger = logger;
 		_linkProvider = linkProvider;
@@ -36,7 +37,7 @@ public class LinkProcessor : IBackgroundProcessor
 		_commentBrowser = commentBrowser;
 		_userCache = userCache;
 		_templateCache = templateCache;
-		_dbTxFactory = dbTxFactory;
+		_dbConnection = dbConnection;
 	}
 
 	/// <inheritdoc />
@@ -48,9 +49,9 @@ public class LinkProcessor : IBackgroundProcessor
 
 		foreach (var item in postIdsWithPendingChanges)
 		{
-			var links = await _linkProvider.GetLinksByRedditPostId(item.RedditPostId, cancellationToken).ToArrayAsync(cancellationToken);
+			var links = await _linkProvider.GetLinksByRedditPostId(item.RedditPostId);
 			var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(item.RedditPostId);
-			var tx = await _dbTxFactory.CreateTransaction(System.Data.IsolationLevel.Serializable);
+			using var tx = _dbConnection.BeginTransaction(IsolationLevel.Serializable);
 
 			if (!links.Any())
 			{
@@ -78,7 +79,7 @@ public class LinkProcessor : IBackgroundProcessor
 
 			await LinkProvider.MarkRedditPostIdAsProcessed(tx, item.QueuedItemId);
 
-			await tx.CommitAsync();
+			tx.Commit();
 		}
 	}
 

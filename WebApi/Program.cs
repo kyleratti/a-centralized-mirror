@@ -1,12 +1,13 @@
+using System.Data;
 using System.Reflection;
 using ApplicationData;
 using ApplicationData.Services;
 using BackgroundProcessor;
 using BackgroundProcessor.Templates;
 using Core.AppSettings;
-using Core.DbConnection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Npgsql;
 using SnooBrowser.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
@@ -16,7 +17,8 @@ using WebApi.Models.Swagger;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-ConfigureServices(builder.Services);
+ConfigureServices(builder.Services, builder.Configuration);
+ConfigureDataAccess(builder.Services, builder.Configuration);
 
 builder.Services
 	.AddAuthentication("ApiKey")
@@ -73,9 +75,11 @@ app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.Run();
+await app.RunAsync();
 
-void ConfigureServices(IServiceCollection services)
+return;
+
+static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
 	services.AddAuthorization(opts =>
 	{
@@ -91,9 +95,8 @@ void ConfigureServices(IServiceCollection services)
 		opts.DefaultAuthenticateScheme = "";
 		opts.DefaultChallengeScheme = "";
 	});*/
-	
-	ConfigureAppSettings<RawDbSettings, DbSettings>(services, "DbSettings");
-	ConfigureAppSettings<RawRedditSettings, RedditSettings>(services, "RedditSettings");
+
+	services.Configure<RedditSettings>(configuration.GetSection("RedditSettings"));
 
 	services.AddMemoryCache();
 
@@ -101,8 +104,6 @@ void ConfigureServices(IServiceCollection services)
 
 	services.AddSnooBrowserClient<RedditAuthParameterProvider, RedditAccessTokenProvider>();
 
-	services.AddScoped<DbConnection>();
-	services.AddScoped<DbTransactionFactory>();
 	services.AddScoped<ApiKeyProvider>();
 	services.AddScoped<LinkProvider>();
 	services.AddScoped<UserProvider>();
@@ -115,14 +116,9 @@ void ConfigureServices(IServiceCollection services)
 	services.AddHostedService<BackgroundServiceWorker>();
 }
 
-void ConfigureAppSettings<TRaw, TService>(IServiceCollection services, string sectionName)
-	where TRaw : class
-	where TService : class
+static void ConfigureDataAccess(IServiceCollection services, IConfiguration configuration)
 {
-	services.AddOptions<TRaw>()
-		.Bind(builder.Configuration.GetSection(sectionName))
-		.ValidateDataAnnotations()
-		.ValidateOnStart();
+	var dbConnectionString = configuration.GetConnectionString("DbConnection");
 
-	services.AddScoped<TService>();
+	services.AddScoped<IDbConnection>(_ => new NpgsqlConnection(dbConnectionString));
 }
