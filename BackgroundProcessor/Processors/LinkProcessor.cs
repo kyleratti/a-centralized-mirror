@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using ApplicationData;
 using ApplicationData.Services;
 using BackgroundProcessor.Templates;
 using DataClasses;
@@ -51,7 +52,8 @@ public class LinkProcessor : IBackgroundProcessor
 		{
 			var links = await _linkProvider.GetLinksByRedditPostId(item.RedditPostId);
 			var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(item.RedditPostId);
-			using var tx = _dbConnection.BeginTransaction(IsolationLevel.Serializable);
+
+			using var tx = _dbConnection.CreateTransaction(IsolationLevel.Serializable);
 
 			if (!links.Any())
 			{

@@ -22,8 +22,8 @@ public class ApiKeyProvider
 	{
 		var reader = await _db.ExecuteReaderAsync(
 			@"SELECT u.user_id, u.display_username, u.developer_username, u.weight, u.created_at, u.updated_at, u.is_admin
-				FROM app.users u
-				INNER JOIN app.api_keys ak ON u.user_id = ak.user_id
+				FROM users u
+				INNER JOIN api_keys ak ON u.user_id = ak.user_id
 				WHERE
 					ak.api_key = @apiKey
 					AND u.is_deleted = false",
@@ -46,10 +46,10 @@ public class ApiKeyProvider
 
 	public async Task CreateApiKeyForUser(int userId, string apiKey) =>
 		await _db.ExecuteAsync(
-			@"INSERT INTO app.api_keys (
+			@"INSERT INTO api_keys (
 				api_key, created_at, last_used_at, user_id
 			) VALUES (
-				@apiKey, NOW(), NULL, @userId
+				@apiKey, CURRENT_TIMESTAMP, NULL, @userId
 			)",
 			new { apiKey, userId });
 }

@@ -7,7 +7,7 @@ using BackgroundProcessor.Templates;
 using Core.AppSettings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.Data.Sqlite;
 using SnooBrowser.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
@@ -120,5 +120,5 @@ static void ConfigureDataAccess(IServiceCollection services, IConfiguration conf
 {
 	var dbConnectionString = configuration.GetConnectionString("DbConnection");
 
-	services.AddScoped<IDbConnection>(_ => new NpgsqlConnection(dbConnectionString));
+	services.AddScoped<IDbConnection>(_ => new SqliteConnection(dbConnectionString));
 }

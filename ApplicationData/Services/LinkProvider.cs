@@ -25,7 +25,7 @@ public class LinkProvider
 		using var reader = await _db.ExecuteReaderAsync(
 			"""
 			SELECT l.link_id, l.reddit_post_id, l.link_url, l.link_type, l.created_at, l.owner
-							FROM app.links l
+							FROM links l
 							WHERE
 								l.reddit_post_id = @redditPostId
 								AND l.link_url = @linkUrl
@@ -58,7 +58,7 @@ public class LinkProvider
 	{
 		using var reader = await _db.ExecuteReaderAsync(
 			$@"SELECT l.link_id, l.reddit_post_id, l.link_url, l.link_type, l.created_at, l.owner
-				FROM app.links l
+				FROM links l
 				WHERE
 					l.link_id = @linkId
 					{(userId.HasValue ? "AND l.owner = @userId" : "")}
@@ -93,7 +93,7 @@ public class LinkProvider
 					,l.link_type AS LinkType
 					,l.created_at AS CreatedAt
 					,l.owner AS OwnerId
-				FROM app.links l
+				FROM links l
 				WHERE
 					l.reddit_post_id = @redditPostId
 					AND l.is_deleted = false
@@ -114,10 +114,10 @@ public class LinkProvider
 
 	public async Task DeleteLinkById(int linkId)
 	{
-		using var tx = _db.BeginTransaction(IsolationLevel.Serializable);
+		using var tx = _db.CreateTransaction(IsolationLevel.Serializable);
 		var redditPostId = await tx.ExecuteScalarAsync<string>(
 			@"
-				UPDATE app.links SET is_deleted = true WHERE link_id = @linkId AND is_deleted = false
+				UPDATE links SET is_deleted = true WHERE link_id = @linkId AND is_deleted = false
 				RETURNING reddit_post_id",
 			new { linkId });
 
@@ -137,39 +137,52 @@ public class LinkProvider
 
 	public record LinkAlreadyExists : CreateLinkError;
 
-	public async Task<Result<int, CreateLinkError>> CreateLink(NewLink link)
+	public async Task<Result<int, LinkProvider.CreateLinkError>> CreateLink(NewLink link)
 	{
-		try
-		{
-			using var tx = _db.BeginTransaction(IsolationLevel.Serializable);
-			// FIXME: SQLite issue: RETURNING
-			// FIXME: SQLite issue: locking
-			var linkIdResult = await tx.ExecuteScalarAsync<int?>("""
-			INSERT INTO app.links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
-			VALUES (@redditPostId, @linkUrl, @linkType, NOW(), false, @userId)
-			RETURNING link_id
+		using var tx = _db.CreateTransaction(IsolationLevel.Serializable);
+
+		var existingLink = await tx.ExecuteScalarAsync<bool?>(
+			"""
+				SELECT 1 FROM links
+				WHERE
+					reddit_post_id = @redditPostId
+					AND link_url = @linkUrl
+					AND link_type = @linkType
+					AND owner = @userId
+					AND is_deleted = false
 			""",
-				new
-				{
-					redditPostId = link.RedditPostId,
-					linkUrl = link.LinkUrl,
-					linkType = link.LinkType.RawValue,
-					userId = link.OwnerUserId,
-				});
+			new
+			{
+				redditPostId = link.RedditPostId,
+				linkUrl = link.LinkUrl,
+				linkType = link.LinkType.RawValue,
+				userId = link.OwnerUserId,
+			});
 
-			if (!linkIdResult.ToMaybe().Try(out var linkId))
-				throw new ApplicationException("Failed to create link");
-
-			await QueueRedditPostIdForUpdate(tx, link.RedditPostId);
-
-			tx.Commit();
-
-			return Result.Ok<int, CreateLinkError>(linkId);
-		}
-		catch (Npgsql.PostgresException ex) when (ex is { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation, ConstraintName: "UQ_reddit_post_id_link_url_link_type_is_deleted_owner" })
-		{
+		if (existingLink is true)
 			return Result.Fail<int, CreateLinkError>(new LinkAlreadyExists());
-		}
+
+		var linkIdResult = await tx.ExecuteScalarAsync<int?>("""
+		INSERT INTO links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
+		VALUES (@redditPostId, @linkUrl, @linkType, CURRENT_TIMESTAMP, false, @userId)
+		RETURNING link_id
+		""",
+			new
+			{
+				redditPostId = link.RedditPostId,
+				linkUrl = link.LinkUrl,
+				linkType = link.LinkType.RawValue,
+				userId = link.OwnerUserId,
+			});
+
+		if (!linkIdResult.ToMaybe().Try(out var linkId))
+			throw new ApplicationException("Failed to create link");
+
+		await QueueRedditPostIdForUpdate(tx, link.RedditPostId);
+
+		tx.Commit();
+
+		return Result.Ok<int, CreateLinkError>(linkId);
 	}
 
 	public async Task<IReadOnlyCollection<Link>> GetAllLinksByUserId(int userId)
@@ -183,7 +196,7 @@ public class LinkProvider
 					,l.link_type AS LinkType
 					,l.created_at AS CreatedAt
 					,l.owner AS OwnerId
-				FROM app.links l
+				FROM links l
 				WHERE
 					l.owner = @userId
 					AND l.is_deleted = false
@@ -206,7 +219,7 @@ public class LinkProvider
 	{
 		var reader = await _db.QueryAsync<(int QueuedItemId, DateTime QueuedAt, string RedditPostId)>(
 			@"SELECT queued_item_id, queued_at, reddit_post_id
-				FROM app.link_queue
+				FROM link_queue
 				WHERE processed_at IS NULL
 				ORDER BY queued_at ASC");
 
@@ -216,7 +229,7 @@ public class LinkProvider
 
 	public static async Task MarkRedditPostIdAsProcessed(IDbTransaction tx, int itemId) =>
 		await tx.ExecuteAsync(
-			@"UPDATE app.link_queue SET processed_at = NOW() WHERE queued_item_id = @itemId",
+			@"UPDATE link_queue SET processed_at = CURRENT_TIMESTAMP WHERE queued_item_id = @itemId",
 			new { itemId });
 
 	public async Task<IReadOnlyCollection<Link>> GetLinksByRedditPostId(string redditPostId)
@@ -230,7 +243,7 @@ public class LinkProvider
 					,l.link_type AS LinkType
 					,l.created_at AS CreatedAt
 					,l.owner AS OwnerId
-				FROM app.links l
+				FROM links l
 				WHERE
 					l.reddit_post_id = @redditPostId
 					AND l.is_deleted = false
@@ -259,13 +272,13 @@ public class LinkProvider
 	{
 		// There is certainly a better way to do this. Oh well!
 		var hasPendingUpdate = await tx.ExecuteScalarAsync<int?>(
-			@"SELECT 1 FROM app.link_queue WHERE reddit_post_id = @redditPostId AND processed_at IS NULL LIMIT 1",
+			@"SELECT 1 FROM link_queue WHERE reddit_post_id = @redditPostId AND processed_at IS NULL LIMIT 1",
 			new { redditPostId }) == 1;
 
 		if (!hasPendingUpdate)
 		{
 			await tx.ExecuteAsync(
-				@"INSERT INTO app.link_queue (reddit_post_id, queued_at) VALUES (@redditPostId, NOW())",
+				@"INSERT INTO link_queue (reddit_post_id, queued_at) VALUES (@redditPostId, CURRENT_TIMESTAMP)",
 				new { redditPostId });
 		}
 	}

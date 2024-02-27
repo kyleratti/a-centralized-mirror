@@ -23,7 +23,7 @@ public class UserProvider
 	{
 		var reader = await _db.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
-				FROM app.users
+				FROM users
 				ORDER BY created_at");
 
 		var users = new List<User>();
@@ -45,11 +45,10 @@ public class UserProvider
 
 	public async Task<Maybe<User>> FindUserByDisplayName(string displayUsername)
 	{
-		// FIXME: SQLite issue: ILIKE is not supported
 		var reader = await _db.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
-				FROM app.users
-				WHERE display_username ILIKE @displayUsername",
+				FROM users
+				WHERE display_username LIKE @displayUsername",
 			new { displayUsername});
 
 		if (!reader.Read())
@@ -71,7 +70,7 @@ public class UserProvider
 	{
 		var reader = await _db.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
-				FROM app.users
+				FROM users
 				WHERE user_id = @userId",
 			new { userId });
 
@@ -91,12 +90,11 @@ public class UserProvider
 	}
 
 	public async Task<int> CreateUser(NewUser newUser) =>
-		// FIXME: SQLite issue: RETURNING is not supported
 		await _db.ExecuteScalarAsync<int>(
-			@"INSERT INTO app.users (
+			@"INSERT INTO users (
 				display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 			) VALUES (
-				@displayUsername, @developerUsername, @weight, NOW(), NULL, false, @isAdmin
+				@displayUsername, @developerUsername, @weight, CURRENT_TIMESTAMP, NULL, false, @isAdmin
 			) RETURNING user_id",
 			new
 			{
@@ -108,6 +106,6 @@ public class UserProvider
 
 	public async Task DeleteUserById(int userId) =>
 		await _db.ExecuteAsync(
-			@"UPDATE app.users SET is_deleted = true WHERE user_id = @userId",
+			@"UPDATE users SET is_deleted = true WHERE user_id = @userId",
 			new { userId });
 }
