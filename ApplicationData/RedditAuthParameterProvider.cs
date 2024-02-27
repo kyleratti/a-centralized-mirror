@@ -1,4 +1,5 @@
 ﻿using Core.AppSettings;
+using Microsoft.Extensions.Options;
 using SnooBrowser.Util;
 
 namespace ApplicationData;
@@ -8,22 +9,22 @@ namespace ApplicationData;
 /// </summary>
 public class RedditAuthParameterProvider : IAuthParameterProvider
 {
-	private readonly RedditSettings _redditSettings;
+	private readonly IOptions<RedditSettings> _redditSettings;
 
 	/// <summary>
 	/// C'tor
 	/// </summary>
-	public RedditAuthParameterProvider(RedditSettings redditSettings)
+	public RedditAuthParameterProvider(IOptions<RedditSettings> redditSettings)
 	{
 		_redditSettings = redditSettings;
 	}
 
 	/// <inheritdoc />
-	public string AppId => _redditSettings.AppId;
+	public string AppId => _redditSettings.Value.AppId;
 
 	/// <inheritdoc />
-	public string AppSecret => _redditSettings.AppSecret;
+	public string AppSecret => _redditSettings.Value.AppSecret;
 
 	/// <inheritdoc />
-	public string RefreshToken => _redditSettings.RefreshToken;
+	public string RefreshToken => _redditSettings.Value.RefreshToken;
 }
