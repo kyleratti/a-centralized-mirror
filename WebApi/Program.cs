@@ -8,6 +8,7 @@ using Core.AppSettings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using SnooBrowser.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
@@ -16,7 +17,18 @@ using WebApi.Models.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
+const string PROJECT_ID = "ACM";
+
 // Add services to the container.
+builder.Configuration.AddAzureAppConfiguration(options =>
+{
+	var azureAppConfigConnectionString = builder.Configuration.GetConnectionString("AzureAppConfig");
+	options.Connect(azureAppConfigConnectionString)
+		.Select(keyFilter: $"{PROJECT_ID}_*")
+		.Select(keyFilter: $"{PROJECT_ID}_*", labelFilter: builder.Environment.EnvironmentName)
+		.ConfigureRefresh(x => x.SetCacheExpiration(TimeSpan.FromDays(1)));
+});
+
 ConfigureServices(builder.Services, builder.Configuration);
 ConfigureDataAccess(builder.Services, builder.Configuration);
 
