@@ -1,4 +1,11 @@
 Changelog
+<a name="2.4.3"></a>
+## [2.4.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.4.3) (2024-03-08)
+
+### 🐛 Bug Fixes
+
+* handle X-Forwarded- headers ([7058936](https://www.github.com/kyleratti/a-centralized-mirror/commit/7058936e69ed5d9484b62af7ef0e16a8bd8af709))
+
 <a name="2.4.2"></a>
 ## [2.4.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.4.2) (2024-03-08)
 
