@@ -13,6 +13,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DataClasses", "DataClasses\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundProcessor", "BackgroundProcessor\BackgroundProcessor.csproj", "{F5B621EC-9091-4484-87A9-03D0145DF007}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E8A8C8B5-E029-4380-8BC9-EC53D7BCE0DC}"
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

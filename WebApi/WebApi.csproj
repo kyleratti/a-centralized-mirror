@@ -7,6 +7,7 @@
     <LangVersion>11</LangVersion>
     <Version>2.2.0</Version>
     <UserSecretsId>33502323-e6f7-405a-897c-fd75a7a25b54</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -47,6 +48,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Localization.resx</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
