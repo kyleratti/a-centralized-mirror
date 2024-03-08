@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
@@ -72,6 +73,8 @@ builder.Services.AddSwaggerGen(opts =>
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 // Configure the HTTP request pipeline.
 app.UseSwagger(c =>
 {
@@ -113,6 +116,11 @@ static void ConfigureOptions(IServiceCollection services, IConfiguration configu
 {
 	services.Configure<RedditSettings>(configuration.GetSection("RedditSettings"));
 	services.Configure<HostingOptions>(configuration.GetSection("Hosting"));
+
+	services.Configure<ForwardedHeadersOptions>(options =>
+	{
+		options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+	});
 }
 
 static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
