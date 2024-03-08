@@ -1,4 +1,11 @@
 Changelog
+<a name="2.4.1"></a>
+## [2.4.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.4.1) (2024-03-08)
+
+### 🐛 Bug Fixes
+
+* log exceptions ([faa8e0a](https://www.github.com/kyleratti/a-centralized-mirror/commit/faa8e0a9361faef54eeef8474246838175233d1c))
+
 <a name="2.4.0"></a>
 ## [2.4.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.4.0) (2024-03-08)
 
