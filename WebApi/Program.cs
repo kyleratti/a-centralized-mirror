@@ -20,14 +20,21 @@ var builder = WebApplication.CreateBuilder(args);
 const string PROJECT_ID = "ACM";
 
 // Add services to the container.
-builder.Configuration.AddAzureAppConfiguration(options =>
-{
-	var azureAppConfigConnectionString = builder.Configuration.GetConnectionString("AzureAppConfig");
-	options.Connect(azureAppConfigConnectionString)
-		.Select(keyFilter: $"{PROJECT_ID}_*")
-		.Select(keyFilter: $"{PROJECT_ID}_*", labelFilter: builder.Environment.EnvironmentName)
-		.ConfigureRefresh(x => x.SetCacheExpiration(TimeSpan.FromDays(1)));
-});
+builder.Configuration
+	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+	.AddUserSecrets<Program>(optional: true, reloadOnChange: true)
+	.AddAzureAppConfiguration(options =>
+	{
+		var azureAppConfigConnectionString = builder.Configuration.GetConnectionString("AzureAppConfig");
+		options.Connect(azureAppConfigConnectionString)
+			.Select(keyFilter: $"{PROJECT_ID}:*", LabelFilter.Null)
+			.Select(keyFilter: $"{PROJECT_ID}:*", labelFilter: builder.Environment.EnvironmentName)
+			.ConfigureRefresh(x => x
+				.Register($"{PROJECT_ID}:AzureAppConfig:Sentinel", refreshAll: true)
+				.SetCacheExpiration(TimeSpan.FromHours(1)))
+			.TrimKeyPrefix($"{PROJECT_ID}:");
+	});
 
 ConfigureServices(builder.Services, builder.Configuration);
 ConfigureDataAccess(builder.Services, builder.Configuration);
@@ -101,12 +108,6 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 			.Build();
 		opts.FallbackPolicy = policy;
 	});
-
-	/*services.AddAuthentication(opts =>
-	{
-		opts.DefaultAuthenticateScheme = "";
-		opts.DefaultChallengeScheme = "";
-	});*/
 
 	services.Configure<RedditSettings>(configuration.GetSection("RedditSettings"));
 
