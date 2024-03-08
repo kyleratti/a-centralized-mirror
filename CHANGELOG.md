@@ -1,4 +1,11 @@
 Changelog
+<a name="2.4.0"></a>
+## [2.4.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.4.0) (2024-03-08)
+
+### ✨ Features
+
+* add processing queue admin endpoint ([13208bb](https://www.github.com/kyleratti/a-centralized-mirror/commit/13208bb734d0a3234a1e935cba9a049a79c4ba58))
+
 <a name="2.3.0"></a>
 ## [2.3.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.3.0) (2024-03-08)
 
