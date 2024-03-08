@@ -43,6 +43,7 @@ builder.Configuration
 
 builder.WebHost.UseSentry();
 
+ConfigureOptions(builder.Services, builder.Configuration);
 ConfigureServices(builder.Services, builder.Configuration);
 ConfigureDataAccess(builder.Services, builder.Configuration);
 
@@ -108,6 +109,12 @@ await app.RunAsync();
 
 return;
 
+static void ConfigureOptions(IServiceCollection services, IConfiguration configuration)
+{
+	services.Configure<RedditSettings>(configuration.GetSection("RedditSettings"));
+	services.Configure<HostingOptions>(configuration.GetSection("Hosting"));
+}
+
 static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
 	services.AddAuthorization(opts =>
@@ -131,8 +138,6 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 				ValidationAlgorithm = ValidationAlgorithm.HMACSHA512,
 			});
 	}
-
-	services.Configure<RedditSettings>(configuration.GetSection("RedditSettings"));
 
 	services.AddMemoryCache();
 
