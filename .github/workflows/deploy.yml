@@ -29,3 +29,4 @@ jobs:
           ssh_deploy_user: ${{ secrets.SSH_DEPLOY_USER }}
           ssh_deploy_key: ${{ secrets.SSH_DEPLOY_KEY }}
           docker_compose_file: ${{ vars.DOCKER_COMPOSE_FILE }}
+          docker_file: WebApi/Dockerfile
