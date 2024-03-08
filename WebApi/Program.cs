@@ -9,11 +9,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
+using Microsoft.Extensions.Options;
 using SnooBrowser.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
 using WebApi.Middleware;
 using WebApi.Models.Swagger;
+using WebApi.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,7 +87,10 @@ app.UseSwaggerUI(opts =>
 
 app.UseStaticFiles();
 
-app.UseHttpsRedirection();
+var hostingOptions = app.Services.GetRequiredService<IOptions<HostingOptions>>();
+
+if (hostingOptions.Value.EnableHttpsRedirect)
+	app.UseHttpsRedirection();
 
 app.UseJsonExceptionHandler();
 
