@@ -6,6 +6,9 @@ using BackgroundProcessor;
 using BackgroundProcessor.Templates;
 using Core.AppSettings;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
@@ -115,6 +118,19 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 			.Build();
 		opts.FallbackPolicy = policy;
 	});
+
+	var hostingOptions = configuration.GetSection("Hosting").Get<HostingOptions>();
+
+	if (!string.IsNullOrEmpty(hostingOptions?.DataProtectionKeysPath))
+	{
+		services.AddDataProtection()
+			.PersistKeysToFileSystem(new DirectoryInfo(hostingOptions.DataProtectionKeysPath))
+			.UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration
+			{
+				EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
+				ValidationAlgorithm = ValidationAlgorithm.HMACSHA512,
+			});
+	}
 
 	services.Configure<RedditSettings>(configuration.GetSection("RedditSettings"));
 
