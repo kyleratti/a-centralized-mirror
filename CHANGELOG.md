@@ -1,4 +1,20 @@
 Changelog
+<a name="2.3.0"></a>
+## [2.3.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.3.0) (2024-03-08)
+
+### ✨ Features
+
+* add Azure App Config ([09d8893](https://www.github.com/kyleratti/a-centralized-mirror/commit/09d889385874be2c9543c09c67ad88498046db11))
+* allow disabling HTTPS redirect ([0fda04b](https://www.github.com/kyleratti/a-centralized-mirror/commit/0fda04b1db2041bfca4c0dde504b048e3945ec5a))
+* specify data protection key persistence location ([ae43cd1](https://www.github.com/kyleratti/a-centralized-mirror/commit/ae43cd1ffd9e6998c032ce37b84e66bea259add6))
+* use Sentry for logging ([deb7723](https://www.github.com/kyleratti/a-centralized-mirror/commit/deb77235e318c6dc03d08cc022ca0e2c49b23eee))
+
+### 🐛 Bug Fixes
+
+* configure HostingOptions ([ab9b26f](https://www.github.com/kyleratti/a-centralized-mirror/commit/ab9b26f5d730dc4ec2c47ee1b9dd7ae27972cfb5))
+* trim project prefix from keys ([3c1efca](https://www.github.com/kyleratti/a-centralized-mirror/commit/3c1efca42caa1f4653123fa59f34a62e04f1c4fc))
+* use IOptions for configuration injection ([ced50b1](https://www.github.com/kyleratti/a-centralized-mirror/commit/ced50b162c54bf0b76ca80074971ee0e0f37db80))
+
 <a name="2.2.0"></a>
 ## [2.2.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.2.0) (2022-12-22)
 
