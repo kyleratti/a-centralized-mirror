@@ -36,6 +36,8 @@ builder.Configuration
 			.TrimKeyPrefix($"{PROJECT_ID}:");
 	});
 
+builder.WebHost.UseSentry();
+
 ConfigureServices(builder.Services, builder.Configuration);
 ConfigureDataAccess(builder.Services, builder.Configuration);
 
