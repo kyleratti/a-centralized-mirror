@@ -16,6 +16,7 @@ RUN dotnet publish "WebApi" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHos
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN mkdir /data
 
 EXPOSE 80
 EXPOSE 443
