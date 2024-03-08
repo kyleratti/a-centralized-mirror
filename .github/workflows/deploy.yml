@@ -1,0 +1,31 @@
+name: "Deploy"
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "The tag to release"
+        required: true
+        type: string
+
+# Allow one run of this workflow per branch and cancel existing runs if triggered again
+concurrency:
+  group: acm-deploy-prod-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: kyleratti/actions/.github/actions/deploy-container@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          project_id: "a-centralized-mirror"
+          release_tag: ${{ github.event.inputs.release_tag }}
+          ssh_deploy_host: ${{ secrets.SSH_DEPLOY_HOST }}
+          ssh_deploy_port: ${{ secrets.SSH_DEPLOY_PORT }}
+          ssh_deploy_user: ${{ secrets.SSH_DEPLOY_USER }}
+          ssh_deploy_key: ${{ secrets.SSH_DEPLOY_KEY }}
+          docker_compose_file: ${{ vars.DOCKER_COMPOSE_FILE }}
