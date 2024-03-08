@@ -1,4 +1,11 @@
 Changelog
+<a name="2.5.0"></a>
+## [2.5.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.0) (2024-03-08)
+
+### ✨ Features
+
+* basic db maintenance ([6e3c93e](https://www.github.com/kyleratti/a-centralized-mirror/commit/6e3c93edd638ac6926758105f3c016ddc6d25566))
+
 <a name="2.4.3"></a>
 ## [2.4.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.4.3) (2024-03-08)
 
