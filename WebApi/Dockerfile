@@ -17,6 +17,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 RUN mkdir /data
+RUN chmod 0755 /data
 
 EXPOSE 80
 EXPOSE 443
