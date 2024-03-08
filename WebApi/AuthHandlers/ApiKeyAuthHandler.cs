@@ -20,26 +20,29 @@ public class ApiKeyAuthSchemeOptions : AuthenticationSchemeOptions
 
 public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 {
+	private readonly ILogger<ApiKeyAuthHandler> _logger;
 	private readonly ApiKeyProvider _apiKeyProvider;
 	private readonly UserCache _userCache;
 	private readonly Regex _apiKeyMatch = new(@"^Key (?<key>.*)$", RegexOptions.Compiled);
 
 	/// <inheritdoc />
 	public ApiKeyAuthHandler(
+		ILogger<ApiKeyAuthHandler> logger,
 		IOptionsMonitor<ApiKeyAuthSchemeOptions> options,
-		ILoggerFactory logger,
+		ILoggerFactory loggerFactory,
 		UrlEncoder encoder,
 		ISystemClock clock,
 		ApiKeyProvider apiKeyProvider,
 		UserCache userCache
-	) : base(options, logger, encoder, clock)
+	) : base(options, loggerFactory, encoder, clock)
 	{
+		_logger = logger;
 		_apiKeyProvider = apiKeyProvider;
 		_userCache = userCache;
 	}
 
 	protected override async Task<AuthenticateResult> HandleAuthenticateAsync() =>
-		await JsonExceptionMiddleware.InvokeWithExceptionHandler(Request.HttpContext, async () =>
+		await JsonExceptionMiddleware.InvokeWithExceptionHandler(_logger, Request.HttpContext, async () =>
 		{
 			// For endpoints with IAllowAnonymous, skip the authentication check.
 			if (Context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() != null)

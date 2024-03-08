@@ -21,10 +21,15 @@ internal record CapturedException(
 
 public class JsonExceptionMiddleware
 {
+	private readonly ILogger<JsonExceptionMiddleware> _logger;
 	private readonly RequestDelegate _next;
 
-	public JsonExceptionMiddleware(RequestDelegate next)
+	public JsonExceptionMiddleware(
+		ILogger<JsonExceptionMiddleware> logger,
+		RequestDelegate next
+	)
 	{
+		_logger = logger;
 		_next = next;
 	}
 
@@ -36,11 +41,11 @@ public class JsonExceptionMiddleware
 		}
 		catch (Exception ex)
 		{
-			await HandleExceptionAsync(httpContext, ex);
+			await HandleExceptionAsync(_logger, httpContext, ex);
 		}
 	}
 
-	public static async Task<T> InvokeWithExceptionHandler<T>(HttpContext httpContext, Func<Task<T>> action)
+	public static async Task<T> InvokeWithExceptionHandler<T>(ILogger logger, HttpContext httpContext, Func<Task<T>> action)
 	{
 		try
 		{
@@ -48,13 +53,15 @@ public class JsonExceptionMiddleware
 		}
 		catch (Exception ex)
 		{
-			await HandleExceptionAsync(httpContext, ex);
+			await HandleExceptionAsync(logger, httpContext, ex);
 			throw;
 		}
 	}
 
-	private static async Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
+	private static async Task HandleExceptionAsync(ILogger logger, HttpContext httpContext, Exception ex)
 	{
+		logger.LogError(ex, "An unhandled exception occurred.");
+
 		HttpStatusCode GetStatusCode()
 		{
 			if (ex.Data.Contains("HttpStatusCode") && ex.Data["HttpStatusCode"] is HttpStatusCode statusCode)
