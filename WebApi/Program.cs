@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using SnooBrowser.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
+using WebApi.HostedServices;
 using WebApi.Middleware;
 using WebApi.Models.Swagger;
 using WebApi.Options;
@@ -162,6 +163,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
 	services.AddSingleton<GlobalMemoryCache>();
 	services.AddSingleton<TemplateCache>();
+	services.AddHostedService<DbMaintenanceService>();
 	services.AddHostedService<BackgroundServiceWorker>();
 }
 
