@@ -1,4 +1,7 @@
 Changelog
+<a name="2.5.3"></a>
+## [2.5.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.3) (2024-03-09)
+
 <a name="2.5.2"></a>
 ## [2.5.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.2) (2024-03-09)
 
