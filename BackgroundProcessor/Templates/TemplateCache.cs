@@ -1,30 +1,25 @@
 ﻿using System.Reflection;
 using ApplicationData.Services;
+using FruityFoundation.Base.Structures;
 using Microsoft.Extensions.Caching.Memory;
+using Nito.AsyncEx;
 
 namespace BackgroundProcessor.Templates;
 
 public class TemplateCache
 {
-	private readonly GlobalMemoryCache _globalCache;
+	private readonly AsyncLock _lock = new();
+	private Maybe<string> _commentReplyTemplate = Maybe.Empty<string>();
 
-	public TemplateCache(GlobalMemoryCache globalCache)
+	public async ValueTask<string> GetCommentReplyTemplate(CancellationToken cancellationToken)
 	{
-		_globalCache = globalCache;
-	}
+		using var accessLock = await _lock.LockAsync(cancellationToken);
 
-	public async Task<string> GetCommentReply() => await GetResourceByName("CommentReply.md");
+		if (_commentReplyTemplate.HasValue)
+			return _commentReplyTemplate.Value;
 
-
-	private async Task<string> GetResourceByName(string name) =>
-		await _globalCache.GetOrCreateAsync(CreateCacheKey(name), async _ => await GetResourceByNameWithoutCache(name));
-
-	private static string CreateCacheKey(string key) => $"{nameof(TemplateCache)}.{key}";
-
-	private static async Task<string> GetResourceByNameWithoutCache(string name)
-	{
 		var assembly = Assembly.GetExecutingAssembly();
-		var resourcePath = $"{nameof(BackgroundProcessor)}.{nameof(Templates)}.{name}";
+		const string resourcePath = "BackgroundProcessor.Templates.CommentReply.md";
 
 		await using var stream = assembly.GetManifestResourceStream(resourcePath);
 
@@ -33,6 +28,9 @@ public class TemplateCache
 
 		using var reader = new StreamReader(stream);
 
-		return await reader.ReadToEndAsync();
+		var templateString = await reader.ReadToEndAsync(cancellationToken);
+		_commentReplyTemplate = templateString;
+
+		return templateString;
 	}
 }

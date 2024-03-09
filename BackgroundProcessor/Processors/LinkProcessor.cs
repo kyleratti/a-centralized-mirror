@@ -18,7 +18,7 @@ public class LinkProcessor : IBackgroundProcessor
 	private readonly LinkProvider _linkProvider;
 	private readonly RedditCommentProvider _commentProvider;
 	private readonly CommentBrowser _commentBrowser;
-	private readonly UserCache _userCache;
+	private readonly UserProvider _userProvider;
 	private readonly TemplateCache _templateCache;
 	private readonly IDbConnectionFactory _dbConnectionFactory;
 
@@ -27,7 +27,7 @@ public class LinkProcessor : IBackgroundProcessor
 		LinkProvider linkProvider,
 		RedditCommentProvider commentProvider,
 		CommentBrowser commentBrowser,
-		UserCache userCache,
+		UserProvider userProvider,
 		TemplateCache templateCache,
 		IDbConnectionFactory dbConnectionFactory
 	)
@@ -36,7 +36,7 @@ public class LinkProcessor : IBackgroundProcessor
 		_linkProvider = linkProvider;
 		_commentProvider = commentProvider;
 		_commentBrowser = commentBrowser;
-		_userCache = userCache;
+		_userProvider = userProvider;
 		_templateCache = templateCache;
 		_dbConnectionFactory = dbConnectionFactory;
 	}
@@ -64,7 +64,8 @@ public class LinkProcessor : IBackgroundProcessor
 			else
 			{
 				var message = await BuildComment(links,
-					getUsername: async userId => (await _userCache.FindUser(userId)).Value.DisplayUsername);
+					getUsername: async userId => (await _userProvider.FindUserByIdIncludeDeleted(userId)).Value.DisplayUsername,
+					cancellationToken);
 
 				if (maybeExistingComment.HasValue)
 				{
@@ -86,33 +87,29 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 	}
 
-	private async Task<string> BuildComment(IReadOnlyCollection<Link> links, Func<int, Task<string>> getUsername)
+	private async Task<string> BuildComment(IReadOnlyCollection<Link> links, Func<int, Task<string>> getUsername, CancellationToken cancellationToken)
 	{
-		var (mirrors, downloads) = links
+		var mirrors = links
+			.Where(x => x.LinkType.IsMirror)
 			.OrderBy(x => x.CreatedAt)
-			.Aggregate((Mirrors: new List<Link>(), Downloads: new List<Link>()),
-			(state, item) =>
-			{
-				if (item.LinkType.IsMirror)
-					state.Mirrors.Add(item);
-				else if (item.LinkType.IsDownload)
-					state.Downloads.Add(item);
-				else
-					throw new ArgumentOutOfRangeException(nameof(item.LinkType), item.LinkType.RawValue,
-						$"Unhandled {item.LinkType.GetType().FullName}");
+			.ToArray();
 
-				return state;
-			});
+		var downloads = links
+			.Where(x => x.LinkType.IsDownload)
+			.OrderBy(x => x.CreatedAt)
+			.ToArray();
 
-		var mirrorsSection = await BuildSection(heading: "Mirrors", prefix: "Mirror", mirrors, getUsername).ToArrayAsync();
-		var downloadsSection = await BuildSection(heading: "Downloads", prefix: "Download", downloads, getUsername).ToArrayAsync();
+		var mirrorsSection = await BuildSection(heading: "Mirrors", prefix: "Mirror", mirrors, getUsername).ToArrayAsync(cancellationToken);
+		var downloadsSection = await BuildSection(heading: "Downloads", prefix: "Download", downloads, getUsername).ToArrayAsync(cancellationToken);
 		var sections = mirrorsSection
 			.ConditionalConcat(mirrorsSection.Any() && downloadsSection.Any(), new[] { Environment.NewLine })
 			.Concat(downloadsSection)
 			.ToArray();
 		// TODO: torrents section
 
-		return string.Format(await _templateCache.GetCommentReply(), string.Join(Environment.NewLine, sections));
+		var commentReplyTemplate = await _templateCache.GetCommentReplyTemplate(cancellationToken);
+
+		return string.Format(commentReplyTemplate, string.Join(Environment.NewLine, sections));
 
 		static async IAsyncEnumerable<string> BuildSection(string heading, string prefix, IReadOnlyList<Link> links, Func<int, Task<string>> getUsername)
 		{

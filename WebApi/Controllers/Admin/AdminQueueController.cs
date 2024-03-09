@@ -13,9 +13,9 @@ public class AdminQueueController : AdminApiController
 
 	/// <inheritdoc />
 	public AdminQueueController(
-		IServiceProvider serviceProvider,
+		IHttpContextAccessor httpContextAccessor,
 		LinkProvider linkProvider
-	) : base(serviceProvider)
+	) : base(httpContextAccessor)
 	{
 		_linkProvider = linkProvider;
 	}

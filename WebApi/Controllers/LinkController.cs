@@ -26,10 +26,10 @@ public class LinkController : ApiController
 	/// C'tor
 	/// </summary>
 	public LinkController(
-		IServiceProvider serviceProvider,
+		IHttpContextAccessor httpContextAccessor,
 		LinkProvider linkProvider,
 		SubmissionBrowser submissionBrowser
-	) : base(serviceProvider)
+	) : base(httpContextAccessor)
 	{
 		_linkProvider = linkProvider;
 		_submissionBrowser = submissionBrowser;
@@ -52,12 +52,12 @@ public class LinkController : ApiController
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
 
-		var maybeSubmission = await _submissionBrowser.GetSubmission(LinkThing.CreateFromShortId(linkRequest.RedditPostId));
+		var maybeSubmission = await _submissionBrowser.GetSubmission(LinkThing.CreateFromShortId(linkRequest.RedditPostId!));
 
 		if (!maybeSubmission.Try(out var submission) || submission.IsArchived || submission.IsLocked)
 			return new BadRequestObjectResult(new BadRequestError(
-				Message: TranslatedStrings.LinkController.RedditPostIdIsNotValid(linkRequest.RedditPostId),
-				RedditPostId: linkRequest.RedditPostId
+				Message: TranslatedStrings.LinkController.RedditPostIdIsNotValid(linkRequest.RedditPostId!),
+				RedditPostId: linkRequest.RedditPostId!
 			));
 
 		var createResult = await _linkProvider.CreateLink(new NewLink(
@@ -72,7 +72,7 @@ public class LinkController : ApiController
 			return createResult.FailureVal.Switch(
 				linkAlreadyExists: () => new ConflictObjectResult(new LinkAlreadyExistsError(
 					Message: TranslatedStrings.LinkController.LinkAlreadyExists,
-					RedditPostId: linkRequest.RedditPostId,
+					RedditPostId: linkRequest.RedditPostId!,
 					Url: validUrl.OriginalString,
 					LinkType: linkRequest.LinkType
 				)));
@@ -158,7 +158,7 @@ public class LinkController : ApiController
 		))
 		.ToArray();
 
-	private static Uri GetValidUriOrFail(string linkUrl)
+	private static Uri GetValidUriOrFail(string? linkUrl)
 	{
 		if (!Uri.TryCreate(linkUrl, UriKind.Absolute, out var uri))
 			throw new ApplicationException($"Unable to parse provided URL: {linkUrl}");

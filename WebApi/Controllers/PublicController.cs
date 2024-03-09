@@ -18,16 +18,16 @@ namespace WebApi.Controllers;
 public class PublicController : ApiController
 {
 	private readonly LinkProvider _linkProvider;
-	private readonly UserCache _userCache;
+	private readonly UserProvider _userProvider;
 
 	/// <summary>
 	/// C'tor
 	/// </summary>
-	public PublicController(IServiceProvider serviceProvider, LinkProvider linkProvider, UserCache userCache)
-		: base(serviceProvider)
+	public PublicController(IHttpContextAccessor httpContextAccessor, LinkProvider linkProvider, UserProvider userProvider)
+		: base(httpContextAccessor)
 	{
 		_linkProvider = linkProvider;
-		_userCache = userCache;
+		_userProvider = userProvider;
 	}
 
 	/// <summary>
@@ -46,7 +46,7 @@ public class PublicController : ApiController
 			.SelectAwait(async link => new PublicLinkListingResult(
 				link.LinkUrl,
 				LinkTypeHelpers.ParseToSerializableLinkType(link.LinkType.RawValue),
-				ProviderUsername: (await _userCache.FindUser(link.OwnerId)).Map(x => x.DisplayUsername).Value))
+				ProviderUsername: (await _userProvider.FindUserByIdIncludeDeleted(link.OwnerId)).Map(x => x.DisplayUsername).Value))
 			.ToArrayAsync();
 	}
 

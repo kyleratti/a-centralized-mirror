@@ -22,7 +22,6 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 {
 	private readonly ILogger<ApiKeyAuthHandler> _logger;
 	private readonly ApiKeyProvider _apiKeyProvider;
-	private readonly UserCache _userCache;
 	private readonly Regex _apiKeyMatch = new(@"^Key (?<key>.*)$", RegexOptions.Compiled);
 
 	/// <inheritdoc />
@@ -31,13 +30,11 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 		IOptionsMonitor<ApiKeyAuthSchemeOptions> options,
 		ILoggerFactory loggerFactory,
 		UrlEncoder encoder,
-		ApiKeyProvider apiKeyProvider,
-		UserCache userCache
+		ApiKeyProvider apiKeyProvider
 	) : base(options, loggerFactory, encoder)
 	{
 		_logger = logger;
 		_apiKeyProvider = apiKeyProvider;
-		_userCache = userCache;
 	}
 
 	protected override async Task<AuthenticateResult> HandleAuthenticateAsync() =>
@@ -50,7 +47,12 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 			if (!Request.Headers.TryGetValue("Authorization", out var authorization))
 				return AuthenticateResult.Fail("No authorization key provided");
 
-			var result = _apiKeyMatch.Match(authorization);
+			var authorizationString = authorization.ToString();
+
+			if (string.IsNullOrEmpty(authorizationString))
+				return AuthenticateResult.Fail("No authorization key provided");
+
+			var result = _apiKeyMatch.Match(authorizationString);
 
 			if (!result.Success)
 				return AuthenticateResult.Fail("Invalid authorization format provided");
@@ -67,7 +69,6 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 				roles.Add(UserRoles.AdministratorRole);
 
 			var principal = new GenericPrincipal(identity, roles.ToArray());
-			_userCache.AddOrUpdateUser(user);
 
 			var ticket = new AuthenticationTicket(principal, Scheme.Name);
 

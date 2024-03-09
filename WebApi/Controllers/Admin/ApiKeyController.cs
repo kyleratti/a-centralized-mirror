@@ -14,10 +14,10 @@ public class ApiKeyController : AdminApiController
 
 	/// <inheritdoc />
 	public ApiKeyController(
-		IServiceProvider serviceProvider,
+		IHttpContextAccessor httpContextAccessor,
 		ApiKeyProvider apiKeyProvider,
 		UserProvider userProvider
-	) : base(serviceProvider)
+	) : base(httpContextAccessor)
 	{
 		_apiKeyProvider = apiKeyProvider;
 		_userProvider = userProvider;

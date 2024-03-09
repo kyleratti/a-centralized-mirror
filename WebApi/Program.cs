@@ -161,9 +161,6 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 	services.AddScoped<UserProvider>();
 	services.AddScoped<RedditCommentProvider>();
 
-	services.AddScoped<UserCache>();
-
-	services.AddSingleton<GlobalMemoryCache>();
 	services.AddSingleton<TemplateCache>();
 	services.AddHostedService<DbMaintenanceService>();
 	services.AddHostedService<BackgroundServiceWorker>();

@@ -11,9 +11,9 @@ public class AdminLinkController : AdminApiController
 	private readonly LinkProvider _linkProvider;
 
 	public AdminLinkController(
-		IServiceProvider serviceProvider,
+		IHttpContextAccessor httpContextAccessor,
 		LinkProvider linkProvider
-	) : base(serviceProvider)
+	) : base(httpContextAccessor)
 	{
 		_linkProvider = linkProvider;
 	}

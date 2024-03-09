@@ -15,9 +15,9 @@ public class AdminUserController : AdminApiController
 
 	/// <inheritdoc />
 	public AdminUserController(
-		IServiceProvider serviceProvider,
+		IHttpContextAccessor httpContextAccessor,
 		UserProvider userProvider
-	) : base(serviceProvider)
+	) : base(httpContextAccessor)
 	{
 		_userProvider = userProvider;
 	}

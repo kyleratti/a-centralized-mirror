@@ -4,30 +4,30 @@ using WebApi.Models;
 
 namespace WebApi.Controllers;
 
+/// <summary>
+/// Information about the logged in user
+/// </summary>
 [ApiController]
 [Route("v1/[controller]")]
-public class MeController : ApiController
+public class MeController(
+	UserProvider _userProvider,
+	IHttpContextAccessor httpContextAccessor
+) : ApiController(httpContextAccessor)
 {
-	private readonly LinkProvider _linkProvider;
-
-	public MeController(
-		IServiceProvider serviceProvider,
-		LinkProvider linkProvider
-	) : base(serviceProvider)
-	{
-		_linkProvider = linkProvider;
-	}
-
 	/// <summary>
 	/// Retrieve information about the current API user.
 	/// </summary>
 	/// <returns></returns>
 	[HttpGet]
 	[Route("")]
-	public AboutMe GetAboutMe() =>
-		new(
-			User.DisplayUsername,
-			User.DeveloperUsername,
-			User.CreatedAt
-		);
+	public async Task<AboutMe> GetAboutMe()
+	{
+		if (!(await _userProvider.FindUserByIdIncludeDeleted(UserId)).Try(out var user))
+			throw new InvalidOperationException($"Unable to find user {UserId}");
+
+		return new AboutMe(
+			DisplayName: user.DisplayUsername,
+			DeveloperName: user.DeveloperUsername,
+			CreatedAt: user.CreatedAt);
+	}
 }

@@ -10,7 +10,7 @@ public class RedditTestController : AdminApiController
 	private readonly MeBrowser _meBrowser;
 
 	/// <inheritdoc />
-	public RedditTestController(IServiceProvider serviceProvider, MeBrowser meBrowser) : base(serviceProvider)
+	public RedditTestController(IHttpContextAccessor httpContextAccessor, MeBrowser meBrowser) : base(httpContextAccessor)
 	{
 		_meBrowser = meBrowser;
 	}

@@ -10,8 +10,8 @@ namespace WebApi.Controllers.Admin;
 public class AdminApiController : ApiController
 {
 	public AdminApiController(
-		IServiceProvider serviceProvider
-	) : base(serviceProvider)
+		IHttpContextAccessor httpContextAccessor
+	) : base(httpContextAccessor)
 	{
 		//
 	}
