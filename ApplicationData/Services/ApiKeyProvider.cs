@@ -21,7 +21,7 @@ public class ApiKeyProvider
 	public async Task<Maybe<User>> FindUserByApiKey(string apiKey)
 	{
 		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		var reader = await connection.ExecuteReaderAsync(
+		using var reader = await connection.ExecuteReaderAsync(
 			@"SELECT u.user_id, u.display_username, u.developer_username, u.weight, u.created_at, u.updated_at, u.is_admin
 				FROM users u
 				INNER JOIN api_keys ak ON u.user_id = ak.user_id

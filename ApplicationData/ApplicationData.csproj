@@ -18,6 +18,10 @@
       <PackageReference Include="Dapper.Transaction" Version="2.1.28" />
       <PackageReference Include="FruityFoundation.Base" Version="1.1.2" />
       <PackageReference Include="FruityFoundation.FsBase" Version="1.1.2" />
+      <PackageReference Include="IDisposableAnalyzers" Version="4.0.7">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.16" />
       <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
       <PackageReference Include="ResultMonad" Version="1.0.1" />

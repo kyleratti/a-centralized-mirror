@@ -22,7 +22,7 @@ public class UserProvider
 	public async Task<IReadOnlyCollection<User>> GetAllUsers()
 	{
 		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		var reader = await connection.ExecuteReaderAsync(
+		using var reader = await connection.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				ORDER BY created_at");
@@ -47,7 +47,7 @@ public class UserProvider
 	public async Task<Maybe<User>> FindUserByDisplayName(string displayUsername)
 	{
 		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		var reader = await connection.ExecuteReaderAsync(
+		using var reader = await connection.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE display_username LIKE @displayUsername",
@@ -71,7 +71,7 @@ public class UserProvider
 	public async Task<Maybe<User>> FindUserByIdIncludeDeleted(int userId)
 	{
 		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		var reader = await connection.ExecuteReaderAsync(
+		using var reader = await connection.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE user_id = @userId",
