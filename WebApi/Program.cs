@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.Options;
 using SnooBrowser.Extensions.DependencyInjection;
@@ -31,7 +30,6 @@ const string PROJECT_ID = "ACM";
 builder.Configuration
 	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-	.AddUserSecrets<Program>(optional: true, reloadOnChange: true)
 	.AddAzureAppConfiguration(options =>
 	{
 		var azureAppConfigConnectionString = builder.Configuration.GetConnectionString("AzureAppConfig");
@@ -43,6 +41,9 @@ builder.Configuration
 				.SetCacheExpiration(TimeSpan.FromHours(1)))
 			.TrimKeyPrefix($"{PROJECT_ID}:");
 	});
+
+if (builder.Environment.IsDevelopment())
+	builder.Configuration.AddUserSecrets<Program>(optional: true, reloadOnChange: true);
 
 builder.WebHost.UseSentry();
 
