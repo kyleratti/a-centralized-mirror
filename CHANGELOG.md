@@ -1,4 +1,11 @@
 Changelog
+<a name="2.5.2"></a>
+## [2.5.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.2) (2024-03-09)
+
+### 🐛 Bug Fixes
+
+* dispose readers ([3e2ef86](https://www.github.com/kyleratti/a-centralized-mirror/commit/3e2ef86fdd2d2a259551727f1ba360423ec2d7a8))
+
 <a name="2.5.1"></a>
 ## [2.5.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.1) (2024-03-09)
 
