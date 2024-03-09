@@ -3,10 +3,7 @@ using System.Runtime.CompilerServices;
 using Dapper;
 using Dapper.Transaction;
 using DataClasses;
-using FruityFoundation.Base.Extensions;
 using FruityFoundation.Base.Structures;
-using Microsoft.Data.Sqlite;
-using ResultMonad;
 
 namespace ApplicationData.Services;
 
@@ -44,7 +41,7 @@ public class LinkProvider
 			});
 
 		if (!reader.Read())
-			return Maybe<Link>.Empty();
+			return Maybe.Empty<Link>();
 
 		return new Link(
 			linkId: reader.GetInt32(0),
@@ -73,7 +70,7 @@ public class LinkProvider
 			});
 
 		if (!reader.Read())
-			return Maybe<Link>.Empty();
+			return Maybe.Empty<Link>();
 
 		return new Link(
 			linkId: reader.GetInt32(0),
@@ -165,7 +162,7 @@ public class LinkProvider
 			});
 
 		if (existingLink is true)
-			return Result.Fail<int, CreateLinkError>(new LinkAlreadyExists());
+			return Result<int, CreateLinkError>.CreateFailure(new LinkAlreadyExists());
 
 		using var tx = connection.CreateTransaction(IsolationLevel.Serializable);
 
@@ -189,7 +186,7 @@ public class LinkProvider
 
 		tx.Commit();
 
-		return Result.Ok<int, CreateLinkError>(linkId);
+		return Result<int, CreateLinkError>.CreateSuccess(linkId);
 	}
 
 	public async Task<IReadOnlyCollection<Link>> GetAllLinksByUserId(int userId)

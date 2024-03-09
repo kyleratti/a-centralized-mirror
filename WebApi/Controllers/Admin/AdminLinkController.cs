@@ -22,7 +22,7 @@ public class AdminLinkController : AdminApiController
 	[Route("{linkId:int}")]
 	public async Task<IActionResult> DeleteLinkAsync(int linkId)
 	{
-		if (!(await _linkProvider.FindLinkById(userId: Maybe<int>.Empty(), linkId)).HasValue)
+		if (!(await _linkProvider.FindLinkById(userId: Maybe.Empty<int>(), linkId)).HasValue)
 			return new NotFoundResult();
 
 		await _linkProvider.DeleteLinkById(linkId);

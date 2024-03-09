@@ -1,6 +1,5 @@
 ﻿using ApplicationData.Services;
 using DataClasses;
-using FruityFoundation.Base.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 #pragma warning disable CS1591
@@ -22,7 +21,7 @@ public class ApiController
 	}
 
 	public int UserId =>
-		Convert.ToInt32(_httpContext.HttpContext!.User.Claims.First(x => x.Type.EqualsIgnoreCase("UserId")).Value);
+		Convert.ToInt32(_httpContext.HttpContext!.User.Claims.First(x => x.Type.Equals("UserId", StringComparison.OrdinalIgnoreCase)).Value);
 
 	public User User => _userCache.GetUserOrFail(UserId);
 }

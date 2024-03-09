@@ -2,7 +2,6 @@
 using ApplicationData.Locale;
 using ApplicationData.Services;
 using DataClasses;
-using FruityFoundation.Base.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SnooBrowser.Browsers;
@@ -68,9 +67,9 @@ public class LinkController : ApiController
 			ownerUserId: UserId
 		));
 
-		if (!createResult.TrySuccess(out _, out var error))
+		if (createResult.IsFailure)
 		{
-			return error!.Switch(
+			return createResult.FailureVal.Switch(
 				linkAlreadyExists: () => new ConflictObjectResult(new LinkAlreadyExistsError(
 					Message: TranslatedStrings.LinkController.LinkAlreadyExists,
 					RedditPostId: linkRequest.RedditPostId,
@@ -164,7 +163,7 @@ public class LinkController : ApiController
 		if (!Uri.TryCreate(linkUrl, UriKind.Absolute, out var uri))
 			throw new ApplicationException($"Unable to parse provided URL: {linkUrl}");
 
-		if (!uri.Scheme.EqualsIgnoreCase("https"))
+		if (!uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
 			throw new ArgumentOutOfRangeException("scheme", uri.Scheme,
 				"You must provide a link using the HTTPS scheme")
 			{

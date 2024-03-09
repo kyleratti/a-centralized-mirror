@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using Dapper;
 using Dapper.Transaction;
-using FruityFoundation.Base.Extensions;
 using FruityFoundation.Base.Structures;
 
 namespace ApplicationData.Services;
@@ -22,7 +21,7 @@ public class RedditCommentProvider
 			@"SELECT reddit_comment_id FROM reddit_comments WHERE reddit_post_id = @redditPostId",
 			new { redditPostId });
 
-		return result.ToMaybe();
+		return result.AsMaybe();
 	}
 
 	public static async Task CreateOrUpdateLinkedComment(IDbTransaction tx, string redditPostId, string redditCommentId) =>

@@ -3,7 +3,7 @@ using ApplicationData;
 using ApplicationData.Services;
 using BackgroundProcessor.Templates;
 using DataClasses;
-using FruityFoundation.Base.Extensions;
+using FruityFoundation.Base.Structures;
 using SnooBrowser.Browsers;
 using SnooBrowser.Models.Comment;
 using SnooBrowser.Things;

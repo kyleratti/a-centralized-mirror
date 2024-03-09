@@ -1,6 +1,5 @@
 ﻿using ApplicationData.Services;
 using DataClasses;
-using FruityFoundation.Base.Extensions;
 using FruityFoundation.Base.Structures;
 using FruityFoundation.FsBase;
 using Microsoft.AspNetCore.Mvc;
@@ -28,14 +27,14 @@ public class AdminUserController : AdminApiController
 	public async Task<IReadOnlyCollection<UserAdminModel>> GetAllUsersAsync() =>
 		(await _userProvider.GetAllUsers())
 		.Select(x => new UserAdminModel(
-			x.UserId,
-			x.DisplayUsername,
-			x.DeveloperUsername,
-			x.Weight,
-			x.CreatedAt,
-			x.UpdatedAt.ToMaybe().ToNullable(),
-			x.IsDeleted,
-			x.IsAdministrator
+			UserId: x.UserId,
+			DisplayUsername: x.DisplayUsername,
+			DeveloperUsername: x.DeveloperUsername,
+			Weight: x.Weight,
+			CreatedAt: x.CreatedAt,
+			UpdatedAt: Option.toMaybe(x.UpdatedAt).ToNullable(),
+			IsDeleted: x.IsDeleted,
+			IsAdministrator: x.IsAdministrator
 		))
 		.ToArray();
 
@@ -50,10 +49,10 @@ public class AdminUserController : AdminApiController
 			});
 
 		var userId = await _userProvider.CreateUser(new NewUser(
-			newUser.DisplayUsername,
-			newUser.DeveloperUsername,
-			newUser.Weight.ToMaybe().ToFSharpOption(),
-			newUser.IsAdministrator.ToMaybe().OrValue(false)
+			displayUsername: newUser.DisplayUsername,
+			developerUsername: newUser.DeveloperUsername,
+			weight: Option.fromMaybe(newUser.Weight.ToMaybe()),
+			isAdministrator: newUser.IsAdministrator.ToMaybe().OrValue(false)
 		));
 
 		return new ObjectResult((await _userProvider.FindUserByIdIncludeDeleted(userId)).Value);

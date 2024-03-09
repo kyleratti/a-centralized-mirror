@@ -2,7 +2,6 @@
 using System.Data.Common;
 using Dapper;
 using DataClasses;
-using FruityFoundation.Base.Extensions;
 using FruityFoundation.Base.Structures;
 using FruityFoundation.FsBase;
 
@@ -36,7 +35,7 @@ public class UserProvider
 				developerUsername: reader.GetString(2),
 				weight: reader.GetInt32(3),
 				createdAt: reader.GetDateTime(4),
-				updatedAt: reader.TryGetDateTime(5).ToFSharpOption(),
+				updatedAt: Option.fromMaybe(reader.TryGetDateTime(5)),
 				isDeleted: reader.GetBoolean(6),
 				isAdministrator: reader.GetBoolean(7)
 			));
@@ -54,7 +53,7 @@ public class UserProvider
 			new { displayUsername});
 
 		if (!reader.Read())
-			return Maybe<User>.Empty();
+			return Maybe.Empty<User>();
 
 		return new User(
 			userId: reader.GetInt32(0),
@@ -62,7 +61,7 @@ public class UserProvider
 			developerUsername: reader.GetString(2),
 			weight: reader.GetInt32(3),
 			createdAt: reader.GetDateTime(4),
-			updatedAt: reader.TryGetDateTime(5).ToFSharpOption(),
+			updatedAt: Option.fromMaybe(reader.TryGetDateTime(5)),
 			isDeleted: reader.GetBoolean(6),
 			isAdministrator: reader.GetBoolean(7)
 		);
@@ -78,7 +77,7 @@ public class UserProvider
 			new { userId });
 
 		if (!reader.Read())
-			return Maybe<User>.Empty();
+			return Maybe.Empty<User>();
 
 		return new User(
 			userId: reader.GetInt32(0),
@@ -86,7 +85,7 @@ public class UserProvider
 			developerUsername: reader.GetString(2),
 			weight: reader.GetInt32(3),
 			createdAt: reader.GetDateTime(4),
-			updatedAt: reader.TryGetDateTime(5).ToFSharpOption(),
+			updatedAt: Option.fromMaybe(reader.TryGetDateTime(5)),
 			isDeleted: reader.GetBoolean(6),
 			isAdministrator: reader.GetBoolean(7)
 		);
@@ -105,7 +104,7 @@ public class UserProvider
 			{
 				displayUsername = newUser.DisplayUsername,
 				developerUsername = newUser.DeveloperUsername,
-				weight = newUser.Weight.ToMaybe().OrValue(0),
+				weight = Option.toMaybe(newUser.Weight).OrValue(0),
 				isAdmin = newUser.IsAdministrator,
 			});
 	}

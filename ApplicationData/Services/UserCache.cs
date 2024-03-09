@@ -18,21 +18,24 @@ public class UserCache
 		_userProvider = userProvider;
 	}
 
-	public Maybe<User> FindUserCacheOnly(int userId) =>
-		_globalCache.TryGetValue(UserIdToKey(userId), out User userObj)
-			? Maybe<User>.Create(userObj)
-			: Maybe<User>.Empty();
+	public Maybe<User> FindUserCacheOnly(int userId)
+	{
+		if (!_globalCache.TryGetValue(UserIdToKey(userId), out User? user))
+			return Maybe.Empty<User>();
+
+		return user!;
+	}
 
 	public async Task<Maybe<User>> FindUser(int userId)
 	{
 		var key = UserIdToKey(userId);
-		if (_globalCache.TryGetValue(key, out User value))
-			return value;
+		if (_globalCache.TryGetValue(key, out User? value))
+			return value!;
 
 		var maybeUser = await _userProvider.FindUserByIdIncludeDeleted(userId);
 		
 		if (!maybeUser.Try(out var user))
-			return Maybe<User>.Empty();
+			return Maybe.Empty<User>();
 
 		return _globalCache.Set(UserIdToKey(userId), user, absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(5));
 	}

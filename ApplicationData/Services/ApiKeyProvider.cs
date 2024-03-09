@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using Dapper;
 using DataClasses;
-using FruityFoundation.Base.Extensions;
 using FruityFoundation.Base.Structures;
 using FruityFoundation.FsBase;
 
@@ -31,7 +30,7 @@ public class ApiKeyProvider
 			new { apiKey });
 
 		if (!reader.Read())
-			return Maybe<User>.Empty();
+			return Maybe.Empty<User>();
 
 		return new User(
 			userId: reader.GetInt32(0),
@@ -39,7 +38,7 @@ public class ApiKeyProvider
 			developerUsername: reader.GetString(2),
 			weight: reader.GetInt32(3),
 			createdAt: reader.GetDateTime(4),
-			updatedAt: reader.TryGetDateTime(5).ToFSharpOption(),
+			updatedAt: Option.fromMaybe(reader.TryGetDateTime(5)),
 			isDeleted: false,
 			isAdministrator: reader.GetBoolean(6)
 		);

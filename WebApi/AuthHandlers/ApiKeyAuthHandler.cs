@@ -16,7 +16,7 @@ using WebApi.Util;
 namespace WebApi.AuthHandlers;
 
 public class ApiKeyAuthSchemeOptions : AuthenticationSchemeOptions
-{ }
+{}
 
 public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 {
@@ -31,10 +31,9 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 		IOptionsMonitor<ApiKeyAuthSchemeOptions> options,
 		ILoggerFactory loggerFactory,
 		UrlEncoder encoder,
-		ISystemClock clock,
 		ApiKeyProvider apiKeyProvider,
 		UserCache userCache
-	) : base(options, loggerFactory, encoder, clock)
+	) : base(options, loggerFactory, encoder)
 	{
 		_logger = logger;
 		_apiKeyProvider = apiKeyProvider;
