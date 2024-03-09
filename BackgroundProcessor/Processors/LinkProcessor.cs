@@ -20,7 +20,7 @@ public class LinkProcessor : IBackgroundProcessor
 	private readonly CommentBrowser _commentBrowser;
 	private readonly UserCache _userCache;
 	private readonly TemplateCache _templateCache;
-	private readonly IDbConnection _dbConnection;
+	private readonly IDbConnectionFactory _dbConnectionFactory;
 
 	public LinkProcessor(
 		ILogger<LinkProcessor> logger,
@@ -29,7 +29,7 @@ public class LinkProcessor : IBackgroundProcessor
 		CommentBrowser commentBrowser,
 		UserCache userCache,
 		TemplateCache templateCache,
-		IDbConnection dbConnection
+		IDbConnectionFactory dbConnectionFactory
 	)
 	{
 		_logger = logger;
@@ -38,7 +38,7 @@ public class LinkProcessor : IBackgroundProcessor
 		_commentBrowser = commentBrowser;
 		_userCache = userCache;
 		_templateCache = templateCache;
-		_dbConnection = dbConnection;
+		_dbConnectionFactory = dbConnectionFactory;
 	}
 
 	/// <inheritdoc />
@@ -53,7 +53,8 @@ public class LinkProcessor : IBackgroundProcessor
 			var links = await _linkProvider.GetLinksByRedditPostId(item.RedditPostId);
 			var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(item.RedditPostId);
 
-			using var tx = _dbConnection.CreateTransaction(IsolationLevel.Serializable);
+			using var connection = await _dbConnectionFactory.CreateConnection();
+			using var lazyTx = LazyDbTransaction.Create(connection, IsolationLevel.Serializable);
 
 			if (!links.Any())
 			{
@@ -75,13 +76,13 @@ public class LinkProcessor : IBackgroundProcessor
 					var result = await _commentBrowser.SubmitComment(LinkThing.CreateFromShortId(item.RedditPostId), message);
 					await TryDistinguishStickyAndLockLogFailure(result.CommentId);
 
-					await RedditCommentProvider.CreateOrUpdateLinkedComment(tx, item.RedditPostId, result.CommentId.ShortId);
+					await RedditCommentProvider.CreateOrUpdateLinkedComment(lazyTx.Tx, item.RedditPostId, result.CommentId.ShortId);
 				}
 			}
 
-			await LinkProvider.MarkRedditPostIdAsProcessed(tx, item.QueuedItemId);
+			await LinkProvider.MarkRedditPostIdAsProcessed(lazyTx.Tx, item.QueuedItemId);
 
-			tx.Commit();
+			lazyTx.Tx.Commit();
 		}
 	}
 

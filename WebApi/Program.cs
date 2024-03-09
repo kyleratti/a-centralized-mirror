@@ -21,6 +21,7 @@ using WebApi.HostedServices;
 using WebApi.Middleware;
 using WebApi.Models.Swagger;
 using WebApi.Options;
+using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -169,7 +170,5 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
 static void ConfigureDataAccess(IServiceCollection services, IConfiguration configuration)
 {
-	var dbConnectionString = configuration.GetConnectionString("DbConnection");
-
-	services.AddScoped<IDbConnection>(_ => new SqliteConnection(dbConnectionString));
+	services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 }

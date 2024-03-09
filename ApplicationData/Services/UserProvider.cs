@@ -10,18 +10,19 @@ namespace ApplicationData.Services;
 
 public class UserProvider
 {
-	private readonly IDbConnection _db;
+	private readonly IDbConnectionFactory _dbConnectionFactory;
 
 	public UserProvider(
-		IDbConnection dbConnection
+		IDbConnectionFactory dbConnectionFactory
 	)
 	{
-		_db = dbConnection;
+		_dbConnectionFactory = dbConnectionFactory;
 	}
 
 	public async Task<IReadOnlyCollection<User>> GetAllUsers()
 	{
-		var reader = await _db.ExecuteReaderAsync(
+		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
+		var reader = await connection.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				ORDER BY created_at");
@@ -45,7 +46,8 @@ public class UserProvider
 
 	public async Task<Maybe<User>> FindUserByDisplayName(string displayUsername)
 	{
-		var reader = await _db.ExecuteReaderAsync(
+		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
+		var reader = await connection.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE display_username LIKE @displayUsername",
@@ -68,7 +70,8 @@ public class UserProvider
 
 	public async Task<Maybe<User>> FindUserByIdIncludeDeleted(int userId)
 	{
-		var reader = await _db.ExecuteReaderAsync(
+		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
+		var reader = await connection.ExecuteReaderAsync(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE user_id = @userId",
@@ -89,8 +92,10 @@ public class UserProvider
 		);
 	}
 
-	public async Task<int> CreateUser(NewUser newUser) =>
-		await _db.ExecuteScalarAsync<int>(
+	public async Task<int> CreateUser(NewUser newUser)
+	{
+		using var connection = await _dbConnectionFactory.CreateConnection();
+		return await connection.ExecuteScalarAsync<int>(
 			@"INSERT INTO users (
 				display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 			) VALUES (
@@ -103,9 +108,13 @@ public class UserProvider
 				weight = newUser.Weight.ToMaybe().OrValue(0),
 				isAdmin = newUser.IsAdministrator,
 			});
+	}
 
-	public async Task DeleteUserById(int userId) =>
-		await _db.ExecuteAsync(
+	public async Task DeleteUserById(int userId)
+	{
+		using var connection = await _dbConnectionFactory.CreateConnection();
+		await connection.ExecuteAsync(
 			@"UPDATE users SET is_deleted = true WHERE user_id = @userId",
 			new { userId });
+	}
 }

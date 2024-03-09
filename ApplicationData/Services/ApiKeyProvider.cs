@@ -9,18 +9,19 @@ namespace ApplicationData.Services;
 
 public class ApiKeyProvider
 {
-	private readonly IDbConnection _db;
+	private readonly IDbConnectionFactory _dbConnectionFactory;
 
 	public ApiKeyProvider(
-		IDbConnection db
+		IDbConnectionFactory dbConnectionFactory
 	)
 	{
-		_db = db;
+		_dbConnectionFactory = dbConnectionFactory;
 	}
 
 	public async Task<Maybe<User>> FindUserByApiKey(string apiKey)
 	{
-		var reader = await _db.ExecuteReaderAsync(
+		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
+		var reader = await connection.ExecuteReaderAsync(
 			@"SELECT u.user_id, u.display_username, u.developer_username, u.weight, u.created_at, u.updated_at, u.is_admin
 				FROM users u
 				INNER JOIN api_keys ak ON u.user_id = ak.user_id
@@ -44,12 +45,15 @@ public class ApiKeyProvider
 		);
 	}
 
-	public async Task CreateApiKeyForUser(int userId, string apiKey) =>
-		await _db.ExecuteAsync(
+	public async Task CreateApiKeyForUser(int userId, string apiKey)
+	{
+		using var connection = await _dbConnectionFactory.CreateConnection();
+		await connection.ExecuteAsync(
 			@"INSERT INTO api_keys (
 				api_key, created_at, last_used_at, user_id
 			) VALUES (
 				@apiKey, CURRENT_TIMESTAMP, NULL, @userId
 			)",
 			new { apiKey, userId });
+	}
 }

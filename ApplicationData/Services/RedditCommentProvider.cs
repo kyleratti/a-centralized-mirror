@@ -8,16 +8,17 @@ namespace ApplicationData.Services;
 
 public class RedditCommentProvider
 {
-	private readonly IDbConnection _db;
+	private readonly IDbConnectionFactory _dbConnectionFactory;
 
-	public RedditCommentProvider(IDbConnection db)
+	public RedditCommentProvider(IDbConnectionFactory dbConnectionFactory)
 	{
-		_db = db;
+		_dbConnectionFactory = dbConnectionFactory;
 	}
 
 	public async Task<Maybe<string>> FindCommentIdByPostId(string redditPostId)
 	{
-		var result = await _db.ExecuteScalarAsync<string?>(
+		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
+		var result = await connection.ExecuteScalarAsync<string?>(
 			@"SELECT reddit_comment_id FROM reddit_comments WHERE reddit_post_id = @redditPostId",
 			new { redditPostId });
 
@@ -32,9 +33,4 @@ public class RedditCommentProvider
 				DO UPDATE
 					SET reddit_comment_id = @redditCommentId, last_updated_at = CURRENT_TIMESTAMP",
 			new { redditPostId, redditCommentId});
-
-	public async Task<int> DeleteLinkedComment(string redditPostId) =>
-		await _db.ExecuteAsync(
-			@"DELETE FROM reddit_comments WHERE reddit_post_id = @redditPostId",
-			new { redditPostId });
 }
