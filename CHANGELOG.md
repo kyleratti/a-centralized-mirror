@@ -1,4 +1,11 @@
 Changelog
+<a name="2.5.1"></a>
+## [2.5.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.1) (2024-03-09)
+
+### 🐛 Bug Fixes
+
+* add user secrets last and only in development ([dae71fc](https://www.github.com/kyleratti/a-centralized-mirror/commit/dae71fc422f971fdc15505509ef03a3b4fd7f68d))
+
 <a name="2.5.0"></a>
 ## [2.5.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.0) (2024-03-08)
 
