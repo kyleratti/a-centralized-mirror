@@ -162,6 +162,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 	services.AddScoped<RedditCommentProvider>();
 
 	services.AddSingleton<TemplateCache>();
+	services.AddSingleton<ResourceAccessManager>();
+
 	services.AddHostedService<DbMaintenanceService>();
 	services.AddHostedService<BackgroundServiceWorker>();
 }
