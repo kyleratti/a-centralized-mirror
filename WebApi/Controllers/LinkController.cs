@@ -21,6 +21,7 @@ public class LinkController : ApiController
 {
 	private readonly LinkProvider _linkProvider;
 	private readonly SubmissionBrowser _submissionBrowser;
+	private readonly ResourceAccessManager _resourceAccessManager;
 
 	/// <summary>
 	/// C'tor
@@ -28,11 +29,13 @@ public class LinkController : ApiController
 	public LinkController(
 		IHttpContextAccessor httpContextAccessor,
 		LinkProvider linkProvider,
-		SubmissionBrowser submissionBrowser
+		SubmissionBrowser submissionBrowser,
+		ResourceAccessManager resourceAccessManager
 	) : base(httpContextAccessor)
 	{
 		_linkProvider = linkProvider;
 		_submissionBrowser = submissionBrowser;
+		_resourceAccessManager = resourceAccessManager;
 	}
 
 	/// <summary>
@@ -47,7 +50,7 @@ public class LinkController : ApiController
 	[SwaggerResponse((int)HttpStatusCode.Conflict,
 		description: "Conflict. This user has already provided this combination of reddit post ID, URL, and link type.",
 		typeof(LinkAlreadyExistsError))]
-	public async Task<IActionResult> SubmitLink([FromBody] SubmitLinkRequest linkRequest)
+	public async Task<IActionResult> SubmitLink([FromBody] SubmitLinkRequest linkRequest, CancellationToken cancellationToken)
 	{
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
@@ -60,12 +63,16 @@ public class LinkController : ApiController
 				RedditPostId: linkRequest.RedditPostId!
 			));
 
-		var createResult = await _linkProvider.CreateLink(new NewLink(
-			redditPostId: linkRequest.RedditPostId,
-			linkUrl: validUrl.OriginalString,
-			linkKind,
-			ownerUserId: UserId
-		));
+		var createResult = await _resourceAccessManager.WithExclusiveAccess(
+			linkRequest.RedditPostId!,
+			async () =>
+				await _linkProvider.CreateLink(new NewLink(
+					redditPostId: linkRequest.RedditPostId,
+					linkUrl: validUrl.OriginalString,
+					linkKind,
+					ownerUserId: UserId
+				)),
+			cancellationToken);
 
 		if (createResult.IsFailure)
 		{
@@ -93,7 +100,7 @@ public class LinkController : ApiController
 	[SwaggerResponse((int)HttpStatusCode.NotFound,
 		description: "Not Found. This user does not have this combination of reddit post ID, URL, and link type.",
 		typeof(LinkNotFoundError))]
-	public async Task<IActionResult> DeleteLinkByLinkData([FromBody] DeleteLinkRequest linkRequest)
+	public async Task<IActionResult> DeleteLinkByLinkData([FromBody] DeleteLinkRequest linkRequest, CancellationToken cancellationToken)
 	{
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
@@ -105,7 +112,10 @@ public class LinkController : ApiController
 				Url: validUrl.OriginalString
 			));
 
-		await _linkProvider.DeleteLinkById(link.LinkId);
+		await _resourceAccessManager.WithExclusiveAccess(
+			linkRequest.RedditPostId,
+			() => _linkProvider.DeleteLinkById(link.LinkId),
+			cancellationToken);
 
 		return new OkObjectResult(new LinkDeleteQueuedSuccessfully(
 			Message: TranslatedStrings.LinkController.LinkDeleted,
@@ -125,7 +135,7 @@ public class LinkController : ApiController
 	[SwaggerResponse((int)HttpStatusCode.NotFound,
 		description: "Not Found. This user does not have this combination of reddit post ID, URL, and link type.",
 		typeof(LinkIdNotFoundError))]
-	public async Task<IActionResult> DeleteLinkById([FromRoute] int linkId)
+	public async Task<IActionResult> DeleteLinkById([FromRoute] int linkId, CancellationToken cancellationToken)
 	{
 		if (!(await _linkProvider.FindLinkById(UserId, linkId)).Try(out var link))
 			return new NotFoundObjectResult(new LinkIdNotFoundError(
@@ -133,7 +143,10 @@ public class LinkController : ApiController
 				LinkId: linkId
 			));
 
-		await _linkProvider.DeleteLinkById(link.LinkId);
+		await _resourceAccessManager.WithExclusiveAccess(
+			link.RedditPostId,
+			() => _linkProvider.DeleteLinkById(link.LinkId),
+			cancellationToken);
 		
 		return new OkObjectResult(new LinkDeleteQueuedSuccessfully(
 			Message: TranslatedStrings.LinkController.LinkDeleted,

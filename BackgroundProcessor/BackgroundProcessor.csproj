@@ -7,6 +7,7 @@
         <UserSecretsId>dotnet-BackgroundProcessor-35541A68-9074-4C0A-9003-D5B4779CC1E8</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <LangVersion>12</LangVersion>
+        <OutputType>Library</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
