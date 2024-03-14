@@ -1,4 +1,11 @@
 Changelog
+<a name="2.5.5"></a>
+## [2.5.5](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.5) (2024-03-14)
+
+### 🐛 Bug Fixes
+
+* register ResourceAccessManager ([ad5c752](https://www.github.com/kyleratti/a-centralized-mirror/commit/ad5c752a18eb38097f0604fe3f2910983d4f75c6))
+
 <a name="2.5.4"></a>
 ## [2.5.4](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.4) (2024-03-14)
 
