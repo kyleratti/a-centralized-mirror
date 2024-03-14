@@ -1,4 +1,11 @@
 Changelog
+<a name="2.5.4"></a>
+## [2.5.4](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.4) (2024-03-14)
+
+### 🐛 Bug Fixes
+
+* hold lock on reddit id during write operations ([e2514dd](https://www.github.com/kyleratti/a-centralized-mirror/commit/e2514dd641995c41dce250545ebc7e4c01003b6d))
+
 <a name="2.5.3"></a>
 ## [2.5.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.3) (2024-03-09)
 
