@@ -1,19 +1,24 @@
 ﻿using ApplicationData.Services;
 using FruityFoundation.Base.Structures;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Util;
+
 #pragma warning disable CS1591
 
 namespace WebApi.Controllers.Admin;
 
+[Authorize(Roles = UserRoles.AdministratorRole)]
+[ApiExplorerSettings(IgnoreApi = true)]
+[ApiController]
 [Route("v1/admin/link")]
-public class AdminLinkController : AdminApiController
+public class AdminLinkController : Controller
 {
 	private readonly LinkProvider _linkProvider;
 
 	public AdminLinkController(
-		IHttpContextAccessor httpContextAccessor,
 		LinkProvider linkProvider
-	) : base(httpContextAccessor)
+	)
 	{
 		_linkProvider = linkProvider;
 	}

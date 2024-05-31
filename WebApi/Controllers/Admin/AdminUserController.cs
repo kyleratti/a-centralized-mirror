@@ -2,22 +2,26 @@
 using DataClasses;
 using FruityFoundation.Base.Structures;
 using FruityFoundation.FsBase;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models.Admin;
+using WebApi.Util;
 
 #pragma warning disable CS1591
 namespace WebApi.Controllers.Admin;
 
+[Authorize(Roles = UserRoles.AdministratorRole)]
+[ApiExplorerSettings(IgnoreApi = true)]
+[ApiController]
 [Route("v1/admin/user")]
-public class AdminUserController : AdminApiController
+public class AdminUserController : Controller
 {
 	private readonly UserProvider _userProvider;
 
 	/// <inheritdoc />
 	public AdminUserController(
-		IHttpContextAccessor httpContextAccessor,
 		UserProvider userProvider
-	) : base(httpContextAccessor)
+	)
 	{
 		_userProvider = userProvider;
 	}
@@ -62,6 +66,9 @@ public class AdminUserController : AdminApiController
 	[Route("{userId:int}")]
 	public async Task<IActionResult> DeleteUserAsync(int userId, [FromQuery(Name = "allowDeleteAdmin")] bool allowDeleteAdmin)
 	{
+		if (!User.GetUserId().Try(out var loggedInUserId))
+			throw new UnauthorizedAccessException("You must be logged in to delete a user.");
+
 		if (!(await _userProvider.FindUserByIdIncludeDeleted(userId)).Try(out var existingUser))
 			return new NotFoundObjectResult(new
 			{
@@ -80,7 +87,7 @@ public class AdminUserController : AdminApiController
 				message = "This user is an administrator. In order to delete them, please set the 'allowDeleteAdmin' query parameter to true."
 			});
 
-		if (existingUser.UserId == UserId)
+		if (existingUser.UserId == loggedInUserId)
 			return new BadRequestObjectResult(new
 			{
 				message = "You cannot delete yourself."

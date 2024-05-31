@@ -1,6 +1,7 @@
 ﻿using ApplicationData.Services;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
+using WebApi.Util;
 
 namespace WebApi.Controllers;
 
@@ -9,11 +10,18 @@ namespace WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("v1/[controller]")]
-public class MeController(
-	UserProvider _userProvider,
-	IHttpContextAccessor httpContextAccessor
-) : ApiController(httpContextAccessor)
+public class MeController : Controller
 {
+	private readonly UserProvider _userProvider;
+
+	/// <summary>
+	/// Information about the logged in user
+	/// </summary>
+	public MeController(UserProvider userProvider)
+	{
+		_userProvider = userProvider;
+	}
+
 	/// <summary>
 	/// Retrieve information about the current API user.
 	/// </summary>
@@ -22,8 +30,11 @@ public class MeController(
 	[Route("")]
 	public async Task<AboutMe> GetAboutMe()
 	{
-		if (!(await _userProvider.FindUserByIdIncludeDeleted(UserId)).Try(out var user))
-			throw new InvalidOperationException($"Unable to find user {UserId}");
+		if (!User.GetUserId().Try(out var loggedInUserId))
+			throw new UnauthorizedAccessException("User is not logged in");
+
+		if (!(await _userProvider.FindUserByIdIncludeDeleted(loggedInUserId)).Try(out var user))
+			throw new InvalidOperationException($"Unable to find user {loggedInUserId}");
 
 		return new AboutMe(
 			DisplayName: user.DisplayUsername,

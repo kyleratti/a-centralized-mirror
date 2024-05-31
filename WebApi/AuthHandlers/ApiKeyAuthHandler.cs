@@ -15,14 +15,13 @@ using WebApi.Util;
 
 namespace WebApi.AuthHandlers;
 
-public class ApiKeyAuthSchemeOptions : AuthenticationSchemeOptions
-{}
+public class ApiKeyAuthSchemeOptions : AuthenticationSchemeOptions;
 
-public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
+public partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 {
 	private readonly ILogger<ApiKeyAuthHandler> _logger;
 	private readonly ApiKeyProvider _apiKeyProvider;
-	private readonly Regex _apiKeyMatch = new(@"^Key (?<key>.*)$", RegexOptions.Compiled);
+	private readonly Regex _apiKeyMatch = ApiKeyRegex();
 
 	/// <inheritdoc />
 	public ApiKeyAuthHandler(
@@ -61,15 +60,15 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 				return AuthenticateResult.Fail("Unable to authenticate with provided key");
 
 			var identity = new GenericIdentity("WebApi");
-			identity.AddClaim(new Claim("UserId", user.UserId.ToString()));
+			identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()));
 
-			var roles = new List<string>();
+			var roles = user switch
+			{
+				{ IsAdministrator: true } => new[] { UserRoles.AdministratorRole },
+				_ => [],
+			};
 
-			if (user.IsAdministrator)
-				roles.Add(UserRoles.AdministratorRole);
-
-			var principal = new GenericPrincipal(identity, roles.ToArray());
-
+			var principal = new GenericPrincipal(identity, roles: roles);
 			var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
 			return AuthenticateResult.Success(ticket);
@@ -84,8 +83,11 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 			Response.ContentType = "application/json";
 			await Response.WriteAsJsonAsync(new
 			{
-				message = "Unauthorized"
+				message = "Unauthorized",
 			});
 		}
 	}
+
+	[GeneratedRegex(@"^Key (?<key>.*)$", RegexOptions.Compiled)]
+	private static partial Regex ApiKeyRegex();
 }

@@ -15,7 +15,7 @@ namespace WebApi.Controllers;
 [ApiController]
 [Route("v1/[controller]")]
 [AllowAnonymous]
-public class PublicController : ApiController
+public class PublicController : Controller
 {
 	private readonly LinkProvider _linkProvider;
 	private readonly UserProvider _userProvider;
@@ -23,8 +23,10 @@ public class PublicController : ApiController
 	/// <summary>
 	/// C'tor
 	/// </summary>
-	public PublicController(IHttpContextAccessor httpContextAccessor, LinkProvider linkProvider, UserProvider userProvider)
-		: base(httpContextAccessor)
+	public PublicController(
+		LinkProvider linkProvider,
+		UserProvider userProvider
+	)
 	{
 		_linkProvider = linkProvider;
 		_userProvider = userProvider;

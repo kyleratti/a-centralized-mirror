@@ -1,4 +1,3 @@
-using System.Data;
 using System.Reflection;
 using ApplicationData;
 using ApplicationData.Services;
@@ -14,13 +13,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.Options;
 using SnooBrowser.Extensions.DependencyInjection;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using WebApi.AuthHandlers;
 using WebApi.HostedServices;
 using WebApi.Middleware;
 using WebApi.Models.Swagger;
 using WebApi.Options;
 using WebApi.Services;
+using WebApi.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,10 +28,14 @@ const string PROJECT_ID = "ACM";
 // Add services to the container.
 builder.Configuration
 	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-	.AddAzureAppConfiguration(options =>
+	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+var azureAppConfigConnectionString = builder.Configuration.GetConnectionString("AzureAppConfig");
+
+if (!string.IsNullOrEmpty(azureAppConfigConnectionString))
+{
+	builder.Configuration.AddAzureAppConfiguration(options =>
 	{
-		var azureAppConfigConnectionString = builder.Configuration.GetConnectionString("AzureAppConfig");
 		options.Connect(azureAppConfigConnectionString)
 			.Select(keyFilter: $"{PROJECT_ID}:*", LabelFilter.Null)
 			.Select(keyFilter: $"{PROJECT_ID}:*", labelFilter: builder.Environment.EnvironmentName)
@@ -41,6 +44,7 @@ builder.Configuration
 				.SetCacheExpiration(TimeSpan.FromHours(1)))
 			.TrimKeyPrefix($"{PROJECT_ID}:");
 	});
+}
 
 if (builder.Environment.IsDevelopment())
 	builder.Configuration.AddUserSecrets<Program>(optional: true, reloadOnChange: true);
@@ -50,10 +54,6 @@ builder.WebHost.UseSentry();
 ConfigureOptions(builder.Services, builder.Configuration);
 ConfigureServices(builder.Services, builder.Configuration);
 ConfigureDataAccess(builder.Services, builder.Configuration);
-
-builder.Services
-	.AddAuthentication("ApiKey")
-	.AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>("ApiKey", _ => { });
 
 builder.Services.AddControllers(c =>
 {
@@ -70,8 +70,11 @@ builder.Services.AddSwaggerGen(opts =>
 
 	opts.OperationFilter<JsonExceptionResponseOperationFilter>();
 	opts.OperationFilter<UnauthorizedResponseOperationFilter>();
+	opts.OperationFilter<AuthorizationRequiredFilter>();
 	opts.EnableAnnotations();
 	opts.UseInlineDefinitionsForEnums();
+
+	opts.AddSecurityDefinition(AuthorizationRequiredFilter.ApiKeyScheme.Reference.Id, AuthorizationRequiredFilter.ApiKeyScheme);
 });
 
 var app = builder.Build();
@@ -87,7 +90,6 @@ app.UseSwagger(c =>
 app.UseSwaggerUI(opts =>
 {
 	opts.SwaggerEndpoint("/v1/swagger.json", $"A Centralized Mirror API: v1 (build {Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "unknown"})");
-	opts.SupportedSubmitMethods(Array.Empty<SubmitMethod>()); // Disable the 'Try it out' button. All endpoints require API keys so it's useless anyway.
 	opts.RoutePrefix = "docs";
 	opts.DocumentTitle = "A Centralized Mirror API Documentation";
 	opts.EnableDeepLinking();
@@ -128,14 +130,14 @@ static void ConfigureOptions(IServiceCollection services, IConfiguration configu
 
 static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
-	services.AddAuthorization(opts =>
+	services.AddAuthentication(opts =>
 	{
-		var policy = new AuthorizationPolicyBuilder()
-			.RequireClaim("UserId")
-			//.RequireAuthenticatedUser()
-			.Build();
-		opts.FallbackPolicy = policy;
+		opts.AddScheme<ApiKeyAuthHandler>("ApiKey", displayName: null);
 	});
+	services.AddAuthorizationBuilder()
+		.SetFallbackPolicy(new AuthorizationPolicyBuilder()
+			.RequireAuthenticatedUser()
+			.Build());
 
 	var hostingOptions = configuration.GetSection("Hosting").Get<HostingOptions>();
 
@@ -151,8 +153,6 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 	}
 
 	services.AddMemoryCache();
-
-	services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 	services.AddSnooBrowserClient<RedditAuthParameterProvider, RedditAccessTokenProvider>();
 

@@ -17,7 +17,7 @@ namespace WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("v1/[controller]")]
-public class LinkController : ApiController
+public class LinkController : Controller
 {
 	private readonly LinkProvider _linkProvider;
 	private readonly SubmissionBrowser _submissionBrowser;
@@ -27,11 +27,10 @@ public class LinkController : ApiController
 	/// C'tor
 	/// </summary>
 	public LinkController(
-		IHttpContextAccessor httpContextAccessor,
 		LinkProvider linkProvider,
 		SubmissionBrowser submissionBrowser,
 		ResourceAccessManager resourceAccessManager
-	) : base(httpContextAccessor)
+	)
 	{
 		_linkProvider = linkProvider;
 		_submissionBrowser = submissionBrowser;
@@ -52,6 +51,9 @@ public class LinkController : ApiController
 		typeof(LinkAlreadyExistsError))]
 	public async Task<IActionResult> SubmitLink([FromBody] SubmitLinkRequest linkRequest, CancellationToken cancellationToken)
 	{
+		if (!User.GetUserId().Try(out var loggedInUserId))
+			throw new UnauthorizedAccessException("User is not logged in");
+
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
 
@@ -70,7 +72,7 @@ public class LinkController : ApiController
 					redditPostId: linkRequest.RedditPostId,
 					linkUrl: validUrl.OriginalString,
 					linkKind,
-					ownerUserId: UserId
+					ownerUserId: loggedInUserId
 				)),
 			cancellationToken);
 
@@ -102,10 +104,13 @@ public class LinkController : ApiController
 		typeof(LinkNotFoundError))]
 	public async Task<IActionResult> DeleteLinkByLinkData([FromBody] DeleteLinkRequest linkRequest, CancellationToken cancellationToken)
 	{
+		if (!User.GetUserId().Try(out var loggedInUserId))
+			throw new UnauthorizedAccessException("User is not logged in");
+
 		var validUrl = GetValidUriOrFail(linkRequest.LinkUrl);
 		var linkKind = GetLinkKindOrFail(linkRequest.LinkType!.Value);
 
-		if (!(await _linkProvider.FindLink(UserId, linkRequest.RedditPostId, validUrl.OriginalString, linkKind)).Try(out var link))
+		if (!(await _linkProvider.FindLink(loggedInUserId, linkRequest.RedditPostId, validUrl.OriginalString, linkKind)).Try(out var link))
 			return new NotFoundObjectResult(new LinkNotFoundError(
 				Message: TranslatedStrings.LinkController.LinkNotFound,
 				RedditPostId: linkRequest.RedditPostId,
@@ -137,7 +142,10 @@ public class LinkController : ApiController
 		typeof(LinkIdNotFoundError))]
 	public async Task<IActionResult> DeleteLinkById([FromRoute] int linkId, CancellationToken cancellationToken)
 	{
-		if (!(await _linkProvider.FindLinkById(UserId, linkId)).Try(out var link))
+		if (!User.GetUserId().Try(out var loggedInUserId))
+			throw new UnauthorizedAccessException("User is not logged in");
+
+		if (!(await _linkProvider.FindLinkById(loggedInUserId, linkId)).Try(out var link))
 			return new NotFoundObjectResult(new LinkIdNotFoundError(
 				Message: TranslatedStrings.LinkController.LinkIdNotFound(linkId),
 				LinkId: linkId
@@ -160,16 +168,21 @@ public class LinkController : ApiController
 	/// </summary>
 	[HttpGet]
 	[Route("All")]
-	public async Task<IReadOnlyCollection<SerializableLink>> GetAllLinksAsync() =>
-		(await _linkProvider.GetAllLinksByUserId(UserId))
-		.Select(x => new SerializableLink(
-			x.LinkId,
-			x.RedditPostId,
-			x.LinkUrl,
-			LinkTypeHelpers.ParseToSerializableLinkType(x.LinkType.RawValue),
-			x.CreatedAt
-		))
-		.ToArray();
+	public async Task<IReadOnlyCollection<SerializableLink>> GetAllLinksAsync()
+	{
+		if (!User.GetUserId().Try(out var loggedInUserId))
+			throw new UnauthorizedAccessException("User is not logged in");
+
+		return (await _linkProvider.GetAllLinksByUserId(loggedInUserId))
+			.Select(x => new SerializableLink(
+				x.LinkId,
+				x.RedditPostId,
+				x.LinkUrl,
+				LinkTypeHelpers.ParseToSerializableLinkType(x.LinkType.RawValue),
+				x.CreatedAt
+			))
+			.ToArray();
+	}
 
 	private static Uri GetValidUriOrFail(string? linkUrl)
 	{

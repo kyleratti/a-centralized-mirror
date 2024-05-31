@@ -1,23 +1,28 @@
 ﻿using System.Security.Cryptography;
 using ApplicationData.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models.Admin;
+using WebApi.Util;
+
 #pragma warning disable CS1591
 
 namespace WebApi.Controllers.Admin;
 
+[Authorize(Roles = UserRoles.AdministratorRole)]
+[ApiExplorerSettings(IgnoreApi = true)]
+[ApiController]
 [Route("v1/admin/apikey")]
-public class ApiKeyController : AdminApiController
+public class ApiKeyController : Controller
 {
 	private readonly ApiKeyProvider _apiKeyProvider;
 	private readonly UserProvider _userProvider;
 
 	/// <inheritdoc />
 	public ApiKeyController(
-		IHttpContextAccessor httpContextAccessor,
 		ApiKeyProvider apiKeyProvider,
 		UserProvider userProvider
-	) : base(httpContextAccessor)
+	)
 	{
 		_apiKeyProvider = apiKeyProvider;
 		_userProvider = userProvider;

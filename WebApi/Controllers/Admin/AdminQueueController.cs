@@ -1,21 +1,25 @@
 ﻿using ApplicationData.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Util;
 
 namespace WebApi.Controllers.Admin;
 
 /// <summary>
 /// Admin Queue controller
 /// </summary>
+[Authorize(Roles = UserRoles.AdministratorRole)]
+[ApiExplorerSettings(IgnoreApi = true)]
+[ApiController]
 [Route("v1/admin/queue")]
-public class AdminQueueController : AdminApiController
+public class AdminQueueController : Controller
 {
 	private readonly LinkProvider _linkProvider;
 
 	/// <inheritdoc />
 	public AdminQueueController(
-		IHttpContextAccessor httpContextAccessor,
 		LinkProvider linkProvider
-	) : base(httpContextAccessor)
+	)
 	{
 		_linkProvider = linkProvider;
 	}
