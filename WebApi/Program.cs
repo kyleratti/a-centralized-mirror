@@ -16,7 +16,6 @@ using SnooBrowser.Extensions.DependencyInjection;
 using WebApi.AuthHandlers;
 using WebApi.HostedServices;
 using WebApi.Middleware;
-using WebApi.Models.Swagger;
 using WebApi.Options;
 using WebApi.Services;
 using WebApi.Swagger;

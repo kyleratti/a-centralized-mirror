@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using WebApi.Middleware;
 
-namespace WebApi.Models.Swagger;
+namespace WebApi.Swagger;
 
 /// <summary>
 /// JsonExceptionResponseOperationFilter

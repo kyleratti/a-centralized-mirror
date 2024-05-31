@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using WebApi.Models;
 
-namespace WebApi.Models.Swagger;
+namespace WebApi.Swagger;
 
 /// <summary>
 /// UnauthorizedResponseOperationFilter
