@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using WebApi.Middleware;
 
@@ -13,7 +12,7 @@ public class JsonExceptionResponseOperationFilter : IOperationFilter
 	/// <inheritdoc />
 	public void Apply(OpenApiOperation operation, OperationFilterContext context)
 	{
-		operation.Responses.Add(HttpStatusCode.InternalServerError.ToString("D"), new OpenApiResponse
+		operation.Responses.Add(StatusCodes.Status500InternalServerError.ToString("D"), new OpenApiResponse
 		{
 			Description = "Internal Server Error",
 			Content = new Dictionary<string, OpenApiMediaType>

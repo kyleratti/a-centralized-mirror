@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using WebApi.Models;
 
@@ -13,7 +12,7 @@ public class UnauthorizedResponseOperationFilter : IOperationFilter
 	/// <inheritdoc />
 	public void Apply(OpenApiOperation operation, OperationFilterContext context)
 	{
-		operation.Responses.Add(HttpStatusCode.Unauthorized.ToString("D"), new OpenApiResponse
+		operation.Responses.Add(StatusCodes.Status401Unauthorized.ToString("D"), new OpenApiResponse
 		{
 			Description = "Unauthorized",
 			Content = new Dictionary<string, OpenApiMediaType>

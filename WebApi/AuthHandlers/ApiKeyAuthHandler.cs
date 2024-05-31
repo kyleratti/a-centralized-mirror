@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
@@ -79,7 +78,7 @@ public partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeO
 	{
 		if (!Request.HttpContext.User.Identity?.IsAuthenticated ?? false)
 		{
-			Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+			Response.StatusCode = StatusCodes.Status401Unauthorized;
 			Response.ContentType = "application/json";
 			await Response.WriteAsJsonAsync(new
 			{

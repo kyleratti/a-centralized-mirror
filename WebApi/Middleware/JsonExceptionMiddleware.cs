@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Net;
 
 #pragma warning disable CS1591
 
@@ -62,18 +61,18 @@ public class JsonExceptionMiddleware
 	{
 		logger.LogError(ex, "An unhandled exception occurred.");
 
-		HttpStatusCode GetStatusCode()
+		int GetStatusCode()
 		{
-			if (ex.Data.Contains("HttpStatusCode") && ex.Data["HttpStatusCode"] is HttpStatusCode statusCode)
+			if (ex.Data.Contains("HttpStatusCode") && ex.Data["HttpStatusCode"] is int statusCode)
 			{
 				ex.Data.Remove("HttpStatusCode"); // No need to leak this to the client.
 				return statusCode;
 			}
 
-			return HttpStatusCode.InternalServerError;
+			return StatusCodes.Status500InternalServerError;
 		}
 
-		var statusCode = (int)GetStatusCode();
+		var statusCode = GetStatusCode();
 
 		httpContext.Response.ContentType = "application/json";
 		httpContext.Response.StatusCode = statusCode;

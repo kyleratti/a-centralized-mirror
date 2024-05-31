@@ -1,5 +1,4 @@
-﻿using System.Net;
-using ApplicationData.Locale;
+﻿using ApplicationData.Locale;
 using ApplicationData.Services;
 using DataClasses;
 using Microsoft.AspNetCore.Mvc;
@@ -42,11 +41,11 @@ public class LinkController : Controller
 	/// </summary>
 	[HttpPost]
 	[Route("")]
-	[SwaggerResponse((int)HttpStatusCode.Created)]
-	[SwaggerResponse((int)HttpStatusCode.BadRequest,
+	[SwaggerResponse(StatusCodes.Status201Created)]
+	[SwaggerResponse(StatusCodes.Status400BadRequest,
 		description: "Bad Request. The request could not be processed due to invalid data on the request.",
 		typeof(BadRequestError))]
-	[SwaggerResponse((int)HttpStatusCode.Conflict,
+	[SwaggerResponse(StatusCodes.Status409Conflict,
 		description: "Conflict. This user has already provided this combination of reddit post ID, URL, and link type.",
 		typeof(LinkAlreadyExistsError))]
 	public async Task<IActionResult> SubmitLink([FromBody] SubmitLinkRequest linkRequest, CancellationToken cancellationToken)
@@ -88,7 +87,7 @@ public class LinkController : Controller
 		}
 
 		// We are technically violating the HTTP spec here but not sending back the location of the resource we just created, but oh well.
-		return new StatusCodeResult((int)HttpStatusCode.Created);
+		return new StatusCodeResult(StatusCodes.Status201Created);
 	}
 
 	/// <summary>
@@ -96,10 +95,10 @@ public class LinkController : Controller
 	/// </summary>
 	[HttpDelete]
 	[Route("")]
-	[SwaggerResponse((int)HttpStatusCode.OK,
+	[SwaggerResponse(StatusCodes.Status200OK,
 		description: "OK. The link has been queued for deletion.",
 		typeof(LinkDeleteQueuedSuccessfully))]
-	[SwaggerResponse((int)HttpStatusCode.NotFound,
+	[SwaggerResponse(StatusCodes.Status404NotFound,
 		description: "Not Found. This user does not have this combination of reddit post ID, URL, and link type.",
 		typeof(LinkNotFoundError))]
 	public async Task<IActionResult> DeleteLinkByLinkData([FromBody] DeleteLinkRequest linkRequest, CancellationToken cancellationToken)
@@ -134,10 +133,10 @@ public class LinkController : Controller
 	/// </summary>
 	[HttpDelete]
 	[Route("{linkId:int}")]
-	[SwaggerResponse((int)HttpStatusCode.OK,
+	[SwaggerResponse(StatusCodes.Status200OK,
 		description: "OK. The link has been queued for deletion.",
 		typeof(LinkDeleteQueuedSuccessfully))]
-	[SwaggerResponse((int)HttpStatusCode.NotFound,
+	[SwaggerResponse(StatusCodes.Status404NotFound,
 		description: "Not Found. This user does not have this combination of reddit post ID, URL, and link type.",
 		typeof(LinkIdNotFoundError))]
 	public async Task<IActionResult> DeleteLinkById([FromRoute] int linkId, CancellationToken cancellationToken)
@@ -193,7 +192,7 @@ public class LinkController : Controller
 			throw new ArgumentOutOfRangeException("scheme", uri.Scheme,
 				"You must provide a link using the HTTPS scheme")
 			{
-				Data = { { "HttpStatusCode", HttpStatusCode.BadRequest } }
+				Data = { { "HttpStatusCode", StatusCodes.Status400BadRequest } }
 			};
 
 		return uri;

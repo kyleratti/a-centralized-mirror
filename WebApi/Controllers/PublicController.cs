@@ -1,5 +1,4 @@
-﻿using System.Net;
-using ApplicationData.Services;
+﻿using ApplicationData.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -38,7 +37,7 @@ public class PublicController : Controller
 	/// <param name="redditPostId">The unique reddit post ID. For example, use "sf8kp8" from the permalink "https://www.reddit.com/r/aww/comments/sf8kp8/treats_you_say/".</param>
 	[HttpGet]
 	[Route("Link/By-Reddit-Post-Id/{redditPostId}")]
-	[SwaggerResponse((int)HttpStatusCode.OK,
+	[SwaggerResponse(StatusCodes.Status200OK,
 		description: "OK. A list of links available for this reddit post ID.",
 		type: typeof(IReadOnlyCollection<PublicLinkListingResult>))]
 	public async Task<IReadOnlyCollection<PublicLinkListingResult>> FindLinksByPostId(string redditPostId)
