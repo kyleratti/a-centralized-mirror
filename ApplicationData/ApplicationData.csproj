@@ -16,9 +16,9 @@
       <PackageReference Include="Dapper" Version="2.1.35" />
       <PackageReference Include="Dapper.Mapper" Version="2.0.0" />
       <PackageReference Include="Dapper.Transaction" Version="2.1.28" />
-      <PackageReference Include="FruityFoundation.Base" Version="1.9.0" />
-      <PackageReference Include="FruityFoundation.FsBase" Version="1.9.0" />
-      <PackageReference Include="IDisposableAnalyzers" Version="4.0.7">
+      <PackageReference Include="FruityFoundation.Base" Version="1.10.0" />
+      <PackageReference Include="FruityFoundation.FsBase" Version="1.10.0" />
+      <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
