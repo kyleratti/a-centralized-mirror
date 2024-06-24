@@ -1,7 +1,6 @@
-﻿using System.Data;
-using Dapper;
-using DataClasses;
+﻿using DataClasses;
 using FruityFoundation.Base.Structures;
+using FruityFoundation.DataAccess.Abstractions;
 using FruityFoundation.FsBase;
 
 namespace ApplicationData.Services;
@@ -19,8 +18,8 @@ public class ApiKeyProvider
 
 	public async Task<Maybe<User>> FindUserByApiKey(string apiKey)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		using var reader = await connection.ExecuteReaderAsync(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		using var reader = await connection.ExecuteReader(
 			@"SELECT u.user_id, u.display_username, u.developer_username, u.weight, u.created_at, u.updated_at, u.is_admin
 				FROM users u
 				INNER JOIN api_keys ak ON u.user_id = ak.user_id
@@ -46,8 +45,8 @@ public class ApiKeyProvider
 
 	public async Task CreateApiKeyForUser(int userId, string apiKey)
 	{
-		using var connection = await _dbConnectionFactory.CreateConnection();
-		await connection.ExecuteAsync(
+		await using var connection = _dbConnectionFactory.CreateConnection();
+		await connection.Execute(
 			@"INSERT INTO api_keys (
 				api_key, created_at, last_used_at, user_id
 			) VALUES (

@@ -1,9 +1,8 @@
 ﻿using System.Data;
 using System.Runtime.CompilerServices;
-using Dapper;
-using Dapper.Transaction;
 using DataClasses;
 using FruityFoundation.Base.Structures;
+using FruityFoundation.DataAccess.Abstractions;
 
 namespace ApplicationData.Services;
 
@@ -20,8 +19,8 @@ public class LinkProvider
 
 	public async Task<Maybe<Link>> FindLink(int userId, string redditPostId, string linkUrl, LinkKind linkKind)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		using var reader = await connection.ExecuteReaderAsync(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		using var reader = await connection.ExecuteReader(
 			"""
 				SELECT l.link_id, l.reddit_post_id, l.link_url, l.link_type, l.created_at, l.owner
 				FROM links l
@@ -40,7 +39,7 @@ public class LinkProvider
 				userId,
 			});
 
-		if (!reader.Read())
+		if (!await reader.ReadAsync())
 			return Maybe.Empty<Link>();
 
 		return new Link(
@@ -55,8 +54,8 @@ public class LinkProvider
 
 	public async Task<Maybe<Link>> FindLinkById(Maybe<int> userId, int linkId)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		using var reader = await connection.ExecuteReaderAsync(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		using var reader = await connection.ExecuteReader(
 			$@"SELECT l.link_id, l.reddit_post_id, l.link_url, l.link_type, l.created_at, l.owner
 				FROM links l
 				WHERE
@@ -69,7 +68,7 @@ public class LinkProvider
 				userId = userId.OrValue(-1),
 			});
 
-		if (!reader.Read())
+		if (!await reader.ReadAsync())
 			return Maybe.Empty<Link>();
 
 		return new Link(
@@ -84,8 +83,8 @@ public class LinkProvider
 
 	public async Task<IReadOnlyCollection<Link>> FindAllLinksByPostId(string redditPostId)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		 var linkQueryResult = await connection.QueryAsync<LinkQueryResult>(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		 var linkQueryResult = await connection.Query<LinkQueryResult>(
 			"""
 				SELECT
 					l.link_id AS LinkId
@@ -115,9 +114,9 @@ public class LinkProvider
 
 	public async Task DeleteLinkById(int linkId)
 	{
-		using var connection = await _dbConnectionFactory.CreateConnection();
-		using var tx = connection.CreateTransaction(IsolationLevel.Serializable);
-		var redditPostId = await tx.ExecuteScalarAsync<string>(
+		await using var connection = _dbConnectionFactory.CreateConnection();
+		await using var tx = await connection.CreateTransaction(IsolationLevel.Serializable, CancellationToken.None);
+		var redditPostId = await tx.ExecuteScalar<string>(
 			@"
 				UPDATE links SET is_deleted = true WHERE link_id = @linkId AND is_deleted = false
 				RETURNING reddit_post_id",
@@ -125,7 +124,7 @@ public class LinkProvider
 
 		await QueueRedditPostIdForUpdate(tx, redditPostId);
 
-		tx.Commit();
+		await tx.Commit(CancellationToken.None);
 	}
 
 	public abstract record CreateLinkError
@@ -141,9 +140,9 @@ public class LinkProvider
 
 	public async Task<Result<int, LinkProvider.CreateLinkError>> CreateLink(NewLink link)
 	{
-		using var connection = await _dbConnectionFactory.CreateConnection();
+		await using var connection = _dbConnectionFactory.CreateConnection();
 
-		var existingLink = await connection.ExecuteScalarAsync<bool?>(
+		var existingLink = await connection.ExecuteScalar<bool?>(
 			"""
 				SELECT 1 FROM links
 				WHERE
@@ -164,9 +163,9 @@ public class LinkProvider
 		if (existingLink is true)
 			return Result<int, CreateLinkError>.CreateFailure(new LinkAlreadyExists());
 
-		using var tx = connection.CreateTransaction(IsolationLevel.Serializable);
+		using var tx = await connection.CreateTransaction(IsolationLevel.Serializable, CancellationToken.None);
 
-		var linkIdResult = await tx.ExecuteScalarAsync<int?>("""
+		var linkIdResult = await tx.ExecuteScalar<int?>("""
 			INSERT INTO links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
 			VALUES (@redditPostId, @linkUrl, @linkType, CURRENT_TIMESTAMP, false, @userId)
 			RETURNING link_id
@@ -184,15 +183,15 @@ public class LinkProvider
 
 		await QueueRedditPostIdForUpdate(tx, link.RedditPostId);
 
-		tx.Commit();
+		await tx.Commit(CancellationToken.None);
 
 		return Result<int, CreateLinkError>.CreateSuccess(linkId);
 	}
 
 	public async Task<IReadOnlyCollection<Link>> GetAllLinksByUserId(int userId)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		var queryResult = await connection.QueryAsync<LinkQueryResult>(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		var queryResult = await connection.Query<LinkQueryResult>(
 			"""
 				SELECT
 					l.link_id AS LinkId
@@ -222,8 +221,8 @@ public class LinkProvider
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		var reader = await connection.QueryAsync<(int QueuedItemId, DateTime QueuedAt, string RedditPostId)>(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		var reader = await connection.Query<(int QueuedItemId, DateTime QueuedAt, string RedditPostId)>(
 			@"SELECT queued_item_id, queued_at, reddit_post_id
 				FROM link_queue
 				WHERE processed_at IS NULL
@@ -233,15 +232,15 @@ public class LinkProvider
 			yield return (QueuedItemId: queuedItemId, QueuedAt: queuedAt, RedditPostId: redditPostId);
 	}
 
-	public static async Task MarkRedditPostIdAsProcessed(IDbTransaction tx, int itemId) =>
-		await tx.ExecuteAsync(
+	public static async Task MarkRedditPostIdAsProcessed(IDatabaseTransactionConnection<ReadWrite> tx, int itemId) =>
+		await tx.Execute(
 			@"UPDATE link_queue SET processed_at = CURRENT_TIMESTAMP WHERE queued_item_id = @itemId",
 			new { itemId });
 
 	public async Task<IReadOnlyCollection<Link>> GetLinksByRedditPostId(string redditPostId)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		var queryResult = await connection.QueryAsync<LinkQueryResult>(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		var queryResult = await connection.Query<LinkQueryResult>(
 			"""
 				SELECT
 					l.link_id AS LinkId
@@ -275,16 +274,16 @@ public class LinkProvider
 	};
 
 	// TODO: this should be a much better system
-	private static async Task QueueRedditPostIdForUpdate(IDbTransaction tx, string redditPostId)
+	private static async Task QueueRedditPostIdForUpdate(IDatabaseTransactionConnection<ReadWrite> tx, string redditPostId)
 	{
 		// There is certainly a better way to do this. Oh well!
-		var hasPendingUpdate = await tx.ExecuteScalarAsync<bool>(
+		var hasPendingUpdate = await tx.ExecuteScalar<bool>(
 			@"SELECT EXISTS(SELECT 1 FROM link_queue WHERE reddit_post_id = @redditPostId AND processed_at IS NULL LIMIT 1)",
 			new { redditPostId });
 
 		if (!hasPendingUpdate)
 		{
-			await tx.ExecuteAsync(
+			await tx.Execute(
 				@"INSERT INTO link_queue (reddit_post_id, queued_at) VALUES (@redditPostId, CURRENT_TIMESTAMP)",
 				new { redditPostId });
 		}

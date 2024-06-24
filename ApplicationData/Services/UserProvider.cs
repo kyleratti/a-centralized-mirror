@@ -1,8 +1,6 @@
-﻿using System.Data;
-using System.Data.Common;
-using Dapper;
-using DataClasses;
+﻿using DataClasses;
 using FruityFoundation.Base.Structures;
+using FruityFoundation.DataAccess.Abstractions;
 using FruityFoundation.FsBase;
 
 namespace ApplicationData.Services;
@@ -20,15 +18,15 @@ public class UserProvider
 
 	public async Task<IReadOnlyCollection<User>> GetAllUsers()
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		using var reader = await connection.ExecuteReaderAsync(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		await using var reader = await connection.ExecuteReader(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				ORDER BY created_at");
 
 		var users = new List<User>();
 
-		while (reader.Read())
+		while (await reader.ReadAsync())
 			users.Add(new User(
 				userId: reader.GetInt32(0),
 				displayUsername: reader.GetString(1),
@@ -45,14 +43,14 @@ public class UserProvider
 
 	public async Task<Maybe<User>> FindUserByDisplayName(string displayUsername)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		using var reader = await connection.ExecuteReaderAsync(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		await using var reader = await connection.ExecuteReader(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE display_username LIKE @displayUsername",
 			new { displayUsername});
 
-		if (!reader.Read())
+		if (!await reader.ReadAsync())
 			return Maybe.Empty<User>();
 
 		return new User(
@@ -69,14 +67,14 @@ public class UserProvider
 
 	public async Task<Maybe<User>> FindUserByIdIncludeDeleted(int userId)
 	{
-		using var connection = await _dbConnectionFactory.CreateReadOnlyConnection();
-		using var reader = await connection.ExecuteReaderAsync(
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		await using var reader = await connection.ExecuteReader(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE user_id = @userId",
 			new { userId });
 
-		if (!reader.Read())
+		if (!await reader.ReadAsync())
 			return Maybe.Empty<User>();
 
 		return new User(
@@ -93,8 +91,8 @@ public class UserProvider
 
 	public async Task<int> CreateUser(NewUser newUser)
 	{
-		using var connection = await _dbConnectionFactory.CreateConnection();
-		return await connection.ExecuteScalarAsync<int>(
+		await using var connection = _dbConnectionFactory.CreateConnection();
+		return await connection.ExecuteScalar<int>(
 			@"INSERT INTO users (
 				display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 			) VALUES (
@@ -111,8 +109,8 @@ public class UserProvider
 
 	public async Task DeleteUserById(int userId)
 	{
-		using var connection = await _dbConnectionFactory.CreateConnection();
-		await connection.ExecuteAsync(
+		await using var connection = _dbConnectionFactory.CreateConnection();
+		await connection.Execute(
 			@"UPDATE users SET is_deleted = true WHERE user_id = @userId",
 			new { userId });
 	}

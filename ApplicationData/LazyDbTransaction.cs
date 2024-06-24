@@ -1,31 +1,55 @@
 ﻿using System.Data;
+using FruityFoundation.Base.Structures;
+using FruityFoundation.DataAccess.Abstractions;
 
 namespace ApplicationData;
 
-public sealed class LazyDbTransaction : IDisposable
+public sealed class LazyDbTransaction : IDisposable, IAsyncDisposable
 {
-	private readonly Lazy<IDbTransaction> _lazyTransaction;
+	private readonly INonTransactionalDbConnection<ReadWrite> _connection;
+	private readonly IsolationLevel _isolationLevel;
 
-	private LazyDbTransaction(Lazy<IDbTransaction> lazyTransaction)
+	private Maybe<IDatabaseTransactionConnection<ReadWrite>> _tx = Maybe.Empty<IDatabaseTransactionConnection<ReadWrite>>();
+
+	private LazyDbTransaction(INonTransactionalDbConnection<ReadWrite> connection, IsolationLevel isolationLevel)
 	{
-		_lazyTransaction = lazyTransaction;
+		_connection = connection;
+		_isolationLevel = isolationLevel;
 	}
 
-	public static LazyDbTransaction Create(IDbConnection connection, IsolationLevel isolationLevel)
+	public static LazyDbTransaction CreateFrom(INonTransactionalDbConnection<ReadWrite> connection, IsolationLevel isolationLevel)
 	{
-		var lazyTx = new Lazy<IDbTransaction>(() => connection.CreateTransaction(isolationLevel));
+		var lazyTx = new LazyDbTransaction(connection, isolationLevel);
 
-		return new LazyDbTransaction(lazyTx);
+		return lazyTx;
 	}
 
-	public IDbTransaction Tx => _lazyTransaction.Value;
+	public async Task<IDatabaseTransactionConnection<ReadWrite>> GetOrCreateTx(CancellationToken cancellationToken)
+	{
+		if (!_tx.Try(out var tx))
+		{
+			tx = await _connection.CreateTransaction(_isolationLevel, cancellationToken);
+			_tx = Maybe.Create(tx);
+		}
+
+		return tx;
+	}
 
 	/// <inheritdoc />
 	public void Dispose()
 	{
-		if (!_lazyTransaction.IsValueCreated)
+		if (!_tx.Try(out var tx))
 			return;
 
-		_lazyTransaction.Value.Dispose();
+		tx.Dispose();
+	}
+
+	/// <inheritdoc />
+	public async ValueTask DisposeAsync()
+	{
+		if (!_tx.Try(out var tx))
+			return;
+
+		await tx.DisposeAsync();
 	}
 }

@@ -1,7 +1,5 @@
-﻿using System.Data;
-using System.Reflection;
-using ApplicationData;
-using Dapper;
+﻿using System.Reflection;
+using FruityFoundation.DataAccess.Abstractions;
 using WebApi.Scripts;
 
 namespace WebApi.HostedServices;
@@ -29,7 +27,7 @@ public class DbMaintenanceService : BackgroundService
 	/// <inheritdoc />
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		using var connection = await _dbConnectionFactory.CreateConnection();
+		await using var connection = _dbConnectionFactory.CreateConnection();
 		await CreateMaintenanceTablesIfNeeded(connection);
 
 		await foreach (var script in GetScriptsToRun(connection).WithCancellation(stoppingToken))
@@ -41,7 +39,7 @@ public class DbMaintenanceService : BackgroundService
 		}
 	}
 
-	private async Task<bool> RunDbMaintenanceScript(IDbConnection connection, IDbMaintenanceScript script)
+	private async Task<bool> RunDbMaintenanceScript(IDatabaseConnection<ReadWrite> connection, IDbMaintenanceScript script)
 	{
 		try
 		{
@@ -49,7 +47,7 @@ public class DbMaintenanceService : BackgroundService
 
 			var scriptName = script.GetType().Name;
 
-			await connection.ExecuteAsync(
+			await connection.Execute(
 				"INSERT INTO DatabaseMaintenance (ScriptName, RanAt, IsSuccessful) VALUES (@scriptName, @ranAt, 1)",
 				new
 				{
@@ -73,7 +71,7 @@ public class DbMaintenanceService : BackgroundService
 				exception = GetExceptionDetails(ex),
 			};
 
-			await connection.ExecuteAsync(
+			await connection.Execute(
 				"""
 					INSERT INTO DatabaseMaintenance (ScriptName, RanAt, IsSuccessful, ErrorDetails)
 					VALUES (@scriptName, @ranAt, 0, @errorDetails)
@@ -102,7 +100,7 @@ public class DbMaintenanceService : BackgroundService
 		};
 	}
 
-	private async IAsyncEnumerable<IDbMaintenanceScript> GetScriptsToRun(IDbConnection connection)
+	private async IAsyncEnumerable<IDbMaintenanceScript> GetScriptsToRun(IDatabaseConnection<ReadWrite> connection)
 	{
 		var allScripts = Assembly.GetExecutingAssembly().GetTypes()
 			.Where(p => typeof(IDbMaintenanceScript).IsAssignableFrom(p) && !p.IsInterface)
@@ -115,7 +113,7 @@ public class DbMaintenanceService : BackgroundService
 		{
 			var scriptName = script.GetType().Name;
 
-			var scriptHasRun = await connection.ExecuteScalarAsync<bool>(
+			var scriptHasRun = await connection.ExecuteScalar<bool>(
 				"SELECT EXISTS (SELECT 1 FROM DatabaseMaintenance WHERE ScriptName = @scriptName AND IsSuccessful = 1)",
 				new { scriptName });
 
@@ -126,11 +124,11 @@ public class DbMaintenanceService : BackgroundService
 		}
 	}
 
-	private async Task CreateMaintenanceTablesIfNeeded(IDbConnection connection)
+	private async Task CreateMaintenanceTablesIfNeeded(IDatabaseConnection<ReadWrite> connection)
 	{
 		try
 		{
-			var tableExists = await connection.ExecuteScalarAsync<bool>(
+			var tableExists = await connection.ExecuteScalar<bool>(
 				"SELECT EXISTS (SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'DatabaseMaintenance')");
 
 			if (tableExists)
@@ -147,7 +145,7 @@ public class DbMaintenanceService : BackgroundService
 				);
 				""";
 
-			await connection.ExecuteAsync(sql);
+			await connection.Execute(sql);
 		}
 		catch (Exception ex)
 		{

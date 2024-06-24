@@ -4,12 +4,15 @@ using ApplicationData.Services;
 using BackgroundProcessor;
 using BackgroundProcessor.Templates;
 using Core.AppSettings;
+using FruityFoundation.DataAccess.Abstractions;
+using FruityFoundation.DataAccess.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.Options;
 using SnooBrowser.Extensions.DependencyInjection;
@@ -17,7 +20,6 @@ using WebApi.AuthHandlers;
 using WebApi.HostedServices;
 using WebApi.Middleware;
 using WebApi.Options;
-using WebApi.Services;
 using WebApi.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -169,5 +171,28 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
 static void ConfigureDataAccess(IServiceCollection services, IConfiguration configuration)
 {
-	services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
+	services.AddSingleton<IDbConnectionFactory>(static serviceProvider =>
+	{
+		var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+		return new DbConnectionFactory(
+			readWriteConnectionFactory: () =>
+			{
+				var connectionString = configuration.GetConnectionString("DbConnection");
+
+				if (string.IsNullOrEmpty(connectionString))
+					throw new InvalidOperationException("DB Connection string is empty");
+
+				return new SqliteConnection(connectionString);
+			},
+			readOnlyConnectionFactory: () =>
+			{
+				var connectionString = configuration.GetConnectionString("DbConnectionReadOnly");
+
+				if (string.IsNullOrEmpty(connectionString))
+					throw new InvalidOperationException("Read-only DB Connection string is empty");
+
+				return new SqliteConnection(connectionString);
+			});
+	});
 }

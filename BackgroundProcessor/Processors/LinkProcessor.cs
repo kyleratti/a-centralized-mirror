@@ -4,6 +4,7 @@ using ApplicationData.Services;
 using BackgroundProcessor.Templates;
 using DataClasses;
 using FruityFoundation.Base.Structures;
+using FruityFoundation.DataAccess.Abstractions;
 using SnooBrowser.Browsers;
 using SnooBrowser.Models.Comment;
 using SnooBrowser.Things;
@@ -11,18 +12,37 @@ using SnooBrowser.Things;
 namespace BackgroundProcessor.Processors;
 
 // ReSharper disable once UnusedType.Global
-// it is auto-created
-public class LinkProcessor(
-	ILogger<LinkProcessor> _logger,
-	LinkProvider _linkProvider,
-	RedditCommentProvider _commentProvider,
-	CommentBrowser _commentBrowser,
-	UserProvider _userProvider,
-	TemplateCache _templateCache,
-	IDbConnectionFactory _dbConnectionFactory,
-	ResourceAccessManager _resourceAccessManager
-) : IBackgroundProcessor
+public class LinkProcessor : IBackgroundProcessor
 {
+	private readonly ILogger<LinkProcessor> _logger;
+	private readonly LinkProvider _linkProvider;
+	private readonly RedditCommentProvider _commentProvider;
+	private readonly CommentBrowser _commentBrowser;
+	private readonly UserProvider _userProvider;
+	private readonly TemplateCache _templateCache;
+	private readonly IDbConnectionFactory _dbConnectionFactory;
+	private readonly ResourceAccessManager _resourceAccessManager;
+
+	public LinkProcessor(ILogger<LinkProcessor> logger,
+		LinkProvider linkProvider,
+		RedditCommentProvider commentProvider,
+		CommentBrowser commentBrowser,
+		UserProvider userProvider,
+		TemplateCache templateCache,
+		IDbConnectionFactory dbConnectionFactory,
+		ResourceAccessManager resourceAccessManager
+	)
+	{
+		_logger = logger;
+		_linkProvider = linkProvider;
+		_commentProvider = commentProvider;
+		_commentBrowser = commentBrowser;
+		_userProvider = userProvider;
+		_templateCache = templateCache;
+		_dbConnectionFactory = dbConnectionFactory;
+		_resourceAccessManager = resourceAccessManager;
+	}
+
 	/// <inheritdoc />
 	public async Task Process(CancellationToken cancellationToken)
 	{
@@ -37,8 +57,8 @@ public class LinkProcessor(
 			var links = await _linkProvider.GetLinksByRedditPostId(item.RedditPostId);
 			var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(item.RedditPostId);
 
-			using var connection = await _dbConnectionFactory.CreateConnection();
-			using var lazyTx = LazyDbTransaction.Create(connection, IsolationLevel.Serializable);
+			await using var connection = _dbConnectionFactory.CreateConnection();
+			await using var lazyTx = LazyDbTransaction.CreateFrom(connection, IsolationLevel.Serializable);
 
 			if (!links.Any())
 			{
@@ -61,13 +81,20 @@ public class LinkProcessor(
 					var result = await _commentBrowser.SubmitComment(LinkThing.CreateFromShortId(item.RedditPostId), message);
 					await TryDistinguishStickyAndLockLogFailure(result.CommentId);
 
-					await RedditCommentProvider.CreateOrUpdateLinkedComment(lazyTx.Tx, item.RedditPostId, result.CommentId.ShortId);
+#pragma warning disable IDISP001
+					var innerTx = await lazyTx.GetOrCreateTx(cancellationToken);
+#pragma warning restore IDISP001
+					await RedditCommentProvider.CreateOrUpdateLinkedComment(innerTx, item.RedditPostId, result.CommentId.ShortId);
 				}
 			}
 
-			await LinkProvider.MarkRedditPostIdAsProcessed(lazyTx.Tx, item.QueuedItemId);
+#pragma warning disable IDISP001
+			var tx = await lazyTx.GetOrCreateTx(cancellationToken);
+#pragma warning restore IDISP001
 
-			lazyTx.Tx.Commit();
+			await LinkProvider.MarkRedditPostIdAsProcessed(tx, item.QueuedItemId);
+
+			await tx.Commit(cancellationToken);
 		}
 	}
 
