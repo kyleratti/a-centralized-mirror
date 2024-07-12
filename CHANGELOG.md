@@ -1,4 +1,7 @@
 Changelog
+<a name="2.5.9"></a>
+## [2.5.9](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.9) (2024-07-12)
+
 <a name="2.5.8"></a>
 ## [2.5.8](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.8) (2024-06-24)
 
