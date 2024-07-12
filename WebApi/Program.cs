@@ -4,15 +4,13 @@ using ApplicationData.Services;
 using BackgroundProcessor;
 using BackgroundProcessor.Templates;
 using Core.AppSettings;
-using FruityFoundation.DataAccess.Abstractions;
-using FruityFoundation.DataAccess.Core;
+using FruityFoundation.DataAccess.Sqlite;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.Options;
 using SnooBrowser.Extensions.DependencyInjection;
@@ -54,7 +52,7 @@ builder.WebHost.UseSentry();
 
 ConfigureOptions(builder.Services, builder.Configuration);
 ConfigureServices(builder.Services, builder.Configuration);
-ConfigureDataAccess(builder.Services, builder.Configuration);
+ConfigureDataAccess(builder.Services);
 
 builder.Services.AddControllers(c =>
 {
@@ -169,30 +167,21 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 	services.AddHostedService<BackgroundServiceWorker>();
 }
 
-static void ConfigureDataAccess(IServiceCollection services, IConfiguration configuration)
+static void ConfigureDataAccess(IServiceCollection services)
 {
-	services.AddSingleton<IDbConnectionFactory>(static serviceProvider =>
-	{
-		var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+	services.AddSqliteDataAccess(
+		getReadWriteConnectionString: static serviceProvider => GetConnectionStringOrThrow(serviceProvider, "DbConnection"),
+		getReadOnlyConnectionString: static serviceProvider => GetConnectionStringOrThrow(serviceProvider, "DbConnectionReadOnly"));
+}
 
-		return new DbConnectionFactory(
-			readWriteConnectionFactory: () =>
-			{
-				var connectionString = configuration.GetConnectionString("DbConnection");
+static string GetConnectionStringOrThrow(IServiceProvider serviceProvider, string connectionStringName)
+{
+	var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-				if (string.IsNullOrEmpty(connectionString))
-					throw new InvalidOperationException("DB Connection string is empty");
+	var connectionString = configuration.GetConnectionString(connectionStringName);
 
-				return new SqliteConnection(connectionString);
-			},
-			readOnlyConnectionFactory: () =>
-			{
-				var connectionString = configuration.GetConnectionString("DbConnectionReadOnly");
+	if (string.IsNullOrEmpty(connectionString))
+		throw new InvalidOperationException($"Connection string is empty: {connectionStringName}");
 
-				if (string.IsNullOrEmpty(connectionString))
-					throw new InvalidOperationException("Read-only DB Connection string is empty");
-
-				return new SqliteConnection(connectionString);
-			});
-	});
+	return connectionString;
 }

@@ -13,9 +13,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FruityFoundation.Base" Version="1.10.0" />
-      <PackageReference Include="FruityFoundation.DataAccess.Abstractions" Version="1.10.0" />
-      <PackageReference Include="FruityFoundation.FsBase" Version="1.10.0" />
+      <PackageReference Include="FruityFoundation.Base" Version="2.0.0" />
+      <PackageReference Include="FruityFoundation.DataAccess.Abstractions" Version="2.0.0" />
+      <PackageReference Include="FruityFoundation.FsBase" Version="2.0.0" />
       <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
