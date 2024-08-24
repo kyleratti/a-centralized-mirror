@@ -1,4 +1,11 @@
 Changelog
+<a name="2.7.1"></a>
+## [2.7.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.1) (2024-08-24)
+
+### 🐛 Bug Fixes
+
+* include is_title_fetched on insert ([79a0e76](https://www.github.com/kyleratti/a-centralized-mirror/commit/79a0e7622ca0c12146ae5b9551cdb88b4542d578))
+
 <a name="2.7.0"></a>
 ## [2.7.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.0) (2024-08-24)
 
