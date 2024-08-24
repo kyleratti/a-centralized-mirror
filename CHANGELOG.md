@@ -1,4 +1,12 @@
 Changelog
+<a name="2.7.0"></a>
+## [2.7.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.0) (2024-08-24)
+
+### ✨ Features
+
+* add endpoint for title back-fill status ([dbf9842](https://www.github.com/kyleratti/a-centralized-mirror/commit/dbf9842c2cf467328a15a345c3c4d4bf38ece2bf))
+* back-fill post titles ([39ec0a8](https://www.github.com/kyleratti/a-centralized-mirror/commit/39ec0a8b6a43b699668798d7358f3a269afa5382))
+
 <a name="2.6.3"></a>
 ## [2.6.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.3) (2024-08-24)
 
