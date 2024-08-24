@@ -81,35 +81,36 @@ public class LinkProvider
 		);
 	}
 
-	public async Task<IReadOnlyCollection<Link>> FindAllLinksByPostId(string redditPostId)
+	public async IAsyncEnumerable<Link> FindAllLinksByPostId(string redditPostId, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
-		 var linkQueryResult = await connection.Query<LinkQueryResult>(
+		var linkQueryResult = connection.QueryUnbuffered<LinkQueryResult>(
 			"""
-				SELECT
-					l.link_id AS LinkId
-					,l.reddit_post_id AS RedditPostId
-					,l.link_url AS LinkUrl
-					,l.link_type AS LinkType
-					,l.created_at AS CreatedAt
-					,l.owner AS OwnerId
-				FROM links l
-				WHERE
-					l.reddit_post_id = @redditPostId
-					AND l.is_deleted = false
-				""",
-			new { redditPostId });
+			SELECT
+				l.link_id AS LinkId
+				,l.reddit_post_id AS RedditPostId
+				,l.link_url AS LinkUrl
+				,l.link_type AS LinkType
+				,l.created_at AS CreatedAt
+				,l.owner AS OwnerId
+			FROM links l
+			WHERE
+				l.reddit_post_id = @redditPostId
+				AND l.is_deleted = false
+			""",
+			new { redditPostId }, cancellationToken);
 
-		 return linkQueryResult
-			 .Select(result => new Link(
-				 linkId: result.LinkId,
-				 redditPostId: result.RedditPostId,
-				 linkUrl: result.LinkUrl,
-				 linkType: ParseRawLinkType(result.LinkType),
-				 createdAt: result.CreatedAt,
-				 ownerId: result.OwnerId
-			 ))
-			 .ToArray();
+		await foreach (var result in linkQueryResult)
+		{
+			yield return new Link(
+				linkId: result.LinkId,
+				redditPostId: result.RedditPostId,
+				linkUrl: result.LinkUrl,
+				linkType: ParseRawLinkType(result.LinkType),
+				createdAt: result.CreatedAt,
+				ownerId: result.OwnerId
+			);
+		}
 	}
 
 	public async Task DeleteLinkById(int linkId)

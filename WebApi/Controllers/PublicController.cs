@@ -35,20 +35,20 @@ public class PublicController : Controller
 	/// Find links available for the specified reddit post ID.
 	/// </summary>
 	/// <param name="redditPostId">The unique reddit post ID. For example, use "sf8kp8" from the permalink "https://www.reddit.com/r/aww/comments/sf8kp8/treats_you_say/".</param>
+	/// <param name="cancellationToken"></param>
 	[HttpGet]
 	[Route("Link/By-Reddit-Post-Id/{redditPostId}")]
 	[SwaggerResponse(StatusCodes.Status200OK,
 		description: "OK. A list of links available for this reddit post ID.",
 		type: typeof(IReadOnlyCollection<PublicLinkListingResult>))]
-	public async Task<IReadOnlyCollection<PublicLinkListingResult>> FindLinksByPostId(string redditPostId)
+	public async Task<IReadOnlyCollection<PublicLinkListingResult>> FindLinksByPostId(string redditPostId, CancellationToken cancellationToken)
 	{
-		var linksByPostId = await _linkProvider.FindAllLinksByPostId(redditPostId);
-		return await linksByPostId.ToAsyncEnumerable()
+		return await _linkProvider.FindAllLinksByPostId(redditPostId, cancellationToken)
 			.SelectAwait(async link => new PublicLinkListingResult(
 				link.LinkUrl,
 				LinkTypeHelpers.ParseToSerializableLinkType(link.LinkType.RawValue),
 				ProviderUsername: (await _userProvider.FindUserByIdIncludeDeleted(link.OwnerId)).Map(x => x.DisplayUsername).Value))
-			.ToArrayAsync();
+			.ToArrayAsync(cancellationToken: cancellationToken);
 	}
 
 	/// <summary>

@@ -97,6 +97,7 @@ app.UseSwaggerUI(opts =>
 });
 
 app.UseStaticFiles();
+app.UseRouting();
 
 var hostingOptions = app.Services.GetRequiredService<IOptions<HostingOptions>>();
 
@@ -105,12 +106,13 @@ if (hostingOptions.Value.EnableHttpsRedirect)
 
 app.UseJsonExceptionHandler();
 
-app.MapControllers();
-
 // These MUST be the last thing added, and authentication MUST come first.
 // If these are higher up in the file, the Swagger UI will be behind authorization - which we do not want.
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
+app.MapControllers();
 
 await app.RunAsync();
 
@@ -129,6 +131,7 @@ static void ConfigureOptions(IServiceCollection services, IConfiguration configu
 
 static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
+	services.AddRazorPages();
 	services.AddAuthentication(opts =>
 	{
 		opts.AddScheme<ApiKeyAuthHandler>("ApiKey", displayName: null);

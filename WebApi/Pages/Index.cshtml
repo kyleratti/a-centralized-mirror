@@ -1,0 +1,88 @@
+﻿@page
+@attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.Authorization
+@model IndexModel
+@{
+	ViewData["Title"] = "search database";
+}
+
+<div class="text-center" xmlns="http://www.w3.org/1999/html">
+	<h1 class="display-4">a-mirror database</h1>
+	<p>search for a video mirror using the id of a reddit post.</p>
+	<p>example: <a href="https://www.reddit.com/r/PublicFreakout/comments/j2vitm/she_just_got_hired/">https://www.reddit.com/r/PublicFreakout/comments/<mark>j2vitm</mark>/she_just_got_hired/</a></p>
+
+	<form method="get">
+		<label for="redditPostId">reddit post id</label>
+		<input type="text" name="redditPostId" id="redditPostId" placeholder="e.g., j2vitm" value="@Model.RedditPostId"/>
+		<span class="text-danger">
+			@Html.ValidationMessageFor(m => m.RedditPostId)
+		</span>
+
+		<button type="submit" class="btn btn-primary">search</button>
+	</form>
+
+	@if (Model.SearchResults.Try(out var links))
+	{
+		<h2>results</h2>
+		<p><a href="https://reddit.com/@Model.RedditPostId" target="_blank">(open reddit post)</a></p>
+
+		@if (links.Count == 0)
+		{
+			<p>no links found. sorry about that.</p>
+		}
+		else
+		{
+			var mirrors = links.Where(x => x.Link.LinkType.IsMirror).ToArray();
+			var downloads = links.Where(x => x.Link.LinkType.IsDownload).ToArray();
+
+			<p>
+				found <strong>@mirrors.Length</strong> @(mirrors.Length == 1 ? "mirror" : "mirrors")
+				and <strong>@downloads.Length</strong> @(downloads.Length == 1 ? "download" : "downloads").
+			</p>
+
+			<div class="results-container">
+				<div class="linktype-container">
+					<h3>mirrors</h3>
+
+					@if (mirrors.Length == 0)
+					{
+						<p>(none)</p>
+					}
+					else
+					{
+						<ul>
+							@foreach (var (mirror, i) in mirrors.Select((x, i) => (x, i)))
+							{
+								<li>
+									<a href="@mirror.Link.LinkUrl" target="_blank">mirror #@(i + 1)</a>
+									(provided by <a href="https://reddit.com/user/@mirror.Owner.DisplayUsername" target="_blank">/u/@mirror.Owner.DisplayUsername</a>)
+								</li>
+							}
+						</ul>
+					}
+				</div>
+
+				<div class="linktype-container">
+					<h3>downloads</h3>
+
+					@if (downloads.Length == 0)
+					{
+					<p>(none)</p>
+					}
+					else
+					{
+					<ul>
+						@foreach (var (download, i) in downloads.Select((x, i) => (x, i)))
+						{
+						<li>
+							<a href="@download.Link.LinkUrl" target="_blank">download #@(i + 1)</a>
+							(provided by <a href="https://reddit.com/user/@download.Owner.DisplayUsername" target="_blank">/u/@download.Owner.DisplayUsername</a>)
+						</li>
+						}
+					</ul>
+					}
+				</div>
+			</div>
+		}
+	}
+</div>
