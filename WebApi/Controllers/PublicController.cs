@@ -67,6 +67,11 @@ public class PublicController : Controller
 	/// <summary>
 	/// A link listing result accessible to the public.
 	/// </summary>
+	/// <param name="RedditPostId">The reddit post id (without prefix, e.g., "abc123").</param>
+	/// <param name="PostTitle">The title of the reddit post. This may be null if the title was not stored when the link was created.</param>
+	/// <param name="LinkUrl">The URL of the link.</param>
+	/// <param name="LinkType">The type of the link.</param>
+	/// <param name="ProviderUsername">The username of the provider of the link (without prefix, e.g., "a-mirror-bot").</param>
 	public record PublicLinkListingResult(
 		[JsonProperty("redditPostId")] string RedditPostId,
 		[JsonProperty("postTitle")] string? PostTitle,
