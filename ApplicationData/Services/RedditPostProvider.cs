@@ -39,7 +39,7 @@ public class RedditPostProvider
 		}
 	}
 
-	public async Task SetPostIdAsTitleFetched(string redditPostId, CancellationToken cancellationToken)
+	public async Task SetTitleFetchedForPostId(string redditPostId, CancellationToken cancellationToken)
 	{
 		await using var connection = _dbConnectionFactory.CreateConnection();
 		await connection.Execute(
@@ -60,7 +60,7 @@ public class RedditPostProvider
 			""", new { redditPostId, title }, cancellationToken);
 	}
 
-	public async Task<int> GetPostsNeedingTitleFetchedCount(CancellationToken cancellationToken)
+	public async Task<int> CountPostsNeedingTitleFetched(CancellationToken cancellationToken)
 	{
 		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
 		return await connection.ExecuteScalar<int>(

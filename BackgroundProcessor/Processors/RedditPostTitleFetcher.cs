@@ -33,7 +33,7 @@ public class RedditPostTitleFetcher : IBackgroundProcessor
 		{
 			if (!(await _submissionBrowser.GetSubmission(LinkThing.CreateFromShortId(redditPostId))).Try(out var submission))
 			{
-				await _redditPostProvider.SetPostIdAsTitleFetched(redditPostId, cancellationToken);
+				await _redditPostProvider.SetTitleFetchedForPostId(redditPostId, cancellationToken);
 				_logger.LogInformation("Submission title couldn't be fetched for {RedditPostId} because the submission has been removed", redditPostId);
 				return;
 			}
