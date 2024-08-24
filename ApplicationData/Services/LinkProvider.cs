@@ -170,7 +170,7 @@ public class LinkProvider
 			INSERT INTO reddit_posts (reddit_post_id, post_title)
 			VALUES (@redditPostId, @postTitle)
 			ON CONFLICT DO NOTHING
-			""", new { link.RedditPostId, postTitle = link.RedditPostTitle });
+			""", new { redditPostId = link.RedditPostId, postTitle = link.RedditPostTitle });
 
 		var linkIdResult = await tx.ExecuteScalar<int?>("""
 			INSERT INTO links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
