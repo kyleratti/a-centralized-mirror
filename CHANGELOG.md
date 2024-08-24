@@ -1,4 +1,11 @@
 Changelog
+<a name="2.6.1"></a>
+## [2.6.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.1) (2024-08-24)
+
+### 🐛 Bug Fixes
+
+* use explicit auth pattern ([fc5c10d](https://www.github.com/kyleratti/a-centralized-mirror/commit/fc5c10d94d389e2d07d42d849cd185815532def7))
+
 <a name="2.6.0"></a>
 ## [2.6.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.0) (2024-08-24)
 
