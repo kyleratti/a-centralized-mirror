@@ -18,17 +18,20 @@ public class PublicController : Controller
 {
 	private readonly LinkProvider _linkProvider;
 	private readonly UserProvider _userProvider;
+	private readonly RedditPostProvider _redditPostProvider;
 
 	/// <summary>
 	/// C'tor
 	/// </summary>
 	public PublicController(
 		LinkProvider linkProvider,
-		UserProvider userProvider
+		UserProvider userProvider,
+		RedditPostProvider redditPostProvider
 	)
 	{
 		_linkProvider = linkProvider;
 		_userProvider = userProvider;
+		_redditPostProvider = redditPostProvider;
 	}
 
 	/// <summary>
@@ -44,10 +47,20 @@ public class PublicController : Controller
 	public async Task<IReadOnlyCollection<PublicLinkListingResult>> FindLinksByPostId(string redditPostId, CancellationToken cancellationToken)
 	{
 		return await _linkProvider.FindAllLinksByPostId(redditPostId, cancellationToken)
-			.SelectAwait(async link => new PublicLinkListingResult(
-				link.LinkUrl,
-				LinkTypeHelpers.ParseToSerializableLinkType(link.LinkType.RawValue),
-				ProviderUsername: (await _userProvider.FindUserByIdIncludeDeleted(link.OwnerId)).Map(x => x.DisplayUsername).Value))
+			.SelectAwait(async link =>
+			{
+				var postTitle = await _redditPostProvider.GetPostTitleByPostId(link.RedditPostId, cancellationToken);
+				var providerUsername = (await _userProvider.FindUserByIdIncludeDeleted(link.OwnerId))
+					.Map(x => x.DisplayUsername)
+					.OrThrow(() => $"Unable to find user info for user id {link.OwnerId}");
+
+				return new PublicLinkListingResult(
+					RedditPostId: link.RedditPostId,
+					PostTitle: postTitle.Cast<string?>().OrValue(null),
+					link.LinkUrl,
+					LinkTypeHelpers.ParseToSerializableLinkType(link.LinkType.RawValue),
+					ProviderUsername: providerUsername);
+			})
 			.ToArrayAsync(cancellationToken: cancellationToken);
 	}
 
@@ -55,6 +68,8 @@ public class PublicController : Controller
 	/// A link listing result accessible to the public.
 	/// </summary>
 	public record PublicLinkListingResult(
+		[JsonProperty("redditPostId")] string RedditPostId,
+		[JsonProperty("postTitle")] string? PostTitle,
 		[JsonProperty("linkUrl")] string LinkUrl,
 		[JsonProperty("linkType")] SerializableLinkType LinkType,
 		[JsonProperty("providerUsername")] string ProviderUsername
