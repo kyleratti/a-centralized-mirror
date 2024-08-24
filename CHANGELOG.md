@@ -1,4 +1,11 @@
 Changelog
+<a name="2.6.3"></a>
+## [2.6.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.3) (2024-08-24)
+
+### 🐛 Bug Fixes
+
+* sql param casing ([e6a9e1f](https://www.github.com/kyleratti/a-centralized-mirror/commit/e6a9e1f8ab81da5ba00b1858653b115a5c75a168))
+
 <a name="2.6.2"></a>
 ## [2.6.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.2) (2024-08-24)
 
