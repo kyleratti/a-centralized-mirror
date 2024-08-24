@@ -7,26 +7,33 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace WebApi.Pages;
 
 /// <summary>
+/// Search result
+/// </summary>
+public record SearchResult(Maybe<string> PostTitle, IReadOnlyCollection<(Link Link, User Owner)> Links);
+
+/// <summary>
 /// Index Model
 /// </summary>
 public class IndexModel : PageModel
 {
 	private readonly LinkProvider _linkProvider;
 	private readonly UserProvider _userProvider;
+	private readonly RedditPostProvider _redditPostProvider;
 
 	/// <summary>
 	/// C'tor
 	/// </summary>
-	public IndexModel(LinkProvider linkProvider, UserProvider userProvider)
+	public IndexModel(LinkProvider linkProvider, UserProvider userProvider, RedditPostProvider redditPostProvider)
 	{
 		_linkProvider = linkProvider;
 		_userProvider = userProvider;
+		_redditPostProvider = redditPostProvider;
 	}
 
 	/// <summary>
 	/// Search results
 	/// </summary>
-	public Maybe<IReadOnlyCollection<(Link Link, User Owner)>> SearchResults = Maybe.Empty<IReadOnlyCollection<(Link, User)>>();
+	public Maybe<SearchResult> SearchResults = Maybe.Empty<SearchResult>();
 
 	/// <summary>
 	/// Reddit Post Id
@@ -52,6 +59,8 @@ public class IndexModel : PageModel
 			})
 			.ToArrayAsync(cancellationToken);
 
-		SearchResults = Maybe.Create<IReadOnlyCollection<(Link Link, User Owner)>>(linksWithOwners);
+		var postTitle = await _redditPostProvider.GetPostTitleByPostId(RedditPostId, cancellationToken);
+
+		SearchResults = new SearchResult(postTitle, linksWithOwners);
 	}
 }

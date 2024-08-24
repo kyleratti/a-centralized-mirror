@@ -162,6 +162,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 	services.AddScoped<LinkProvider>();
 	services.AddScoped<UserProvider>();
 	services.AddScoped<RedditCommentProvider>();
+	services.AddScoped<RedditPostProvider>();
 
 	services.AddSingleton<TemplateCache>();
 	services.AddSingleton<ResourceAccessManager>();
