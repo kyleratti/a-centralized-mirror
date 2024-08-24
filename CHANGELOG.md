@@ -1,4 +1,18 @@
 Changelog
+<a name="2.6.0"></a>
+## [2.6.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.0) (2024-08-24)
+
+### ✨ Features
+
+* display post title when available ([94bfcb9](https://www.github.com/kyleratti/a-centralized-mirror/commit/94bfcb9e24678ec68598b3750704e3a0d9f2c405))
+* include reddit post title in public api ([8507609](https://www.github.com/kyleratti/a-centralized-mirror/commit/850760997dafbf35f6bf83fb7f2b6d46e3945035))
+* save reddit post title ([0e16f4e](https://www.github.com/kyleratti/a-centralized-mirror/commit/0e16f4ec053a4535686dcd8e306d6b696d7c3ab4))
+* search by reddit post ([9bcee6a](https://www.github.com/kyleratti/a-centralized-mirror/commit/9bcee6a9d9efa196f5bb8b621af4cdfae0d8df4b))
+
+### 🐛 Bug Fixes
+
+* add nullability note ([79a0fe9](https://www.github.com/kyleratti/a-centralized-mirror/commit/79a0fe91c86f85475b81c173ccc960f16ee2afa2))
+
 <a name="2.5.9"></a>
 ## [2.5.9](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.5.9) (2024-07-12)
 
