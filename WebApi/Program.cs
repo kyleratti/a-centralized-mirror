@@ -136,10 +136,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 	{
 		opts.AddScheme<ApiKeyAuthHandler>("ApiKey", displayName: null);
 	});
-	services.AddAuthorizationBuilder()
-		.SetFallbackPolicy(new AuthorizationPolicyBuilder()
-			.RequireAuthenticatedUser()
-			.Build());
+	services.AddAuthorization();
 
 	var hostingOptions = configuration.GetSection("Hosting").Get<HostingOptions>();
 

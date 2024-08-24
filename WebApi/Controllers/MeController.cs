@@ -1,4 +1,5 @@
 ﻿using ApplicationData.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 using WebApi.Util;
@@ -10,6 +11,7 @@ namespace WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("v1/[controller]")]
+[Authorize]
 public class MeController : Controller
 {
 	private readonly UserProvider _userProvider;

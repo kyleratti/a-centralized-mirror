@@ -1,6 +1,7 @@
 ﻿using ApplicationData.Locale;
 using ApplicationData.Services;
 using DataClasses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SnooBrowser.Browsers;
@@ -16,6 +17,7 @@ namespace WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("v1/[controller]")]
+[Authorize]
 public class LinkController : Controller
 {
 	private readonly LinkProvider _linkProvider;
