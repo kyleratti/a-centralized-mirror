@@ -36,6 +36,7 @@ type Link = {
 
 type NewLink = {
     RedditPostId : string
+    RedditPostTitle : string
     LinkUrl : string
     LinkType : LinkKind
     OwnerUserId : int32

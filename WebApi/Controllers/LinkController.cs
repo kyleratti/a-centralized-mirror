@@ -69,6 +69,7 @@ public class LinkController : Controller
 			async () =>
 				await _linkProvider.CreateLink(new NewLink(
 					redditPostId: linkRequest.RedditPostId,
+					redditPostTitle: submission.Title,
 					linkUrl: validUrl.OriginalString,
 					linkKind,
 					ownerUserId: loggedInUserId

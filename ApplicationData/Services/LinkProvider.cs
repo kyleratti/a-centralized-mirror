@@ -164,7 +164,13 @@ public class LinkProvider
 		if (existingLink is true)
 			return Result<int, CreateLinkError>.CreateFailure(new LinkAlreadyExists());
 
-		using var tx = await connection.CreateTransaction(IsolationLevel.Serializable, CancellationToken.None);
+		await using var tx = await connection.CreateTransaction(IsolationLevel.Serializable, CancellationToken.None);
+
+		await tx.Execute("""
+			INSERT INTO reddit_posts (reddit_post_id, post_title)
+			VALUES (@redditPostId, @postTitle)
+			ON CONFLICT DO NOTHING
+			""", new { link.RedditPostId, postTitle = link.RedditPostTitle });
 
 		var linkIdResult = await tx.ExecuteScalar<int?>("""
 			INSERT INTO links (reddit_post_id, link_url, link_type, created_at, is_deleted, owner)
