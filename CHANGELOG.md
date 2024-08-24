@@ -1,4 +1,11 @@
 Changelog
+<a name="2.6.2"></a>
+## [2.6.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.2) (2024-08-24)
+
+### 🐛 Bug Fixes
+
+* include bootstrap files ([47dabb9](https://www.github.com/kyleratti/a-centralized-mirror/commit/47dabb9f2ab8d58613004792d6ec0547587bcf3c))
+
 <a name="2.6.1"></a>
 ## [2.6.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.6.1) (2024-08-24)
 
