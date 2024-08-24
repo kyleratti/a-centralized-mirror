@@ -59,4 +59,12 @@ public class RedditPostProvider
 			WHERE reddit_post_id = @redditPostId
 			""", new { redditPostId, title }, cancellationToken);
 	}
+
+	public async Task<int> GetPostsNeedingTitleFetchedCount(CancellationToken cancellationToken)
+	{
+		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
+		return await connection.ExecuteScalar<int>(
+			"SELECT COUNT(*) FROM reddit_posts WHERE is_title_fetched = 0",
+			cancellationToken: cancellationToken);
+	}
 }

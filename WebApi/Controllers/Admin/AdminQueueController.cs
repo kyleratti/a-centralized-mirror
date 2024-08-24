@@ -15,13 +15,16 @@ namespace WebApi.Controllers.Admin;
 public class AdminQueueController : Controller
 {
 	private readonly LinkProvider _linkProvider;
+	private readonly RedditPostProvider _redditPostProvider;
 
 	/// <inheritdoc />
 	public AdminQueueController(
-		LinkProvider linkProvider
+		LinkProvider linkProvider,
+		RedditPostProvider redditPostProvider
 	)
 	{
 		_linkProvider = linkProvider;
+		_redditPostProvider = redditPostProvider;
 	}
 
 	/// <summary>
@@ -44,6 +47,21 @@ public class AdminQueueController : Controller
 		{
 			itemCount = postIdsWithPendingChanges.Length,
 			queuedItems = postIdsWithPendingChanges,
+		});
+	}
+
+	/// <summary>
+	/// Get the posts needing their title fetched
+	/// </summary>
+	[HttpGet]
+	[Route("post-title-backlog")]
+	public async Task<IActionResult> GetPostTitleFetchBacklog(CancellationToken cancellationToken)
+	{
+		var count = await _redditPostProvider.GetPostsNeedingTitleFetchedCount(cancellationToken);
+
+		return new OkObjectResult(new
+		{
+			postsNeedingTitleFetchedCount = count,
 		});
 	}
 }
