@@ -1,4 +1,11 @@
 Changelog
+<a name="2.7.2"></a>
+## [2.7.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.2) (2024-08-28)
+
+### 🐛 Bug Fixes
+
+* skip submissions that throw ([5ca259c](https://www.github.com/kyleratti/a-centralized-mirror/commit/5ca259c4831fa0625dd03d423592f6a0cecf126d))
+
 <a name="2.7.1"></a>
 ## [2.7.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.1) (2024-08-24)
 
