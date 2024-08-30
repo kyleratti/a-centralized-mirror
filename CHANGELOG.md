@@ -1,4 +1,11 @@
 Changelog
+<a name="2.7.4"></a>
+## [2.7.4](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.4) (2024-08-30)
+
+### 🐛 Bug Fixes
+
+* improve output ([514a8a1](https://www.github.com/kyleratti/a-centralized-mirror/commit/514a8a12fe070732a3a9fb9986b04f8333e8c095))
+
 <a name="2.7.3"></a>
 ## [2.7.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.3) (2024-08-30)
 
