@@ -49,14 +49,4 @@ public class AdminQueueController : Controller
 			queuedItems = postIdsWithPendingChanges,
 		});
 	}
-
-	/// <summary>
-	/// Get the posts needing their title fetched
-	/// </summary>
-	[HttpGet]
-	[Route("post-title-backlog")]
-	public IAsyncEnumerable<object> GetPostTitleFetchBacklog(CancellationToken cancellationToken) =>
-		_redditPostProvider.GetPostsWithoutTitleFetched(cancellationToken)
-			.Select(x => new { x.PostId, x.Title })
-			.AsAsyncEnumerable();
 }

@@ -55,7 +55,7 @@ public class LinkProvider
 	public async Task<Maybe<Link>> FindLinkById(Maybe<int> userId, int linkId)
 	{
 		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
-		using var reader = await connection.ExecuteReader(
+		await using var reader = await connection.ExecuteReader(
 			$@"SELECT l.link_id, l.reddit_post_id, l.link_url, l.link_type, l.created_at, l.owner
 				FROM links l
 				WHERE
@@ -167,8 +167,8 @@ public class LinkProvider
 		await using var tx = await connection.CreateTransaction(IsolationLevel.Serializable, CancellationToken.None);
 
 		await tx.Execute("""
-			INSERT INTO reddit_posts (reddit_post_id, post_title, is_title_fetched)
-			VALUES (@redditPostId, @postTitle, 1)
+			INSERT INTO reddit_posts (reddit_post_id, post_title)
+			VALUES (@redditPostId, @postTitle)
 			ON CONFLICT DO NOTHING
 			""", new { redditPostId = link.RedditPostId, postTitle = link.RedditPostTitle });
 

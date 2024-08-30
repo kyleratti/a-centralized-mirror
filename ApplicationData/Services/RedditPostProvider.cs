@@ -25,39 +25,4 @@ public class RedditPostProvider
 
 		return reader.TryGetString(0);
 	}
-
-	public async IAsyncEnumerable<(string PostId, string? Title)> GetPostsWithoutTitleFetched([EnumeratorCancellation] CancellationToken cancellationToken)
-	{
-		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
-
-		var query = connection.QueryUnbuffered<(string PostId, string? Title)>(
-			"SELECT reddit_post_id AS PostId, post_title AS Title FROM reddit_posts WHERE is_title_fetched = 0",
-			cancellationToken: cancellationToken);
-
-		await foreach (var redditPostId in query)
-		{
-			yield return redditPostId;
-		}
-	}
-
-	public async Task SetTitleFetchedForPostId(string redditPostId, CancellationToken cancellationToken)
-	{
-		await using var connection = _dbConnectionFactory.CreateConnection();
-		await connection.Execute(
-			"UPDATE reddit_posts SET is_title_fetched = 1 WHERE reddit_post_id = @redditPostId",
-			new { redditPostId }, cancellationToken);
-	}
-
-	public async Task SetPostTitle(string redditPostId, string title, CancellationToken cancellationToken)
-	{
-		await using var connection = _dbConnectionFactory.CreateConnection();
-		await connection.Execute(
-			"""
-			UPDATE reddit_posts
-			SET
-				post_title = @title
-				,is_title_fetched = 1
-			WHERE reddit_post_id = @redditPostId
-			""", new { redditPostId, title }, cancellationToken);
-	}
 }
