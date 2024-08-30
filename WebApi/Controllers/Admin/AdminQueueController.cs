@@ -55,13 +55,8 @@ public class AdminQueueController : Controller
 	/// </summary>
 	[HttpGet]
 	[Route("post-title-backlog")]
-	public async Task<IActionResult> GetPostTitleFetchBacklog(CancellationToken cancellationToken)
+	public IAsyncEnumerable<string> GetPostTitleFetchBacklog(CancellationToken cancellationToken)
 	{
-		var count = await _redditPostProvider.CountPostsNeedingTitleFetched(cancellationToken);
-
-		return new OkObjectResult(new
-		{
-			postsNeedingTitleFetchedCount = count,
-		});
+		return _redditPostProvider.GetPostsNeedingTitleFetched(cancellationToken);
 	}
 }

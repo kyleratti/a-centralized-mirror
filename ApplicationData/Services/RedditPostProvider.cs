@@ -60,11 +60,14 @@ public class RedditPostProvider
 			""", new { redditPostId, title }, cancellationToken);
 	}
 
-	public async Task<int> CountPostsNeedingTitleFetched(CancellationToken cancellationToken)
+	public async IAsyncEnumerable<string> GetPostsNeedingTitleFetched([EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
-		return await connection.ExecuteScalar<int>(
-			"SELECT COUNT(*) FROM reddit_posts WHERE is_title_fetched = 0",
+
+		var query = connection.QueryUnbuffered<string>("SELECT reddit_post_id FROM reddit_posts WHERE is_title_fetched = 0",
 			cancellationToken: cancellationToken);
+
+		await foreach (var redditPostId in query)
+			yield return redditPostId;
 	}
 }
