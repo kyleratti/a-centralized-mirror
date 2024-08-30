@@ -1,4 +1,11 @@
 Changelog
+<a name="2.7.3"></a>
+## [2.7.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.3) (2024-08-30)
+
+### 🐛 Bug Fixes
+
+* return post ids from controller ([bb68b29](https://www.github.com/kyleratti/a-centralized-mirror/commit/bb68b29977f1fd2dd8981227980a03a40946b0f2))
+
 <a name="2.7.2"></a>
 ## [2.7.2](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.2) (2024-08-28)
 
