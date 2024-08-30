@@ -1,4 +1,11 @@
 Changelog
+<a name="2.7.5"></a>
+## [2.7.5](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.5) (2024-08-30)
+
+### 🐛 Bug Fixes
+
+* set titles as fetched if title is present ([8eb2849](https://www.github.com/kyleratti/a-centralized-mirror/commit/8eb284988c56b52823b1a1ac3bab45e4bf6c8345))
+
 <a name="2.7.4"></a>
 ## [2.7.4](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.4) (2024-08-30)
 
