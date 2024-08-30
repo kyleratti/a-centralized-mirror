@@ -25,11 +25,11 @@ public class RedditPostTitleFetcher : IBackgroundProcessor
 	/// <inheritdoc />
 	public async Task Process(CancellationToken cancellationToken)
 	{
-		var query = _redditPostProvider.GetPostIdsWithoutTitleFetched(cancellationToken)
+		var query = _redditPostProvider.GetPostsWithoutTitleFetched(cancellationToken)
 			.Take(10)
 			.WithCancellation(cancellationToken);
 
-		await foreach (var redditPostId in query)
+		await foreach (var (redditPostId, _) in query)
 		{
 			try
 			{

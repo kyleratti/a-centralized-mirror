@@ -55,8 +55,8 @@ public class AdminQueueController : Controller
 	/// </summary>
 	[HttpGet]
 	[Route("post-title-backlog")]
-	public IAsyncEnumerable<string> GetPostTitleFetchBacklog(CancellationToken cancellationToken)
-	{
-		return _redditPostProvider.GetPostsNeedingTitleFetched(cancellationToken);
-	}
+	public IAsyncEnumerable<object> GetPostTitleFetchBacklog(CancellationToken cancellationToken) =>
+		_redditPostProvider.GetPostsWithoutTitleFetched(cancellationToken)
+			.Select(x => new { x.PostId, x.Title })
+			.AsAsyncEnumerable();
 }
