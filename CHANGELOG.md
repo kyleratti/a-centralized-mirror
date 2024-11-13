@@ -1,4 +1,11 @@
 Changelog
+<a name="2.7.9"></a>
+## [2.7.9](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.9) (2024-11-13)
+
+### 🐛 Bug Fixes
+
+* don't halt all processing if error occurs ([83ee344](https://www.github.com/kyleratti/a-centralized-mirror/commit/83ee3442f9215e0a601ba1e25de83746afff19c9))
+
 <a name="2.7.8"></a>
 ## [2.7.8](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.8) (2024-11-13)
 
