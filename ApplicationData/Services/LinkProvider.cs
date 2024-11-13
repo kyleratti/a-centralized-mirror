@@ -230,10 +230,31 @@ public class LinkProvider
 	{
 		await using var connection = _dbConnectionFactory.CreateReadOnlyConnection();
 		var reader = await connection.Query<(int QueuedItemId, DateTime QueuedAt, string RedditPostId)>(
-			@"SELECT queued_item_id, queued_at, reddit_post_id
-				FROM link_queue
-				WHERE processed_at IS NULL
-				ORDER BY queued_at ASC");
+			@"WITH Oldest AS (
+    SELECT queued_item_id, queued_at, reddit_post_id,
+           ROW_NUMBER() OVER (ORDER BY queued_at ASC) AS rn
+    FROM link_queue
+    WHERE processed_at IS NULL
+    ORDER BY queued_at ASC
+),
+Newest AS (
+    SELECT queued_item_id, queued_at, reddit_post_id,
+           ROW_NUMBER() OVER (ORDER BY queued_at DESC) AS rn
+    FROM link_queue
+    WHERE processed_at IS NULL
+    ORDER BY queued_at DESC
+)
+SELECT queued_item_id, queued_at, reddit_post_id
+FROM (
+    SELECT queued_item_id, queued_at, reddit_post_id, rn
+    FROM Oldest
+    UNION ALL
+    SELECT queued_item_id, queued_at, reddit_post_id, rn
+    FROM Newest
+)
+ORDER BY rn, CASE WHEN rn % 2 = 1 THEN 1 ELSE 2 END;
+
+", cancellationToken: cancellationToken);
 
 		foreach (var (queuedItemId, queuedAt, redditPostId) in reader)
 			yield return (QueuedItemId: queuedItemId, QueuedAt: queuedAt, RedditPostId: redditPostId);
