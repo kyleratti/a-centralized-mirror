@@ -1,4 +1,11 @@
 Changelog
+<a name="2.8.0"></a>
+## [2.8.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.0) (2024-11-13)
+
+### ✨ Features
+
+* process both ends of queue ([cf09293](https://www.github.com/kyleratti/a-centralized-mirror/commit/cf09293dce81d1338d65ec495ffc8c2699a41347))
+
 <a name="2.7.9"></a>
 ## [2.7.9](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.9) (2024-11-13)
 
