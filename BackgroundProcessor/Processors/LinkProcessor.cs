@@ -52,50 +52,79 @@ public class LinkProcessor : IBackgroundProcessor
 
 		foreach (var item in postIdsWithPendingChanges)
 		{
-			using var redditPostIdLock = await _resourceAccessManager.ObtainExclusiveAccess(item.RedditPostId, cancellationToken);
+			await WithLogging(
+				item.RedditPostId,
+				item.QueuedItemId,
+				async ct =>
+				{
+					using var redditPostIdLock = await _resourceAccessManager.ObtainExclusiveAccess(item.RedditPostId, cancellationToken);
+					await ProcessLink(item.RedditPostId, item.QueuedItemId, ct);
+				},
+				cancellationToken);
+		}
+	}
 
-			var links = await _linkProvider.GetLinksByRedditPostId(item.RedditPostId);
-			var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(item.RedditPostId);
+	private async Task WithLogging(string redditPostId, int queuedItemId, Func<CancellationToken, Task> action, CancellationToken cancellationToken)
+	{
+		using var _ = _logger.BeginScope(new Dictionary<string, object>
+		{
+			["RedditPostId"] = redditPostId,
+			["QueuedItemId"] = queuedItemId,
+		});
 
-			await using var connection = _dbConnectionFactory.CreateConnection();
-			await using var lazyTx = LazyDbTransaction.CreateFrom(connection, IsolationLevel.Serializable);
+		try
+		{
+			await action(cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "An error occurred while processing link");
+		}
+	}
 
-			if (!links.Any())
+	private async Task ProcessLink(string redditPostId, int queuedItemId, CancellationToken cancellationToken)
+	{
+		var links = await _linkProvider.GetLinksByRedditPostId(redditPostId);
+		var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(redditPostId);
+
+		await using var connection = _dbConnectionFactory.CreateConnection();
+		await using var lazyTx = LazyDbTransaction.CreateFrom(connection, IsolationLevel.Serializable);
+
+		if (!links.Any())
+		{
+			if (maybeExistingComment.HasValue)
+				await _commentBrowser.DeleteComment(CommentThing.CreateFromShortId(maybeExistingComment.Value));
+		}
+		else
+		{
+			var message = await BuildComment(links,
+				getUsername: async userId => (await _userProvider.FindUserByIdIncludeDeleted(userId)).Value.DisplayUsername,
+				cancellationToken);
+
+			if (maybeExistingComment.HasValue)
 			{
-				if (maybeExistingComment.HasValue)
-					await _commentBrowser.DeleteComment(CommentThing.CreateFromShortId(maybeExistingComment.Value));
+				var result = await _commentBrowser.EditComment(CommentThing.CreateFromShortId(maybeExistingComment.Value), message);
+				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
 			}
 			else
 			{
-				var message = await BuildComment(links,
-					getUsername: async userId => (await _userProvider.FindUserByIdIncludeDeleted(userId)).Value.DisplayUsername,
-					cancellationToken);
-
-				if (maybeExistingComment.HasValue)
-				{
-					var result = await _commentBrowser.EditComment(CommentThing.CreateFromShortId(maybeExistingComment.Value), message);
-					await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
-				}
-				else
-				{
-					var result = await _commentBrowser.SubmitComment(LinkThing.CreateFromShortId(item.RedditPostId), message);
-					await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
+				var result = await _commentBrowser.SubmitComment(LinkThing.CreateFromShortId(redditPostId), message);
+				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
 
 #pragma warning disable IDISP001
-					var innerTx = await lazyTx.GetOrCreateTx(cancellationToken);
+				var innerTx = await lazyTx.GetOrCreateTx(cancellationToken);
 #pragma warning restore IDISP001
-					await RedditCommentProvider.CreateOrUpdateLinkedComment(innerTx, item.RedditPostId, result.CommentId.ShortId);
-				}
+				await RedditCommentProvider.CreateOrUpdateLinkedComment(innerTx, redditPostId, result.CommentId.ShortId);
 			}
+		}
 
 #pragma warning disable IDISP001
-			var tx = await lazyTx.GetOrCreateTx(cancellationToken);
+		var tx = await lazyTx.GetOrCreateTx(cancellationToken);
 #pragma warning restore IDISP001
 
-			await LinkProvider.MarkRedditPostIdAsProcessed(tx, item.QueuedItemId);
+		await LinkProvider.MarkRedditPostIdAsProcessed(tx, queuedItemId);
 
-			await tx.Commit(cancellationToken);
-		}
+		await tx.Commit(cancellationToken);
 	}
 
 	private async Task<string> BuildComment(IReadOnlyCollection<Link> links, Func<int, Task<string>> getUsername, CancellationToken cancellationToken)
