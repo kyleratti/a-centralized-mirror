@@ -1,4 +1,11 @@
 Changelog
+<a name="2.7.8"></a>
+## [2.7.8](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.8) (2024-11-13)
+
+### 🐛 Bug Fixes
+
+* improve exception message ([c1242a0](https://www.github.com/kyleratti/a-centralized-mirror/commit/c1242a05c21e85a503ff214c3701ac4b234b56d7))
+
 <a name="2.7.7"></a>
 ## [2.7.7](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.7.7) (2024-10-09)
 
