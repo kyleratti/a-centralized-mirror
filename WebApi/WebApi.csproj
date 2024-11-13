@@ -19,16 +19,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FruityFoundation.DataAccess.Sqlite" Version="2.0.0" />
+    <PackageReference Include="FruityFoundation.DataAccess.Sqlite" Version="2.1.1" />
     <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="7.3.0" />
-    <PackageReference Include="Sentry.AspNetCore" Version="4.10.2" />
-    <PackageReference Include="SnooBrowser.Extensions.DependencyInjection" Version="3.1.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.2" />
+    <PackageReference Include="Sentry.AspNetCore" Version="4.13.0" />
+    <PackageReference Include="SnooBrowser.Extensions.DependencyInjection" Version="3.1.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.0.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Runtime.Caching" Version="8.0.1" />
   </ItemGroup>
