@@ -74,12 +74,12 @@ public class LinkProcessor : IBackgroundProcessor
 				if (maybeExistingComment.HasValue)
 				{
 					var result = await _commentBrowser.EditComment(CommentThing.CreateFromShortId(maybeExistingComment.Value), message);
-					await TryDistinguishStickyAndLockLogFailure(result.CommentId);
+					await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
 				}
 				else
 				{
 					var result = await _commentBrowser.SubmitComment(LinkThing.CreateFromShortId(item.RedditPostId), message);
-					await TryDistinguishStickyAndLockLogFailure(result.CommentId);
+					await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
 
 #pragma warning disable IDISP001
 					var innerTx = await lazyTx.GetOrCreateTx(cancellationToken);
@@ -138,7 +138,7 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 	}
 
-	private async Task TryDistinguishStickyAndLockLogFailure(CommentThing comment)
+	private async Task TryDistinguishStickyAndLockLogFailure(OneOf<LinkThing, CommentThing> parent, CommentThing comment)
 	{
 		try
 		{
@@ -147,7 +147,13 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while trying to distinguish and sticky comment: {CommentId}", comment.FullId);
+			var (parentType, parentId) = parent.Map(
+				static link => ("link", link.FullId),
+				static comment => ("comment", comment.FullId));
+
+			_logger.LogError(ex,
+				"An error occurred while trying to distinguish and sticky comment (ParentType={ParentType}, ParentId={ParentId}, CommentId={CommentId})",
+				parentType, parentId, comment.FullId);
 		}
 	}
 }
