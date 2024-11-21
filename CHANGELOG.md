@@ -1,4 +1,13 @@
 Changelog
+<a name="2.8.4"></a>
+## [2.8.4](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.4) (2024-11-21)
+
+### 🐛 Bug Fixes
+
+* don't do mod actions if not a mod ([eb76889](https://www.github.com/kyleratti/a-centralized-mirror/commit/eb768890df6e975ae1e920b0352d73485bfd1eb5))
+* don't try to comment on locked posts ([0ef4696](https://www.github.com/kyleratti/a-centralized-mirror/commit/0ef469698d0770237d89c4b86129e116ec64ca84))
+* only delete comment when comment exists ([eb1834c](https://www.github.com/kyleratti/a-centralized-mirror/commit/eb1834cc416d15c7b1b0138fe2ab7c6c94bedea7))
+
 <a name="2.8.3"></a>
 ## [2.8.3](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.3) (2024-11-21)
 
