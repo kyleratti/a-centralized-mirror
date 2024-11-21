@@ -23,6 +23,7 @@ public class LinkProcessor : IBackgroundProcessor
 	private readonly IDbConnectionFactory _dbConnectionFactory;
 	private readonly ResourceAccessManager _resourceAccessManager;
 	private readonly SubmissionBrowser _submissionBrowser;
+	private readonly SubredditBrowser _subredditBrowser;
 
 	public LinkProcessor(ILogger<LinkProcessor> logger,
 		LinkProvider linkProvider,
@@ -32,7 +33,8 @@ public class LinkProcessor : IBackgroundProcessor
 		TemplateCache templateCache,
 		IDbConnectionFactory dbConnectionFactory,
 		ResourceAccessManager resourceAccessManager,
-		SubmissionBrowser submissionBrowser
+		SubmissionBrowser submissionBrowser,
+		SubredditBrowser subredditBrowser
 	)
 	{
 		_logger = logger;
@@ -44,6 +46,7 @@ public class LinkProcessor : IBackgroundProcessor
 		_dbConnectionFactory = dbConnectionFactory;
 		_resourceAccessManager = resourceAccessManager;
 		_submissionBrowser = submissionBrowser;
+		_subredditBrowser = subredditBrowser;
 	}
 
 	/// <inheritdoc />
@@ -111,40 +114,34 @@ public class LinkProcessor : IBackgroundProcessor
 
 	private async Task ProcessLink(string redditPostId, int queuedItemId, CancellationToken cancellationToken)
 	{
-		var links = await _linkProvider.GetLinksByRedditPostId(redditPostId);
-		var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(redditPostId);
+		var redditPostLinkId = LinkThing.CreateFromShortId(redditPostId);
+
+		var maybeExistingSubmission = await _submissionBrowser.GetSubmission(redditPostLinkId);
+		var links = await _linkProvider.GetLinksByRedditPostId(redditPostLinkId.ShortId);
+		var maybeExistingComment = await _commentProvider.FindCommentIdByPostId(redditPostLinkId.ShortId);
 
 		await using var connection = _dbConnectionFactory.CreateConnection();
 		await using var lazyTx = LazyDbTransaction.CreateFrom(connection, IsolationLevel.Serializable);
 
-		if (!links.Any())
+		if (!maybeExistingSubmission.Try(out var submission))
 		{
-			if (maybeExistingComment.HasValue)
-				await _commentBrowser.DeleteComment(CommentThing.CreateFromShortId(maybeExistingComment.Value));
+			_logger.LogDebug("Submission {RedditPostId} not found, skipping processing", redditPostLinkId);
+		}
+		else if (links.Count == 0 && maybeExistingComment.HasValue)
+		{
+			await _commentBrowser.DeleteComment(CommentThing.CreateFromShortId(maybeExistingComment.Value));
 		}
 		else
 		{
-			var redditPostLinkId = LinkThing.CreateFromShortId(redditPostId);
+			var subreddit = await _subredditBrowser.GetAboutSubreddit(submission.Subreddit);
 
-			var message = await BuildComment(links,
-				getUsername: async userId => (await _userProvider.FindUserByIdIncludeDeleted(userId)).Value.DisplayUsername,
+			await CreateOrEditComment(
+				lazyTx,
+				redditPostLinkId,
+				links,
+				maybeExistingComment,
+				isUserModerator: subreddit.Data.IsUserModerator,
 				cancellationToken);
-
-			if (maybeExistingComment.HasValue)
-			{
-				var result = await _commentBrowser.EditComment(CommentThing.CreateFromShortId(maybeExistingComment.Value), message);
-				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
-			}
-			else if (await IsCommentAbleToBePosted(redditPostLinkId, cancellationToken))
-			{
-				var result = await _commentBrowser.SubmitComment(redditPostLinkId, message);
-				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
-
-#pragma warning disable IDISP001
-				var innerTx = await lazyTx.GetOrCreateTx(cancellationToken);
-#pragma warning restore IDISP001
-				await RedditCommentProvider.CreateOrUpdateLinkedComment(innerTx, redditPostId, result.CommentId.ShortId);
-			}
 		}
 
 #pragma warning disable IDISP001
@@ -154,6 +151,40 @@ public class LinkProcessor : IBackgroundProcessor
 		await LinkProvider.MarkRedditPostIdAsProcessed(tx, queuedItemId);
 
 		await tx.Commit(cancellationToken);
+	}
+
+	private async Task CreateOrEditComment(
+		LazyDbTransaction lazyTx,
+		LinkThing redditPostId,
+		IReadOnlyCollection<Link> links,
+		Maybe<string> maybeExistingComment,
+		bool isUserModerator,
+		CancellationToken cancellationToken
+	)
+	{
+		var message = await BuildComment(links,
+			getUsername: async userId => (await _userProvider.FindUserByIdIncludeDeleted(userId)).Value.DisplayUsername,
+			cancellationToken);
+
+		if (maybeExistingComment.HasValue)
+		{
+			var result = await _commentBrowser.EditComment(CommentThing.CreateFromShortId(maybeExistingComment.Value), message);
+
+			if (isUserModerator)
+				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
+		}
+		else if (await IsCommentAbleToBePosted(redditPostId, cancellationToken))
+		{
+			var result = await _commentBrowser.SubmitComment(redditPostId, message);
+
+			if (isUserModerator)
+				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
+
+#pragma warning disable IDISP001
+			var innerTx = await lazyTx.GetOrCreateTx(cancellationToken);
+#pragma warning restore IDISP001
+			await RedditCommentProvider.CreateOrUpdateLinkedComment(innerTx, redditPostId.ShortId, result.CommentId.ShortId);
+		}
 	}
 
 	private async Task<string> BuildComment(IReadOnlyCollection<Link> links, Func<int, Task<string>> getUsername, CancellationToken cancellationToken)
@@ -196,7 +227,10 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 	}
 
-	private async Task TryDistinguishStickyAndLockLogFailure(OneOf<LinkThing, CommentThing> parent, CommentThing comment)
+	private async Task TryDistinguishStickyAndLockLogFailure(
+		OneOf<LinkThing, CommentThing> parent,
+		CommentThing comment
+	)
 	{
 		try
 		{
