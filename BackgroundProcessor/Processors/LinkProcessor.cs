@@ -7,6 +7,7 @@ using FruityFoundation.Base.Structures;
 using FruityFoundation.DataAccess.Abstractions;
 using SnooBrowser.Browsers;
 using SnooBrowser.Models.Comment;
+using SnooBrowser.Models.Submission;
 using SnooBrowser.Things;
 
 namespace BackgroundProcessor.Processors;
@@ -88,24 +89,16 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 	}
 
-	private async Task<bool> IsCommentAbleToBePosted(LinkThing redditPostId, CancellationToken cancellationToken)
+	private bool IsCommentAbleToBePosted(Submission submission, CancellationToken cancellationToken)
 	{
-		var maybeSubmission = await _submissionBrowser.GetSubmission(redditPostId);
-
-		if (!maybeSubmission.Try(out var submission))
-		{
-			_logger.LogDebug("Submission {RedditPostId} not found, skipping processing", redditPostId);
-			return false;
-		}
-
 		if (submission.IsLocked)
 		{
-			_logger.LogDebug("Submission {RedditPostId} is locked, skipping processing", redditPostId);
+			_logger.LogDebug("Submission {RedditPostId} is locked, skipping processing", submission.RedditPostId);
 			return false;
 		}
 		else if (submission.IsArchived)
 		{
-			_logger.LogDebug("Submission {RedditPostId} is archived, skipping processing", redditPostId);
+			_logger.LogDebug("Submission {RedditPostId} is archived, skipping processing", submission.RedditPostId);
 			return false;
 		}
 
@@ -137,6 +130,7 @@ public class LinkProcessor : IBackgroundProcessor
 
 			await CreateOrEditComment(
 				lazyTx,
+				submission,
 				redditPostLinkId,
 				links,
 				maybeExistingComment,
@@ -155,6 +149,7 @@ public class LinkProcessor : IBackgroundProcessor
 
 	private async Task CreateOrEditComment(
 		LazyDbTransaction lazyTx,
+		Submission submission,
 		LinkThing redditPostId,
 		IReadOnlyCollection<Link> links,
 		Maybe<string> maybeExistingComment,
@@ -173,7 +168,7 @@ public class LinkProcessor : IBackgroundProcessor
 			if (isUserModerator)
 				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
 		}
-		else if (await IsCommentAbleToBePosted(redditPostId, cancellationToken))
+		else if (IsCommentAbleToBePosted(submission, cancellationToken))
 		{
 			var result = await _commentBrowser.SubmitComment(redditPostId, message);
 
