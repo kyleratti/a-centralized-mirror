@@ -104,9 +104,10 @@ public class LinkProcessor : IBackgroundProcessor
 		{
 			_logger.LogDebug("Submission {RedditPostId} not found, skipping processing", redditPostLinkId);
 		}
-		else if (links.Count == 0 && maybeExistingComment.HasValue)
+		else if (links.Count == 0)
 		{
-			await _commentBrowser.DeleteComment(CommentThing.CreateFromShortId(maybeExistingComment.Value));
+			if (maybeExistingComment.HasValue)
+				await _commentBrowser.DeleteComment(CommentThing.CreateFromShortId(maybeExistingComment.Value));
 		}
 		else
 		{
