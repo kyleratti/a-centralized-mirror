@@ -22,6 +22,7 @@ public class LinkProcessor : IBackgroundProcessor
 	private readonly TemplateCache _templateCache;
 	private readonly IDbConnectionFactory _dbConnectionFactory;
 	private readonly ResourceAccessManager _resourceAccessManager;
+	private readonly SubmissionBrowser _submissionBrowser;
 
 	public LinkProcessor(ILogger<LinkProcessor> logger,
 		LinkProvider linkProvider,
@@ -30,7 +31,8 @@ public class LinkProcessor : IBackgroundProcessor
 		UserProvider userProvider,
 		TemplateCache templateCache,
 		IDbConnectionFactory dbConnectionFactory,
-		ResourceAccessManager resourceAccessManager
+		ResourceAccessManager resourceAccessManager,
+		SubmissionBrowser submissionBrowser
 	)
 	{
 		_logger = logger;
@@ -41,6 +43,7 @@ public class LinkProcessor : IBackgroundProcessor
 		_templateCache = templateCache;
 		_dbConnectionFactory = dbConnectionFactory;
 		_resourceAccessManager = resourceAccessManager;
+		_submissionBrowser = submissionBrowser;
 	}
 
 	/// <inheritdoc />
@@ -82,6 +85,30 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 	}
 
+	private async Task<bool> IsCommentAbleToBePosted(LinkThing redditPostId, CancellationToken cancellationToken)
+	{
+		var maybeSubmission = await _submissionBrowser.GetSubmission(redditPostId);
+
+		if (!maybeSubmission.Try(out var submission))
+		{
+			_logger.LogDebug("Submission {RedditPostId} not found, skipping processing", redditPostId);
+			return false;
+		}
+
+		if (submission.IsLocked)
+		{
+			_logger.LogDebug("Submission {RedditPostId} is locked, skipping processing", redditPostId);
+			return false;
+		}
+		else if (submission.IsArchived)
+		{
+			_logger.LogDebug("Submission {RedditPostId} is archived, skipping processing", redditPostId);
+			return false;
+		}
+
+		return true;
+	}
+
 	private async Task ProcessLink(string redditPostId, int queuedItemId, CancellationToken cancellationToken)
 	{
 		var links = await _linkProvider.GetLinksByRedditPostId(redditPostId);
@@ -97,6 +124,8 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 		else
 		{
+			var redditPostLinkId = LinkThing.CreateFromShortId(redditPostId);
+
 			var message = await BuildComment(links,
 				getUsername: async userId => (await _userProvider.FindUserByIdIncludeDeleted(userId)).Value.DisplayUsername,
 				cancellationToken);
@@ -106,9 +135,9 @@ public class LinkProcessor : IBackgroundProcessor
 				var result = await _commentBrowser.EditComment(CommentThing.CreateFromShortId(maybeExistingComment.Value), message);
 				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
 			}
-			else
+			else if (await IsCommentAbleToBePosted(redditPostLinkId, cancellationToken))
 			{
-				var result = await _commentBrowser.SubmitComment(LinkThing.CreateFromShortId(redditPostId), message);
+				var result = await _commentBrowser.SubmitComment(redditPostLinkId, message);
 				await TryDistinguishStickyAndLockLogFailure(result.ParentId, result.CommentId);
 
 #pragma warning disable IDISP001
