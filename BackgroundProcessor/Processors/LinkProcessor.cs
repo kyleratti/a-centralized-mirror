@@ -89,22 +89,6 @@ public class LinkProcessor : IBackgroundProcessor
 		}
 	}
 
-	private bool IsCommentAbleToBePosted(Submission submission, CancellationToken cancellationToken)
-	{
-		if (submission.IsLocked)
-		{
-			_logger.LogDebug("Submission {RedditPostId} is locked, skipping processing", submission.RedditPostId);
-			return false;
-		}
-		else if (submission.IsArchived)
-		{
-			_logger.LogDebug("Submission {RedditPostId} is archived, skipping processing", submission.RedditPostId);
-			return false;
-		}
-
-		return true;
-	}
-
 	private async Task ProcessLink(string redditPostId, int queuedItemId, CancellationToken cancellationToken)
 	{
 		var redditPostLinkId = LinkThing.CreateFromShortId(redditPostId);
@@ -145,6 +129,22 @@ public class LinkProcessor : IBackgroundProcessor
 		await LinkProvider.MarkRedditPostIdAsProcessed(tx, queuedItemId);
 
 		await tx.Commit(cancellationToken);
+	}
+
+	private bool IsCommentAbleToBePosted(Submission submission, CancellationToken cancellationToken)
+	{
+		if (submission.IsLocked)
+		{
+			_logger.LogDebug("Submission {RedditPostId} is locked, skipping processing", submission.RedditPostId);
+			return false;
+		}
+		else if (submission.IsArchived)
+		{
+			_logger.LogDebug("Submission {RedditPostId} is archived, skipping processing", submission.RedditPostId);
+			return false;
+		}
+
+		return true;
 	}
 
 	private async Task CreateOrEditComment(
