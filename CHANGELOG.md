@@ -1,4 +1,11 @@
 Changelog
+<a name="2.8.1"></a>
+## [2.8.1](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.1) (2024-11-21)
+
+### 🐛 Bug Fixes
+
+* remove bad link ([c994e26](https://www.github.com/kyleratti/a-centralized-mirror/commit/c994e265b3352cf97b0aa9acbd23ba67d08d0060))
+
 <a name="2.8.0"></a>
 ## [2.8.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.0) (2024-11-13)
 
