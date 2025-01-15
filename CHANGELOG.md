@@ -1,4 +1,11 @@
 Changelog
+<a name="2.8.5"></a>
+## [2.8.5](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.5) (2025-01-15)
+
+### 🐛 Bug Fixes
+
+* remove bad post ([46ba50c](https://www.github.com/kyleratti/a-centralized-mirror/commit/46ba50c0987691f7e62ef9b48e11821cdda28346))
+
 <a name="2.8.4"></a>
 ## [2.8.4](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.4) (2024-11-21)
 
