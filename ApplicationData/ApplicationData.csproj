@@ -13,14 +13,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FruityFoundation.Base" Version="2.1.1" />
-      <PackageReference Include="FruityFoundation.DataAccess.Abstractions" Version="2.1.1" />
-      <PackageReference Include="FruityFoundation.FsBase" Version="2.1.1" />
+      <PackageReference Include="FruityFoundation.Base" Version="3.0.0" />
+      <PackageReference Include="FruityFoundation.DataAccess.Abstractions" Version="3.0.0" />
+      <PackageReference Include="FruityFoundation.FsBase" Version="3.0.0" />
       <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.1" />
       <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
       <PackageReference Include="SnooBrowser" Version="3.2.0" />
       <PackageReference Include="System.Linq.Async" Version="6.0.1" />
