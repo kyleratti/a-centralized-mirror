@@ -1,4 +1,11 @@
 Changelog
+<a name="2.9.0"></a>
+## [2.9.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.9.0) (2025-07-22)
+
+### ✨ Features
+
+* add admin maintenance controller ([bdbb1bb](https://www.github.com/kyleratti/a-centralized-mirror/commit/bdbb1bb743631b9dd96ddc72acef6b2d4a039d30))
+
 <a name="2.8.11"></a>
 ## [2.8.11](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.8.11) (2025-07-22)
 
