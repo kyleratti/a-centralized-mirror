@@ -1,4 +1,11 @@
 Changelog
+<a name="2.10.0"></a>
+## [2.10.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.10.0) (2025-07-23)
+
+### ✨ Features
+
+* don't sticky comment ([ead5917](https://www.github.com/kyleratti/a-centralized-mirror/commit/ead59176900390d096faca1d8f984354f1e5f673))
+
 <a name="2.9.0"></a>
 ## [2.9.0](https://www.github.com/kyleratti/a-centralized-mirror/releases/tag/v2.9.0) (2025-07-22)
 
