@@ -230,7 +230,7 @@ public class LinkProcessor : IBackgroundProcessor
 	{
 		try
 		{
-			await _commentBrowser.DistinguishComment(comment, DistinguishType.Moderator, isSticky: true);
+			await _commentBrowser.DistinguishComment(comment, DistinguishType.Moderator, isSticky: false);
 			await _commentBrowser.LockComment(comment);
 		}
 		catch (Exception ex)
