@@ -26,7 +26,7 @@ public class ApiKeyProvider
 				WHERE
 					ak.api_key = @apiKey
 					AND u.is_deleted = false",
-			new { apiKey });
+			new { apiKey }, CancellationToken.None);
 
 		if (!reader.Read())
 			return Maybe.Empty<User>();

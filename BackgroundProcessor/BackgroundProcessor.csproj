@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net11.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>dotnet-BackgroundProcessor-35541A68-9074-4C0A-9003-D5B4779CC1E8</UserSecretsId>
@@ -11,16 +11,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FruityFoundation.Base" Version="3.0.0" />
+        <PackageReference Include="FruityFoundation.Base" Version="4.0.0" />
         <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0" />
         <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
         <PackageReference Include="SnooBrowser" Version="3.2.0" />
         <PackageReference Include="SnooBrowser.Extensions.DependencyInjection" Version="3.2.0" />
-        <PackageReference Include="System.Linq.Async" Version="6.0.3" />
     </ItemGroup>
 
     <ItemGroup>

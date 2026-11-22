@@ -50,7 +50,7 @@ public class IndexModel : PageModel
 			return;
 
 		var linksWithOwners = await _linkProvider.FindAllLinksByPostId(RedditPostId, cancellationToken)
-			.SelectAwait(async link =>
+			.Select(async (Link link, CancellationToken _) =>
 			{
 				if (!(await _userProvider.FindUserByIdIncludeDeleted(link.OwnerId)).Try(out var owner))
 					throw new ApplicationException($"Link {link.LinkId} has an owner ID {link.OwnerId} that does not exist.");

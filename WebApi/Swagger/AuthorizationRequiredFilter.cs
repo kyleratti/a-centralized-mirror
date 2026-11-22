@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WebApi.Swagger;
@@ -9,6 +9,11 @@ namespace WebApi.Swagger;
 /// </summary>
 public class AuthorizationRequiredFilter : IOperationFilter
 {
+	/// <summary>
+	/// Security scheme ID for the API key scheme
+	/// </summary>
+	public const string ApiKeySchemeId = "Key";
+
 	/// <summary>
 	/// API Key required scheme
 	/// </summary>
@@ -23,11 +28,6 @@ public class AuthorizationRequiredFilter : IOperationFilter
 		              Enter 'Key' [space] and then your API key in the input below.
 		              Example: Key 1234567890abcdef
 		              """,
-		Reference = new OpenApiReference
-		{
-			Id = "Key",
-			Type = ReferenceType.SecurityScheme,
-		},
 	};
 
 	/// <inheritdoc />
@@ -42,7 +42,7 @@ public class AuthorizationRequiredFilter : IOperationFilter
 		[
 			new OpenApiSecurityRequirement
 			{
-				{ ApiKeyScheme, Array.Empty<string>() },
+				[new OpenApiSecuritySchemeReference(ApiKeySchemeId, context.Document)] = [],
 			}
 		];
 	}

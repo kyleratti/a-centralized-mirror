@@ -22,7 +22,7 @@ public class UserProvider
 		await using var reader = await connection.ExecuteReader(
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
-				ORDER BY created_at");
+				ORDER BY created_at", null, CancellationToken.None);
 
 		var users = new List<User>();
 
@@ -48,7 +48,7 @@ public class UserProvider
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE display_username LIKE @displayUsername",
-			new { displayUsername});
+			new { displayUsername}, CancellationToken.None);
 
 		if (!await reader.ReadAsync())
 			return Maybe.Empty<User>();
@@ -72,7 +72,7 @@ public class UserProvider
 			@"SELECT user_id, display_username, developer_username, weight, created_at, updated_at, is_deleted, is_admin
 				FROM users
 				WHERE user_id = @userId",
-			new { userId });
+			new { userId }, CancellationToken.None);
 
 		if (!await reader.ReadAsync())
 			return Maybe.Empty<User>();

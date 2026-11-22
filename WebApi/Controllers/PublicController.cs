@@ -1,4 +1,5 @@
 ﻿using ApplicationData.Services;
+using DataClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -47,9 +48,9 @@ public class PublicController : Controller
 	public async Task<IReadOnlyCollection<PublicLinkListingResult>> FindLinksByPostId(string redditPostId, CancellationToken cancellationToken)
 	{
 		return await _linkProvider.FindAllLinksByPostId(redditPostId, cancellationToken)
-			.SelectAwait(async link =>
+			.Select(async (link, ct) =>
 			{
-				var postTitle = await _redditPostProvider.GetPostTitleByPostId(link.RedditPostId, cancellationToken);
+				var postTitle = await _redditPostProvider.GetPostTitleByPostId(link.RedditPostId, ct);
 				var providerUsername = (await _userProvider.FindUserByIdIncludeDeleted(link.OwnerId))
 					.Map(x => x.DisplayUsername)
 					.OrThrow(() => $"Unable to find user info for user id {link.OwnerId}");
@@ -61,7 +62,7 @@ public class PublicController : Controller
 					LinkTypeHelpers.ParseToSerializableLinkType(link.LinkType.RawValue),
 					ProviderUsername: providerUsername);
 			})
-			.ToArrayAsync(cancellationToken: cancellationToken);
+			.ToArrayAsync(cancellationToken);
 	}
 
 	/// <summary>

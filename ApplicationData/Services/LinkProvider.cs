@@ -37,7 +37,7 @@ public class LinkProvider
 				linkUrl,
 				linkType = linkKind.RawValue,
 				userId,
-			});
+			}, CancellationToken.None);
 
 		if (!await reader.ReadAsync())
 			return Maybe.Empty<Link>();
@@ -66,7 +66,7 @@ public class LinkProvider
 			{
 				linkId,
 				userId = userId.OrValue(-1),
-			});
+			}, CancellationToken.None);
 
 		if (!await reader.ReadAsync())
 			return Maybe.Empty<Link>();

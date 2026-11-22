@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>12</LangVersion>
+    <LangVersion>14</LangVersion>
     <Version>2.10.0</Version>
     <UserSecretsId>33502323-e6f7-405a-897c-fd75a7a25b54</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -19,18 +19,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FruityFoundation.DataAccess.Sqlite" Version="3.0.0" />
+    <PackageReference Include="FruityFoundation.DataAccess.Sqlite" Version="4.0.0" />
     <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="8.0.0" />
-    <PackageReference Include="Sentry.AspNetCore" Version="5.12.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="8.6.1" />
+    <PackageReference Include="Sentry.AspNetCore" Version="7.0.1" />
     <PackageReference Include="SnooBrowser.Extensions.DependencyInjection" Version="3.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
-    <PackageReference Include="System.Linq.Async" Version="6.0.3" />
-    <PackageReference Include="System.Runtime.Caching" Version="9.0.1" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="11.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="11.0.1" />
+    <PackageReference Include="System.Runtime.Caching" Version="11.0.0" />
   </ItemGroup>
 
   <ItemGroup>

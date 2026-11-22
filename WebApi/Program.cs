@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using ApplicationData;
 using ApplicationData.Services;
 using BackgroundProcessor;
@@ -22,8 +22,6 @@ using WebApi.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
-const string PROJECT_ID = "ACM";
-
 // Add services to the container.
 builder.Configuration
 	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -36,12 +34,12 @@ if (!string.IsNullOrEmpty(azureAppConfigConnectionString))
 	builder.Configuration.AddAzureAppConfiguration(options =>
 	{
 		options.Connect(azureAppConfigConnectionString)
-			.Select(keyFilter: $"{PROJECT_ID}:*", LabelFilter.Null)
-			.Select(keyFilter: $"{PROJECT_ID}:*", labelFilter: builder.Environment.EnvironmentName)
+			.Select(keyFilter: "ACM:*", LabelFilter.Null)
+			.Select(keyFilter: "ACM:*", labelFilter: builder.Environment.EnvironmentName)
 			.ConfigureRefresh(x => x
-				.Register($"{PROJECT_ID}:AzureAppConfig:Sentinel", refreshAll: true)
-				.SetCacheExpiration(TimeSpan.FromHours(1)))
-			.TrimKeyPrefix($"{PROJECT_ID}:");
+				.Register("ACM:AzureAppConfig:Sentinel", refreshAll: true)
+				.SetRefreshInterval(TimeSpan.FromMinutes(60)))
+			.TrimKeyPrefix("ACM:");
 	});
 }
 
@@ -73,7 +71,7 @@ builder.Services.AddSwaggerGen(opts =>
 	opts.EnableAnnotations();
 	opts.UseInlineDefinitionsForEnums();
 
-	opts.AddSecurityDefinition(AuthorizationRequiredFilter.ApiKeyScheme.Reference.Id, AuthorizationRequiredFilter.ApiKeyScheme);
+	opts.AddSecurityDefinition(AuthorizationRequiredFilter.ApiKeySchemeId, AuthorizationRequiredFilter.ApiKeyScheme);
 });
 
 var app = builder.Build();
